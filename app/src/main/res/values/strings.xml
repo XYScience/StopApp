@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">小黑屋</string>
+    <string name="tip">提示</string>
+    <string name="allow">允许</string>
+    <string name="confirm">确定</string>
+    <string name="deny">拒绝</string>
+    <string name="quick_disable_or_enable">一键停用</string>
+    <string name="setting">设置</string>
+    <string name="about">关于</string>
+    <string name="change_launcher_icon">切换桌面图标</string>
+    <string name="select">选择</string>
+    <string name="cancel">取消</string>
+    <string name="circle">圆形</string>
+    <string name="square">圆角矩形</string>
+    <string name="launcher_icon_had_change">桌面图标已切换，可能需要数秒到半分钟后生效</string>
+    <string name="all_apps">所有应用</string>
+    <string name="system_apps">系统应用</string>
+    <string name="user_apps">用户应用</string>
+    <string name="disable_apps">停用应用</string>
+    <string name="whether_disable_app">要把 [ %s ] 关进小黑屋吗？</string>
+    <string name="whether_enable_app">要解封 [ %s ] 吗？</string>
+    <string name="if_want_to_use_please_grant_app_root">暂时没有root权限！请授予本应用root权限！</string>
+    <string name="quick_disable">一键停用</string>
+    <string name="quick_enable">一键启用</string>
+    <string name="no_disable_apps">什么鬼都没有啊(ˉ▽ˉ)</string>
+    <string name="add">添加</string>
+    <string name="apps_list">应用列表</string>
+</resources>
