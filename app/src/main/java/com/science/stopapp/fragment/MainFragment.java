@@ -3,9 +3,7 @@ package com.science.stopapp.fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.science.baserecyclerviewadapter.interfaces.OnItemClickListener;
 import com.science.stopapp.R;
@@ -27,6 +25,7 @@ import java.util.List;
 
 public class MainFragment extends BaseFragment implements AppListContract.View {
 
+    public static final String DISABLE_APPS = "disable_apps";
     private AppListContract.Presenter mPresenter;
     private RecyclerView mRecyclerView;
     public DisableAppAdapter mDisableAppAdapter;
@@ -51,9 +50,14 @@ public class MainFragment extends BaseFragment implements AppListContract.View {
         mDisableAppAdapter = new DisableAppAdapter(getActivity(), mRecyclerView);
         mRecyclerView.setAdapter(mDisableAppAdapter);
 
-        mPresenter.commandSu(AppListFragment.COMMAND_APP_LIST, "-d", null, -1);
+        mListDisableApps = new ArrayList<>();
+        getDisableApps();
         initListener();
         initRefreshLayout(view);
+    }
+
+    public void getDisableApps() {
+        mPresenter.commandSu(AppListFragment.COMMAND_APP_LIST, "-d", null, -1);
     }
 
     private void initListener() {
@@ -73,7 +77,7 @@ public class MainFragment extends BaseFragment implements AppListContract.View {
     @Override
     public void onRefresh() {
         super.onRefresh();
-        mPresenter.commandSu(AppListFragment.COMMAND_APP_LIST, "-d", null, -1);
+        getDisableApps();
     }
 
     @Override
@@ -93,9 +97,6 @@ public class MainFragment extends BaseFragment implements AppListContract.View {
         setRefreshing(false);
         mDisableAppAdapter.setData(false, appList);
         mListDisableApps = appList;
-
-        mDisableAppAdapter.setCustomNoDataView(LayoutInflater.from(getActivity()).
-                inflate(R.layout.view_empty, (ViewGroup) mRecyclerView.getParent(), false));
     }
 
     public List<String> getListDisableApps() {

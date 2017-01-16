@@ -16,9 +16,7 @@ import com.science.stopapp.presenter.AppListContract;
 import com.science.stopapp.presenter.AppListPresenter;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author SScience
@@ -31,13 +29,10 @@ public class AppListFragment extends BaseFragment implements AppListContract.Vie
 
     public static final String TAB_CATEGORY = "tab_category";
     public static final String COMMAND_APP_LIST = "list packages";
-    public static final String BUNDLE_APP_LIST = "app_list";
-    private RecyclerView mRecyclerView;
     public AppListAdapter mAppListAdapter;
     private AppListContract.Presenter mPresenter;
     private List<AppInfo> mAppInfoList;
-    private List<AppInfo> mAppInfoListNew;
-    private Set<String> mCurrentDisableApps; // 保存当前页面停用的apps
+    private List<String> mPackageNameList;
     private int tabCategory;
 
     public static AppListFragment newInstance(int tabCategory) {
@@ -56,7 +51,7 @@ public class AppListFragment extends BaseFragment implements AppListContract.Vie
     @Override
     protected void doCreateView(View view) {
         new AppListPresenter(getActivity(), this);
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
+        RecyclerView mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
         mRecyclerView.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(layoutManager);
@@ -65,7 +60,6 @@ public class AppListFragment extends BaseFragment implements AppListContract.Vie
         mAppListAdapter = new AppListAdapter(getActivity(), mRecyclerView);
         mRecyclerView.setAdapter(mAppListAdapter);
 
-        mCurrentDisableApps = new HashSet<>();
         tabCategory = getArguments().getInt(TAB_CATEGORY);
         initListener();
     }
@@ -102,16 +96,20 @@ public class AppListFragment extends BaseFragment implements AppListContract.Vie
 
     @Override
     public void getAppList(List<AppInfo> appList) {
+        mPackageNameList = new ArrayList<>();
+        for (int i = 0; i < appList.size(); i++) {
+            String packageName = appList.get(i).getAppPackageName();
+            if (getActivity().getPackageName().equals(packageName)) {
+                appList.remove(i);
+            }
+            mPackageNameList.add(packageName);
+        }
         mAppListAdapter.setData(false, appList);
         mAppInfoList = appList;
     }
 
-    public List<String> getListApps() {
-        List<String> list = new ArrayList<>();
-        for (int i = 0; i < mAppInfoList.size(); i++) {
-            list.add(mAppInfoList.get(i).getAppPackageName());
-        }
-        return list;
+    public List<String> getPackageNameList() {
+        return mPackageNameList;
     }
 
     @Override

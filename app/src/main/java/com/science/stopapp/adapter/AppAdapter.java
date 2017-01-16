@@ -52,18 +52,16 @@ public class AppAdapter extends BaseCommonAdapter<List<AppInfo>> {
     @Override
     public void convertCommon(final ViewHolder viewHolder, List<AppInfo> appInfo, final int position) {
         final AppInfo info = appInfo.get(position);
-        if (!mActivity.getPackageName().equals(info.getAppPackageName())) {
-            viewHolder.setImageDrawable(R.id.iv_app_icon, info.getAppIcon());
-            viewHolder.setText(R.id.tv_app_name, info.getAppName());
-            viewHolder.setText(R.id.tv_app_package_name, info.getAppPackageName());
+        viewHolder.setImageDrawable(R.id.iv_app_icon, info.getAppIcon());
+        viewHolder.setText(R.id.tv_app_name, info.getAppName());
+        viewHolder.setText(R.id.tv_app_package_name, info.getAppPackageName());
 
-            ((TextView) viewHolder.getView(R.id.tv_app_name)).setTextColor(info.isEnable()
-                    ? mResources.getColor(R.color.textPrimary) : mResources.getColor(R.color.translucentBg));
-            ((TextView) viewHolder.getView(R.id.tv_app_package_name)).setTextColor(info.isEnable()
-                    ? mResources.getColor(R.color.textSecondary) : mResources.getColor(R.color.translucentBg));
-            ((ImageView) viewHolder.getView(R.id.iv_app_icon)).getDrawable().setColorFilter(info.isEnable()
-                    ? mColorFilterNormal : mColorFilterGrey);
-        }
+        ((TextView) viewHolder.getView(R.id.tv_app_name)).setTextColor(info.isEnable()
+                ? mResources.getColor(R.color.textPrimary) : mResources.getColor(R.color.translucentBg));
+        ((TextView) viewHolder.getView(R.id.tv_app_package_name)).setTextColor(info.isEnable()
+                ? mResources.getColor(R.color.textSecondary) : mResources.getColor(R.color.translucentBg));
+        ((ImageView) viewHolder.getView(R.id.iv_app_icon)).getDrawable().setColorFilter(info.isEnable()
+                ? mColorFilterNormal : mColorFilterGrey);
     }
 
     @Override

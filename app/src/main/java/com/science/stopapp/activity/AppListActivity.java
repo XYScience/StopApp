@@ -1,6 +1,6 @@
 package com.science.stopapp.activity;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -37,10 +37,11 @@ public class AppListActivity extends BaseActivity {
     public ViewPager mViewPager;
     private AppCompatCheckBox mCbSelectAllApps;
     private List<Set<String>> mSelection;
+    private FloatingActionButton mFabConfirm;
 
-    public static void actionStartActivity(Context context) {
-        Intent intent = new Intent(context, AppListActivity.class);
-        context.startActivity(intent);
+    public static void actionStartActivity(Activity activity) {
+        Intent intent = new Intent(activity, AppListActivity.class);
+        activity.startActivityForResult(intent, 1);
     }
 
     @Override
@@ -53,6 +54,9 @@ public class AppListActivity extends BaseActivity {
         setToolbar(getString(R.string.apps_list));
 
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
+        mCbSelectAllApps = (AppCompatCheckBox) findViewById(R.id.cb_select_all_apps);
+        mFabConfirm = (FloatingActionButton) findViewById(R.id.fab);
+        mFabConfirm.setAlpha(0f);
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
         final MyPagerAdapter myPagerAdapter = new MyPagerAdapter(getSupportFragmentManager(), this);
@@ -64,11 +68,27 @@ public class AppListActivity extends BaseActivity {
         mSelection.add(new HashSet<String>());
         mSelection.add(new HashSet<String>());
 
-        mCbSelectAllApps = (AppCompatCheckBox) findViewById(R.id.cb_select_all_apps);
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                checkSelection();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
         mCbSelectAllApps.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                List<String> listApps = myPagerAdapter.getFragments(mViewPager.getCurrentItem()).getListApps();
+                List<String> listApps = myPagerAdapter.getFragments(mViewPager.getCurrentItem()).getPackageNameList();
                 if (listApps.size() != getSelection().size()) {
                     getSelection().addAll(listApps);
                     buttonView.setChecked(true);
@@ -80,8 +100,7 @@ public class AppListActivity extends BaseActivity {
             }
         });
 
-        FloatingActionButton fabConfirm = (FloatingActionButton) findViewById(R.id.fab);
-        fabConfirm.setOnClickListener(new View.OnClickListener() {
+        mFabConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -96,10 +115,14 @@ public class AppListActivity extends BaseActivity {
     public void checkSelection() {
         if (getSelection().size() == 0) {
             mCbSelectAllApps.setClickable(false);
+            mFabConfirm.setClickable(false);
             ViewCompat.animate(mCbSelectAllApps).alpha(0).setInterpolator(new DecelerateInterpolator());
+            ViewCompat.animate(mFabConfirm).alpha(0).setInterpolator(new DecelerateInterpolator());
         } else {
             mCbSelectAllApps.setClickable(true);
+            mFabConfirm.setClickable(true);
             ViewCompat.animate(mCbSelectAllApps).alpha(1).setInterpolator(new AccelerateInterpolator());
+            ViewCompat.animate(mFabConfirm).alpha(1).setInterpolator(new AccelerateInterpolator());
         }
     }
 }
