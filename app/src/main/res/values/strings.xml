@@ -18,12 +18,14 @@
     <string name="user_apps">用户应用</string>
     <string name="disable_apps">停用应用</string>
     <string name="whether_disable_app">要把 [ %s ] 关进小黑屋吗？</string>
+    <string name="whether_add_disable_app">要把 [ %s ] 加入小黑屋吗？</string>
     <string name="whether_enable_app">要解封 [ %s ] 吗？</string>
     <string name="if_want_to_use_please_grant_app_root">暂时没有root权限！请授予本应用root权限！</string>
     <string name="quick_disable">一键停用</string>
     <string name="quick_enable">一键启用</string>
     <string name="no_disable_apps">什么鬼都没有啊(ˉ▽ˉ)</string>
     <string name="add">添加</string>
-    <string name="apps_list">应用列表</string>
+    <string name="add_apps">添加应用</string>
     <string name="add_finish">添加完成！</string>
+    <string name="app_ready_add_disable">该应用已经加入小黑屋(*^_^*)</string>
 </resources>

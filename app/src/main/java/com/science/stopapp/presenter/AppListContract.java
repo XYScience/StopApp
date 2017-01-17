@@ -24,7 +24,8 @@ public interface AppListContract {
     }
 
     interface Presenter extends BasePresenter {
-        void operationApp(AppInfo appInfo, int position);
+
+        void disableApp(AppInfo appInfo, int position);
 
         void commandSu(String cmd, String filter, AppInfo appInfo, int position);
     }

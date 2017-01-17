@@ -17,10 +17,8 @@
         android:id="@+id/fab_remove"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:layout_margin="@dimen/activity_horizontal_margin"
-        app:layout_behavior="com.science.stopapp.util.ScrollAwareFABBehavior"
-        app:srcCompat="@drawable/ic_whtie_enable_app" />
+        android:alpha="0"
+        app:srcCompat="@drawable/ic_white_enable_app" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_disable"
@@ -28,6 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/activity_horizontal_margin"
+        android:alpha="0"
         app:layout_behavior="com.science.stopapp.util.ScrollAwareFABBehavior"
         app:srcCompat="@drawable/ic_white_fab_disable" />
 

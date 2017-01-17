@@ -49,7 +49,7 @@ public class AppListPresenter implements AppListContract.Presenter {
     }
 
     @Override
-    public void operationApp(final AppInfo appInfo, final int position) {
+    public void disableApp(final AppInfo appInfo, final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setTitle(R.string.tip);
         builder.setMessage(appInfo.isEnable() ? mContext.getString(R.string.whether_disable_app, appInfo.getAppName())

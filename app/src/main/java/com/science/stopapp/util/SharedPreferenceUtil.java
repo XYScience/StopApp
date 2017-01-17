@@ -17,7 +17,7 @@ import java.util.Set;
 
 public class SharedPreferenceUtil {
 
-    public static String FILL_NAME = "share_data";
+    public static String FILL_NAME = "file_disable_apps";
 
     /**
      * 存入某个key对应的value值

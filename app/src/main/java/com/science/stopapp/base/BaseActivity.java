@@ -8,11 +8,13 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Interpolator;
 
 import com.science.stopapp.R;
 
@@ -188,4 +190,15 @@ public abstract class BaseActivity extends AppCompatActivity {
         Snackbar.make(view, content, Snackbar.LENGTH_LONG).show();
     }
     // tip end
+
+    /**
+     * view渐显or渐隐动画
+     * @param view
+     * @param alpha
+     * @param interpolator
+     */
+    protected void setInterpolator(View view, float alpha, Interpolator interpolator) {
+        view.setClickable(alpha == 1);
+        ViewCompat.animate(view).alpha(alpha).setInterpolator(interpolator);
+    }
 }

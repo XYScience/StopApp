@@ -58,7 +58,6 @@ public abstract class BaseFragment extends Fragment implements WeakHandler.IHand
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipeRefreshLayout);
         mSwipeRefreshLayout.setOnRefreshListener(this);
         mSwipeRefreshLayout.setColorSchemeResources(android.R.color.black);
-        //mSwipeRefreshLayout.setProgressViewOffset(true, -200, 50);
         return mSwipeRefreshLayout;
     }
 

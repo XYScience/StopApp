@@ -5,13 +5,13 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.AppCompatCheckBox;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.CompoundButton;
@@ -20,11 +20,11 @@ import com.science.stopapp.R;
 import com.science.stopapp.base.BaseActivity;
 import com.science.stopapp.fragment.MainFragment;
 import com.science.stopapp.presenter.AppListPresenter;
+import com.science.stopapp.util.CommonUtil;
+import com.science.stopapp.util.ScrollAwareFABBehavior;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import static com.science.stopapp.R.id.fab;
 
 public class MainActivity extends BaseActivity {
 
@@ -33,6 +33,7 @@ public class MainActivity extends BaseActivity {
     private Set<String> mSelection;
     private AppCompatCheckBox mChSelectApps;
     private FloatingActionButton mFabDisable, mFabRemove;
+    private boolean isFirst = true;
 
     @Override
     protected int getContentLayout() {
@@ -47,7 +48,6 @@ public class MainActivity extends BaseActivity {
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
         mFabDisable = (FloatingActionButton) findViewById(R.id.fab_disable);
         mFabRemove = (FloatingActionButton) findViewById(R.id.fab_remove);
-        mFabDisable.setAlpha(0f);
         mSelection = new HashSet<>();
 
         mMainFragment = (MainFragment) getSupportFragmentManager().findFragmentById(R.id.contentFrame);
@@ -62,11 +62,20 @@ public class MainActivity extends BaseActivity {
         // Create the presenter
         new AppListPresenter(MainActivity.this, mMainFragment);
 
+        initListener();
+    }
+
+    private void initListener() {
+        mFabRemove.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mMainFragment.diffAppsList(true);
+            }
+        });
         mFabDisable.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                mMainFragment.diffAppsList(false);
             }
         });
     }
@@ -77,15 +86,15 @@ public class MainActivity extends BaseActivity {
 
     public void checkSelection() {
         if (getSelection().isEmpty()) {
-            mChSelectApps.setClickable(false);
-            mFabDisable.setClickable(false);
-            ViewCompat.animate(mChSelectApps).alpha(0).setInterpolator(new DecelerateInterpolator());
-            ViewCompat.animate(mFabDisable).alpha(0).setInterpolator(new DecelerateInterpolator());
+            DecelerateInterpolator interpolator = new DecelerateInterpolator();
+            setInterpolator(mChSelectApps, 0, interpolator);
+            setInterpolator(mFabDisable, 0, interpolator);
+            setInterpolator(mFabRemove, 0, interpolator);
         } else {
-            mChSelectApps.setClickable(true);
-            mFabDisable.setClickable(true);
-            ViewCompat.animate(mChSelectApps).alpha(1).setInterpolator(new AccelerateInterpolator());
-            ViewCompat.animate(mFabDisable).alpha(1).setInterpolator(new AccelerateInterpolator());
+            AccelerateInterpolator interpolator = new AccelerateInterpolator();
+            setInterpolator(mChSelectApps, 1, interpolator);
+            setInterpolator(mFabDisable, 1, interpolator);
+            setInterpolator(mFabRemove, 1, interpolator);
         }
     }
 
@@ -104,7 +113,7 @@ public class MainActivity extends BaseActivity {
                 } else {
                     getSelection().clear();
                 }
-                mMainFragment.mDisableAppAdapter.notifyDataSetChanged();
+                mMainFragment.getDisableAppAdapter().notifyDataSetChanged();
                 checkSelection();
             }
         });
@@ -133,6 +142,23 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        mMainFragment.getDisableApps();
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            mMainFragment.getRefreshLayout().setProgressViewOffset(true, -200, 80);
+            mMainFragment.getRefreshLayout().setRefreshing(true);
+            mMainFragment.getDisableAppsCmd();
+        }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus && isFirst) {
+            isFirst = false;
+            CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.setMargins(0, 0, CommonUtil.dipToPx(this, 16), mFabRemove.getHeight() + CommonUtil.dipToPx(this, 32));
+            params.gravity = Gravity.BOTTOM | Gravity.END;
+            params.setBehavior(new ScrollAwareFABBehavior());
+            mFabRemove.setLayoutParams(params);
+        }
     }
 }

@@ -1,6 +1,8 @@
 package com.science.stopapp.fragment;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,9 +16,14 @@ import com.science.stopapp.base.BaseFragment;
 import com.science.stopapp.bean.AppInfo;
 import com.science.stopapp.presenter.AppListContract;
 import com.science.stopapp.presenter.AppListPresenter;
+import com.science.stopapp.util.SharedPreferenceUtil;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import static com.science.stopapp.fragment.MainFragment.DISABLE_APPS;
 
 /**
  * @author SScience
@@ -68,7 +75,7 @@ public class AppListFragment extends BaseFragment implements AppListContract.Vie
         mAppListAdapter.setOnItemClickListener(new OnItemClickListener<AppInfo>() {
             @Override
             public void onItemClick(AppInfo appInfo, int position) {
-                mPresenter.operationApp(appInfo, position);
+                addDisableApp(appInfo);
             }
 
             @Override
@@ -76,6 +83,31 @@ public class AppListFragment extends BaseFragment implements AppListContract.Vie
                 onLazyLoad();
             }
         });
+    }
+
+    public void addDisableApp(final AppInfo appInfo) {
+        Set<String> disableApps = new HashSet<>();
+        disableApps = (Set<String>) SharedPreferenceUtil.get(getActivity(), DISABLE_APPS, disableApps);
+        for (String packageName : disableApps) {
+            if (appInfo.getAppPackageName().contains(packageName)) {
+                snackBarShow(((AppListActivity) getActivity()).mCoordinatorLayout, getString(R.string.app_ready_add_disable));
+                return;
+            }
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(R.string.tip);
+        builder.setMessage(appInfo.isEnable() ? getActivity().getString(R.string.whether_add_disable_app, appInfo.getAppName())
+                : getActivity().getString(R.string.whether_enable_app, appInfo.getAppName()));
+        builder.setNegativeButton(R.string.cancel, null);
+        builder.setPositiveButton(getActivity().getString(R.string.confirm), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                ((AppListActivity) getActivity()).getSelection().add(appInfo.getAppPackageName());
+                ((AppListActivity) getActivity()).addDisableApps();
+                dialog.dismiss();
+            }
+        });
+        builder.show();
     }
 
     @Override

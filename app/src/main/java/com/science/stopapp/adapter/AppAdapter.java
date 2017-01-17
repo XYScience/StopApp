@@ -72,7 +72,7 @@ public class AppAdapter extends BaseCommonAdapter<List<AppInfo>> {
             ViewHolder holder = (ViewHolder) viewHolder;
             Bundle payload = (Bundle) payloads.get(0);
             boolean isEnable = payload.getBoolean(BUNDLE_PAYLOAD);
-            ((AppCompatCheckBox) holder.getView(R.id.cb_select_all_apps)).setChecked(false);
+            ((AppCompatCheckBox) holder.getView(R.id.cb_select_apps)).setChecked(false);
             ((TextView) holder.getView(R.id.tv_app_name)).setTextColor(isEnable
                     ? mResources.getColor(R.color.textPrimary) : mResources.getColor(R.color.translucentBg));
             ((TextView) holder.getView(R.id.tv_app_package_name)).setTextColor(isEnable
