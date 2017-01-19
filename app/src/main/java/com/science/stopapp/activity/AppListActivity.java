@@ -3,7 +3,6 @@ package com.science.stopapp.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -125,14 +124,9 @@ public class AppListActivity extends BaseActivity {
         SharedPreferenceUtil.clear(AppListActivity.this);
         SharedPreferenceUtil.put(AppListActivity.this, DISABLE_APPS, disableApps);
         snackBarShow(mCoordinatorLayout, R.string.add_finish);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Intent intent = new Intent(AppListActivity.this, MainActivity.class);
-                setResult(RESULT_OK, intent);
-                finish();
-            }
-        }, 1000);
+        Intent intent = new Intent(AppListActivity.this, MainActivity.class);
+        setResult(RESULT_OK, intent);
+        finish();
     }
 
     public Set<String> getSelection() {

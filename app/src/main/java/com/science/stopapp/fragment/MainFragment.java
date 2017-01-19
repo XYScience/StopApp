@@ -147,6 +147,8 @@ public class MainFragment extends BaseFragment implements AppListContract.View {
     }
 
     public void diffAppsList(boolean isRemove) {
+        getRefreshLayout().setProgressViewOffset(true, -200, 80);
+        getRefreshLayout().setRefreshing(true);
         isFirstCmd = true;
         try {
             mAppInfoListNew = new ArrayList<>();
@@ -169,6 +171,7 @@ public class MainFragment extends BaseFragment implements AppListContract.View {
                     mAppInfoListNew.remove(i);
                     mMainActivity.getSelection().remove(packageName);
                     mDisableApps.remove(packageName);
+                    i--;
                 } else {
                     if (mAppInfoListNew.get(i).isEnable()) {
                         mPresenter.commandSu(AppListPresenter.COMMAND_DISABLE, packageName, mAppInfoListNew.get(i), i);
@@ -216,6 +219,7 @@ public class MainFragment extends BaseFragment implements AppListContract.View {
             mListDisableApps = mAppInfoListNew;
             mDisableAppAdapter.setData(mListDisableApps);
             mMainActivity.checkSelection();
+            setRefreshing(false);
         }
     }
 
