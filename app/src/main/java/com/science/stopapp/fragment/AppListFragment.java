@@ -113,9 +113,9 @@ public class AppListFragment extends BaseFragment implements AppListContract.Vie
     @Override
     public void onLazyLoad() {
         if (tabCategory == 0) {
-            mPresenter.commandSu(COMMAND_APP_LIST, "-3", null, -1);
+            mPresenter.commandSu(COMMAND_APP_LIST, "-3", null, false);
         } else if (tabCategory == 1) {
-            mPresenter.commandSu(COMMAND_APP_LIST, "-s", null, -1);
+            mPresenter.commandSu(COMMAND_APP_LIST, "-s", null, false);
         }
     }
 
@@ -145,7 +145,7 @@ public class AppListFragment extends BaseFragment implements AppListContract.Vie
     }
 
     @Override
-    public void disableOrEnableAppsSuccess(AppInfo appInfo, int position) {
+    public void disableOrEnableAppsSuccess(AppInfo appInfo, boolean isLaunch) {
 
     }
 

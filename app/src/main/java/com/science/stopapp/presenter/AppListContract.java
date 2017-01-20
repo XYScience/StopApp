@@ -18,7 +18,7 @@ public interface AppListContract {
     interface View extends BaseView<Presenter> {
         void getAppList(List<AppInfo> appList);
 
-        void disableOrEnableAppsSuccess(AppInfo appInfo, int position);
+        void disableOrEnableAppsSuccess(AppInfo appInfo, boolean isLaunchApp);
 
         void getRootFailed();
     }
@@ -27,6 +27,6 @@ public interface AppListContract {
 
         void disableApp(AppInfo appInfo, int position);
 
-        void commandSu(String cmd, String filter, AppInfo appInfo, int position);
+        void commandSu(String cmd, String filter, AppInfo appInfo, boolean isLaunchApp);
     }
 }

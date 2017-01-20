@@ -59,7 +59,7 @@ public class AppListPresenter implements AppListContract.Presenter {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 appInfo.setEnable(!appInfo.isEnable());
-                commandSu(appInfo.isEnable() ? COMMAND_ENABLE : COMMAND_DISABLE, appInfo.appPackageName, appInfo, position);
+                commandSu(appInfo.isEnable() ? COMMAND_ENABLE : COMMAND_DISABLE, appInfo.appPackageName, appInfo, false);
                 dialog.dismiss();
             }
         });
@@ -75,7 +75,7 @@ public class AppListPresenter implements AppListContract.Presenter {
      * -u：也包括卸载的软件包。
      */
     @Override
-    public void commandSu(final String cmd, final String filter, final AppInfo appInfo, final int position) {
+    public void commandSu(final String cmd, final String filter, final AppInfo appInfo, final boolean isLaunchApp) {
         new AsyncTask<Boolean, Object, List<AppInfo>>() {
             @Override
             protected List<AppInfo> doInBackground(Boolean... params) {
@@ -135,7 +135,7 @@ public class AppListPresenter implements AppListContract.Presenter {
             protected void onPostExecute(List<AppInfo> list) {
                 if (list != null) {
                     if (list.isEmpty() && list.size() == 0) {
-                        mView.disableOrEnableAppsSuccess(appInfo, position);
+                        mView.disableOrEnableAppsSuccess(appInfo, isLaunchApp);
                     } else {
                         mView.getAppList(list);
                     }

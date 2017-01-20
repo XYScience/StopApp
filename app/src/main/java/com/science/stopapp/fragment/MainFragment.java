@@ -1,5 +1,6 @@
 package com.science.stopapp.fragment;
 
+import android.content.Intent;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DividerItemDecoration;
@@ -10,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.science.baserecyclerviewadapter.interfaces.OnItemClickListener;
-import com.science.myloggerlibrary.MyLogger;
 import com.science.stopapp.R;
 import com.science.stopapp.activity.MainActivity;
 import com.science.stopapp.adapter.DisableAppAdapter;
@@ -77,9 +77,9 @@ public class MainFragment extends BaseFragment implements AppListContract.View {
         mListDisableApps.clear();
         mDisableApps = (Set<String>) SharedPreferenceUtil.get(mMainActivity, DISABLE_APPS, mDisableApps);
         if (mDisableApps.isEmpty()) {
-            mPresenter.commandSu(AppListFragment.COMMAND_APP_LIST, "-d", null, -1);
+            mPresenter.commandSu(AppListFragment.COMMAND_APP_LIST, "-d", null, false);
         } else {
-            mPresenter.commandSu(AppListFragment.COMMAND_APP_LIST, "", null, -1);
+            mPresenter.commandSu(AppListFragment.COMMAND_APP_LIST, "", null, false);
         }
     }
 
@@ -87,7 +87,7 @@ public class MainFragment extends BaseFragment implements AppListContract.View {
         mDisableAppAdapter.setOnItemClickListener(new OnItemClickListener<AppInfo>() {
             @Override
             public void onItemClick(AppInfo appInfo, int position) {
-                mPresenter.disableApp(appInfo, position);
+                launchAppApp(appInfo, position);
             }
 
             @Override
@@ -120,7 +120,6 @@ public class MainFragment extends BaseFragment implements AppListContract.View {
         setSwipeRefreshEnable(true);
         setRefreshing(false);
         if (mDisableApps.isEmpty()) {
-            MyLogger.e("111111");
             for (AppInfo appInfo : appList) {
                 mDisableApps.add(appInfo.getAppPackageName());
             }
@@ -131,14 +130,12 @@ public class MainFragment extends BaseFragment implements AppListContract.View {
                 String packageName = appInfo.getAppPackageName();
                 if (mDisableApps.contains(packageName)) {
                     mListDisableApps.add(appInfo);
-                    MyLogger.e("222222:" + packageName);
                     if (appInfo.isEnable()) {
                         mMainActivity.getSelection().add(packageName);
                     }
                 }
             }
         }
-        MyLogger.e("333333:" + mListDisableApps.size());
         mDisableAppAdapter.setData(false, mListDisableApps);
         mMainActivity.checkSelection();
 
@@ -146,8 +143,26 @@ public class MainFragment extends BaseFragment implements AppListContract.View {
         mDisableAppAdapter.setCustomNoDataView(view);
     }
 
+    public void launchAppApp(AppInfo appInfo, int position) {
+        if (!appInfo.isEnable()) {
+            isFirstCmd = true;
+            try {
+                mAppInfoListNew = new ArrayList<>();
+                for (AppInfo info : mListDisableApps) {
+                    mAppInfoListNew.add(info.clone());
+                }
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+            mPresenter.commandSu(AppListPresenter.COMMAND_ENABLE, appInfo.getAppPackageName(), appInfo, true);
+            mAppInfoListNew.get(position).setEnable(true);
+        } else {
+            Intent resolveIntent = mMainActivity.getPackageManager().getLaunchIntentForPackage(appInfo.getAppPackageName());
+            startActivity(resolveIntent);
+        }
+    }
+
     public void diffAppsList(boolean isRemove) {
-        getRefreshLayout().setProgressViewOffset(true, -200, 80);
         getRefreshLayout().setRefreshing(true);
         isFirstCmd = true;
         try {
@@ -165,7 +180,7 @@ public class MainFragment extends BaseFragment implements AppListContract.View {
             if (mMainActivity.getSelection().contains(packageName)) {
                 if (isRemove) {
                     if (!mAppInfoListNew.get(i).isEnable()) {
-                        mPresenter.commandSu(AppListPresenter.COMMAND_ENABLE, packageName, mAppInfoListNew.get(i), i);
+                        mPresenter.commandSu(AppListPresenter.COMMAND_ENABLE, packageName, mAppInfoListNew.get(i), false);
                         isNotCmd = false;
                     }
                     mAppInfoListNew.remove(i);
@@ -174,7 +189,7 @@ public class MainFragment extends BaseFragment implements AppListContract.View {
                     i--;
                 } else {
                     if (mAppInfoListNew.get(i).isEnable()) {
-                        mPresenter.commandSu(AppListPresenter.COMMAND_DISABLE, packageName, mAppInfoListNew.get(i), i);
+                        mPresenter.commandSu(AppListPresenter.COMMAND_DISABLE, packageName, mAppInfoListNew.get(i), false);
                     }
                     mAppInfoListNew.get(i).setEnable(!mAppInfoListNew.get(i).isEnable());
                 }
@@ -184,7 +199,7 @@ public class MainFragment extends BaseFragment implements AppListContract.View {
             SharedPreferenceUtil.clear(mMainActivity);
             SharedPreferenceUtil.put(mMainActivity, DISABLE_APPS, mDisableApps);
             if (isNotCmd) {
-                disableOrEnableAppsSuccess(null, -1);
+                disableOrEnableAppsSuccess(null, false);
             }
         }
     }
@@ -202,14 +217,13 @@ public class MainFragment extends BaseFragment implements AppListContract.View {
         for (int i = 0; i < mListDisableApps.size(); i++) {
             list.add(mListDisableApps.get(i).getAppPackageName());
         }
-        MyLogger.e("444444:" + list.size());
         return list;
     }
 
     private boolean isFirstCmd = true;
 
     @Override
-    public void disableOrEnableAppsSuccess(AppInfo appInfo, int position) {
+    public void disableOrEnableAppsSuccess(AppInfo appInfo, boolean isLaunch) {
         if (isFirstCmd) {
             isFirstCmd = false;
             snackBarShow(mMainActivity.mCoordinatorLayout, "完成");
@@ -220,6 +234,11 @@ public class MainFragment extends BaseFragment implements AppListContract.View {
             mDisableAppAdapter.setData(mListDisableApps);
             mMainActivity.checkSelection();
             setRefreshing(false);
+
+            if (isLaunch) {
+                Intent resolveIntent = mMainActivity.getPackageManager().getLaunchIntentForPackage(appInfo.getAppPackageName());
+                startActivity(resolveIntent);
+            }
         }
     }
 

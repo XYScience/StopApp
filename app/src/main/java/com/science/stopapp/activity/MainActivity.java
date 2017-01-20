@@ -143,7 +143,6 @@ public class MainActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK) {
-            mMainFragment.getRefreshLayout().setProgressViewOffset(true, -200, 80);
             mMainFragment.getRefreshLayout().setRefreshing(true);
             mMainFragment.getDisableAppsCmd();
         }
