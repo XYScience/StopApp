@@ -1,16 +1,14 @@
-package com.science.stopapp.presenter;
+package com.science.stopapp.model;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
-import android.support.v7.app.AlertDialog;
-import android.util.Log;
 
 import com.science.myloggerlibrary.MyLogger;
-import com.science.stopapp.R;
 import com.science.stopapp.bean.AppInfo;
+import com.science.stopapp.presenter.DisableAppsPresenter;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -20,62 +18,80 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.science.stopapp.fragment.AppListFragment.COMMAND_APP_LIST;
-
 /**
  * @author SScience
  * @description
- * @email chentushen.science@gmail.com,274240671@qq.com
- * @data 2017/1/15
+ * @email chentushen.science@gmail.com
+ * @data 2017/1/27
  */
 
-public class AppListPresenter implements AppListContract.Presenter {
+public class AppsRepository {
 
-    private static final String TAG = AppListPresenter.class.getSimpleName() + "-----";
-    public static final String COMMAND_DISABLE = "disable";
-    public static final String COMMAND_ENABLE = "enable";
-    private AppListContract.View mView;
+    private static final int APPS_FLAG_ALL = 0;
+    private static final int APPS_FLAG_SYSTEM = 1;
+    private static final int APPS_FLAG_USER = 2;
     private Context mContext;
 
-    public AppListPresenter(Context context, AppListContract.View mView) {
+    public AppsRepository(Context context) {
         mContext = context;
-        this.mView = mView;
-        this.mView.setPresenter(this);
     }
 
-    @Override
-    public void start() {
-
+    public interface GetAppsCallback {
+        void onAppsLoaded(List<AppInfo> apps);
     }
 
-    @Override
-    public void disableApp(final AppInfo appInfo, final int position) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setTitle(R.string.tip);
-        builder.setMessage(appInfo.isEnable() ? mContext.getString(R.string.whether_disable_app, appInfo.getAppName())
-                : mContext.getString(R.string.whether_enable_app, appInfo.getAppName()));
-        builder.setNegativeButton(R.string.cancel, null);
-        builder.setPositiveButton(mContext.getString(R.string.confirm), new DialogInterface.OnClickListener() {
+    public interface GetAppsCmdCallback {
+        void onRootAppsLoaded(List<AppInfo> apps);
+
+        void onRootError();
+
+        void onRootSuccess();
+    }
+
+    public void getApps(final int appFlag, final GetAppsCallback callback) {
+        new AsyncTask<Boolean, Boolean, List<AppInfo>>() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                appInfo.setEnable(!appInfo.isEnable());
-                commandSu(appInfo.isEnable() ? COMMAND_ENABLE : COMMAND_DISABLE, appInfo.appPackageName, appInfo, false);
-                dialog.dismiss();
+            protected List<AppInfo> doInBackground(Boolean... params) {
+                ArrayList<AppInfo> appListSystem = new ArrayList<>();
+                ArrayList<AppInfo> appListUser = new ArrayList<>();
+                PackageManager packageManager = mContext.getPackageManager();
+                List<PackageInfo> packages = packageManager.getInstalledPackages(0);
+                for (PackageInfo packageInfo : packages) {
+                    AppInfo appInfo = new AppInfo();
+                    ApplicationInfo applicationInfo = packageInfo.applicationInfo;
+                    if (!applicationInfo.packageName.equals(mContext.getPackageName())) {
+                        appInfo.setAppName(applicationInfo.loadLabel(packageManager).toString());
+                        appInfo.setAppPackageName(applicationInfo.packageName);
+                        appInfo.setAppIcon(applicationInfo.loadIcon(packageManager));
+                        appInfo.setEnable(applicationInfo.enabled);
+                        appInfo.setSystemApp((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
+                        if ((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                            appListSystem.add(appInfo);
+                        } else {
+                            appListUser.add(appInfo);
+                        }
+                    }
+                }
+                if (appFlag == APPS_FLAG_ALL) {
+                    appListSystem.addAll(appListUser);
+                    return appListSystem;
+                } else if (appFlag == APPS_FLAG_SYSTEM) {
+                    return appListSystem;
+                } else {
+                    return appListUser;
+                }
             }
-        });
-        builder.show();
+
+            @Override
+            protected void onPostExecute(List<AppInfo> appList) {
+                if (!appList.isEmpty()) {
+                    callback.onAppsLoaded(appList);
+                }
+            }
+        }.execute();
     }
 
-    /**
-     * -d：进行过滤以仅显示已停用的软件包。
-     * -e：进行过滤以仅显示已启用的软件包。
-     * -s：进行过滤以仅显示系统软件包。
-     * -3：进行过滤以仅显示第三方软件包。
-     * -i：查看软件包的安装程序。
-     * -u：也包括卸载的软件包。
-     */
-    @Override
-    public void commandSu(final String cmd, final String filter, final AppInfo appInfo, final boolean isLaunchApp) {
+    public void commandSu(final String cmd, final GetAppsCmdCallback callback) {
         new AsyncTask<Boolean, Object, List<AppInfo>>() {
             @Override
             protected List<AppInfo> doInBackground(Boolean... params) {
@@ -88,7 +104,7 @@ public class AppListPresenter implements AppListContract.Presenter {
                     Process process = Runtime.getRuntime().exec("su");
                     dataOutputStream = new DataOutputStream(process.getOutputStream());
                     // 执行pm install命令
-                    String command = "pm " + cmd + " " + filter + "\n";
+                    String command = "pm " + cmd + "\n";
                     dataOutputStream.write(command.getBytes(Charset.forName("utf-8")));
                     dataOutputStream.flush();
                     dataOutputStream.writeBytes("exit\n");
@@ -96,7 +112,7 @@ public class AppListPresenter implements AppListContract.Presenter {
                     int i = process.waitFor();
                     if (i == 0) { // 正确获取root权限
                         appList = new ArrayList<>();
-                        if (cmd.equals(COMMAND_APP_LIST)) { // 获取应用
+                        if (cmd.contains(DisableAppsPresenter.COMMAND_APP_LIST)) { // 获取应用
                             String msg = "";
                             BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
                             while ((msg = br.readLine()) != null) {
@@ -111,11 +127,11 @@ public class AppListPresenter implements AppListContract.Presenter {
                             }
                         } else {
                             // 停用or启用
-                            MyLogger.e(filter + " success");
+                            MyLogger.e(cmd + " success");
                         }
                     }
                 } catch (Exception e) {
-                    Log.e(TAG, e.getMessage(), e);
+                    MyLogger.e(e.getMessage());
                 } finally {
                     try {
                         if (dataOutputStream != null) {
@@ -125,7 +141,7 @@ public class AppListPresenter implements AppListContract.Presenter {
                             errorStream.close();
                         }
                     } catch (IOException e) {
-                        Log.e(TAG, e.getMessage(), e);
+                        MyLogger.e(e.getMessage());
                     }
                 }
                 return appList;
@@ -135,12 +151,12 @@ public class AppListPresenter implements AppListContract.Presenter {
             protected void onPostExecute(List<AppInfo> list) {
                 if (list != null) {
                     if (list.isEmpty() && list.size() == 0) {
-                        mView.disableOrEnableAppsSuccess(appInfo, isLaunchApp);
+                        callback.onRootSuccess();
                     } else {
-                        mView.getAppList(list);
+                        callback.onRootAppsLoaded(list);
                     }
                 } else {
-                    mView.getRootFailed();
+                    callback.onRootError();
                 }
             }
         }.execute();

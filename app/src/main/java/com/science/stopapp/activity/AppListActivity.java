@@ -18,14 +18,11 @@ import com.science.stopapp.R;
 import com.science.stopapp.adapter.MyPagerAdapter;
 import com.science.stopapp.base.BaseActivity;
 import com.science.stopapp.fragment.AppListFragment;
-import com.science.stopapp.util.SharedPreferenceUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static com.science.stopapp.fragment.MainFragment.DISABLE_APPS;
 
 /**
  * @author SScience
@@ -71,7 +68,6 @@ public class AppListActivity extends BaseActivity {
         mSelection.add(new HashSet<String>());
 
         initListener();
-        mFabConfirm.setClickable(false);
     }
 
     private void initListener() {
@@ -96,7 +92,7 @@ public class AppListActivity extends BaseActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 AppListFragment appListFragment = ((MyPagerAdapter) mViewPager.getAdapter()).getFragments(mViewPager.getCurrentItem());
-                List<String> listApps = appListFragment.getPackageNameList();
+                List<String> listApps = appListFragment.getPackageNames();
                 if (listApps.size() != getSelection().size()) {
                     getSelection().addAll(listApps);
                     buttonView.setChecked(true);
@@ -111,22 +107,10 @@ public class AppListActivity extends BaseActivity {
         mFabConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addDisableApps();
+                ((MyPagerAdapter) mViewPager.getAdapter()).
+                        getFragments(mViewPager.getCurrentItem()).addDisableApps(getSelection());
             }
         });
-    }
-
-    public void addDisableApps() {
-        Set<String> disableApps = new HashSet<>();
-        disableApps = (Set<String>) SharedPreferenceUtil.get(AppListActivity.this, DISABLE_APPS, disableApps);
-        disableApps.addAll(getSelection());
-
-        SharedPreferenceUtil.clear(AppListActivity.this);
-        SharedPreferenceUtil.put(AppListActivity.this, DISABLE_APPS, disableApps);
-        snackBarShow(mCoordinatorLayout, R.string.add_finish);
-        Intent intent = new Intent(AppListActivity.this, MainActivity.class);
-        setResult(RESULT_OK, intent);
-        finish();
     }
 
     public Set<String> getSelection() {

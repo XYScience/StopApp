@@ -18,8 +18,9 @@ import android.widget.CompoundButton;
 
 import com.science.stopapp.R;
 import com.science.stopapp.base.BaseActivity;
+import com.science.stopapp.bean.AppInfo;
 import com.science.stopapp.fragment.MainFragment;
-import com.science.stopapp.presenter.AppListPresenter;
+import com.science.stopapp.presenter.DisableAppsPresenter;
 import com.science.stopapp.util.CommonUtil;
 import com.science.stopapp.util.ScrollAwareFABBehavior;
 
@@ -33,7 +34,7 @@ public class MainActivity extends BaseActivity {
     private Set<String> mSelection;
     private AppCompatCheckBox mChSelectApps;
     private FloatingActionButton mFabDisable, mFabRemove;
-    private boolean isFirst = true;
+    private boolean isWindowFocusChangedFirst = true;
 
     @Override
     protected int getContentLayout() {
@@ -60,7 +61,7 @@ public class MainActivity extends BaseActivity {
         }
 
         // Create the presenter
-        new AppListPresenter(MainActivity.this, mMainFragment);
+        new DisableAppsPresenter(MainActivity.this, mMainFragment);
 
         initListener();
     }
@@ -69,13 +70,13 @@ public class MainActivity extends BaseActivity {
         mFabRemove.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mMainFragment.diffAppsList(true);
+                mMainFragment.batchApps(true);
             }
         });
         mFabDisable.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mMainFragment.diffAppsList(false);
+                mMainFragment.batchApps(false);
             }
         });
     }
@@ -85,16 +86,27 @@ public class MainActivity extends BaseActivity {
     }
 
     public void checkSelection() {
+        DecelerateInterpolator di = new DecelerateInterpolator();
         if (getSelection().isEmpty()) {
-            DecelerateInterpolator interpolator = new DecelerateInterpolator();
-            setInterpolator(mChSelectApps, 0, interpolator);
-            setInterpolator(mFabDisable, 0, interpolator);
-            setInterpolator(mFabRemove, 0, interpolator);
+            setInterpolator(mChSelectApps, 0, di);
+            setInterpolator(mFabDisable, 0, di);
+            setInterpolator(mFabRemove, 0, di);
         } else {
-            AccelerateInterpolator interpolator = new AccelerateInterpolator();
-            setInterpolator(mChSelectApps, 1, interpolator);
-            setInterpolator(mFabDisable, 1, interpolator);
-            setInterpolator(mFabRemove, 1, interpolator);
+            AccelerateInterpolator ai = new AccelerateInterpolator();
+            setInterpolator(mChSelectApps, 1, ai);
+            for (AppInfo appInfo : mMainFragment.getAppInfos()) {
+                if (mSelection.contains(appInfo.getAppPackageName())) {
+                    if (appInfo.isEnable()) {
+                        setInterpolator(mFabDisable, 1, ai);
+                        setFabMargins(mFabRemove.getHeight(), 32);
+                        break;
+                    } else {
+                        setInterpolator(mFabDisable, 0, di);
+                        setFabMargins(0, 16);
+                    }
+                }
+            }
+            setInterpolator(mFabRemove, 1, ai);
         }
     }
 
@@ -144,20 +156,25 @@ public class MainActivity extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK) {
             mMainFragment.getRefreshLayout().setRefreshing(true);
-            mMainFragment.getDisableAppsCmd();
+            mMainFragment.getPresenter().start();
         }
     }
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        if (hasFocus && isFirst) {
-            isFirst = false;
-            CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            params.setMargins(0, 0, CommonUtil.dipToPx(this, 16), mFabRemove.getHeight() + CommonUtil.dipToPx(this, 32));
-            params.gravity = Gravity.BOTTOM | Gravity.END;
-            params.setBehavior(new ScrollAwareFABBehavior());
-            mFabRemove.setLayoutParams(params);
+        if (hasFocus && isWindowFocusChangedFirst) {
+            isWindowFocusChangedFirst = false;
+            setFabMargins(mFabRemove.getHeight(), 32);
         }
+    }
+
+    private void setFabMargins(int height, float bottom) {
+        CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.setMargins(0, 0, CommonUtil.dipToPx(this, 16),
+                height + CommonUtil.dipToPx(this, bottom));
+        params.gravity = Gravity.BOTTOM | Gravity.END;
+        params.setBehavior(new ScrollAwareFABBehavior());
+        mFabRemove.setLayoutParams(params);
     }
 }

@@ -28,14 +28,12 @@ import static com.science.stopapp.util.DiffCallBack.BUNDLE_PAYLOAD;
 
 public class AppAdapter extends BaseCommonAdapter<List<AppInfo>> {
 
-    private Activity mActivity;
     private ColorMatrixColorFilter mColorFilterGrey, mColorFilterNormal; // 设置图片灰度
     private Resources mResources;
 
     public AppAdapter(Activity activity, RecyclerView recyclerView) {
         super(activity, recyclerView);
-        mActivity = activity;
-        mResources = mActivity.getResources();
+        mResources = activity.getResources();
         ColorMatrix matrix = new ColorMatrix();
         matrix.setSaturation(0); // 参数大于1将增加饱和度，0～1之间会减少饱和度。0值将产生一幅灰度图像。
         mColorFilterGrey = new ColorMatrixColorFilter(matrix);
@@ -72,7 +70,7 @@ public class AppAdapter extends BaseCommonAdapter<List<AppInfo>> {
             ViewHolder holder = (ViewHolder) viewHolder;
             Bundle payload = (Bundle) payloads.get(0);
             boolean isEnable = payload.getBoolean(BUNDLE_PAYLOAD);
-            ((AppCompatCheckBox) holder.getView(R.id.cb_select_apps)).setChecked(false);
+            ((AppCompatCheckBox) holder.getView(R.id.cb_select_apps)).setChecked(isEnable);
             ((TextView) holder.getView(R.id.tv_app_name)).setTextColor(isEnable
                     ? mResources.getColor(R.color.textPrimary) : mResources.getColor(R.color.translucentBg));
             ((TextView) holder.getView(R.id.tv_app_package_name)).setTextColor(isEnable
@@ -80,5 +78,15 @@ public class AppAdapter extends BaseCommonAdapter<List<AppInfo>> {
             ((ImageView) holder.getView(R.id.iv_app_icon)).getDrawable().setColorFilter(isEnable
                     ? mColorFilterNormal : mColorFilterGrey);
         }
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(AppInfo appInfo, int position);
+    }
+
+    private OnItemClickListener mOnItemClickListener;
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        mOnItemClickListener = onItemClickListener;
     }
 }

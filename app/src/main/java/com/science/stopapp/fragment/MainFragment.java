@@ -1,6 +1,5 @@
 package com.science.stopapp.fragment;
 
-import android.content.Intent;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DividerItemDecoration;
@@ -16,15 +15,11 @@ import com.science.stopapp.activity.MainActivity;
 import com.science.stopapp.adapter.DisableAppAdapter;
 import com.science.stopapp.base.BaseFragment;
 import com.science.stopapp.bean.AppInfo;
-import com.science.stopapp.presenter.AppListContract;
-import com.science.stopapp.presenter.AppListPresenter;
+import com.science.stopapp.presenter.DisableAppsContract;
 import com.science.stopapp.util.DiffCallBack;
-import com.science.stopapp.util.SharedPreferenceUtil;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author SScience
@@ -33,17 +28,14 @@ import java.util.Set;
  * @data 2017/1/15
  */
 
-public class MainFragment extends BaseFragment implements AppListContract.View {
+public class MainFragment extends BaseFragment implements DisableAppsContract.View {
 
-    public static final String DISABLE_APPS = "disable_apps";
-    private AppListContract.Presenter mPresenter;
+    private DisableAppsContract.Presenter mPresenter;
     private RecyclerView mRecyclerView;
     private DisableAppAdapter mDisableAppAdapter;
-    private List<AppInfo> mListDisableApps;
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private List<AppInfo> mAppInfoListNew;
-    private Set<String> mDisableApps;
     private MainActivity mMainActivity;
+    private List<AppInfo> mAppInfos;
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -65,34 +57,24 @@ public class MainFragment extends BaseFragment implements AppListContract.View {
         mDisableAppAdapter = new DisableAppAdapter(mMainActivity, mRecyclerView);
         mRecyclerView.setAdapter(mDisableAppAdapter);
 
-        mListDisableApps = new ArrayList<>();
-        mDisableApps = new HashSet<>();
-        getDisableAppsCmd();
-        initListener();
         mSwipeRefreshLayout = initRefreshLayout(view);
         setSwipeRefreshEnable(false);
-    }
+        initListener();
+        mPresenter.start();
 
-    public void getDisableAppsCmd() {
-        mListDisableApps.clear();
-        mDisableApps = (Set<String>) SharedPreferenceUtil.get(mMainActivity, DISABLE_APPS, mDisableApps);
-        if (mDisableApps.isEmpty()) {
-            mPresenter.commandSu(AppListFragment.COMMAND_APP_LIST, "-d", null, false);
-        } else {
-            mPresenter.commandSu(AppListFragment.COMMAND_APP_LIST, "", null, false);
-        }
+        mAppInfos = new ArrayList<>();
     }
 
     private void initListener() {
         mDisableAppAdapter.setOnItemClickListener(new OnItemClickListener<AppInfo>() {
             @Override
             public void onItemClick(AppInfo appInfo, int position) {
-                launchAppApp(appInfo, position);
+                mPresenter.launchApp(appInfo, position);
             }
 
             @Override
             public void onItemEmptyClick() {
-                getDisableAppsCmd();
+                mPresenter.start();
             }
         });
     }
@@ -100,108 +82,48 @@ public class MainFragment extends BaseFragment implements AppListContract.View {
     @Override
     public void onRefresh() {
         super.onRefresh();
-        getDisableAppsCmd();
+        mPresenter.start();
     }
 
     @Override
-    public void setPresenter(AppListContract.Presenter presenter) {
+    public void setPresenter(DisableAppsContract.Presenter presenter) {
         if (presenter != null) {
             mPresenter = presenter;
         }
     }
 
-    @Override
-    public void onLazyLoad() {
-
+    public DisableAppsContract.Presenter getPresenter() {
+        return mPresenter;
     }
 
     @Override
-    public void getAppList(List<AppInfo> appList) {
+    public void onLazyLoad() {
+    }
+
+    @Override
+    public void getApps(List<AppInfo> appList) {
+        mAppInfos = appList;
+        mDisableAppAdapter.setData(false, appList);
+        mMainActivity.checkSelection();
         setSwipeRefreshEnable(true);
         setRefreshing(false);
-        if (mDisableApps.isEmpty()) {
-            for (AppInfo appInfo : appList) {
-                mDisableApps.add(appInfo.getAppPackageName());
-            }
-            SharedPreferenceUtil.put(mMainActivity, DISABLE_APPS, mDisableApps);
-            mListDisableApps = appList;
-        } else {
-            for (AppInfo appInfo : appList) {
-                String packageName = appInfo.getAppPackageName();
-                if (mDisableApps.contains(packageName)) {
-                    mListDisableApps.add(appInfo);
-                    if (appInfo.isEnable()) {
-                        mMainActivity.getSelection().add(packageName);
-                    }
-                }
-            }
-        }
-        mDisableAppAdapter.setData(false, mListDisableApps);
-        mMainActivity.checkSelection();
 
         View view = LayoutInflater.from(mMainActivity).inflate(R.layout.view_empty, (ViewGroup) mRecyclerView.getParent(), false);
         mDisableAppAdapter.setCustomNoDataView(view);
     }
 
-    public void launchAppApp(AppInfo appInfo, int position) {
-        if (!appInfo.isEnable()) {
-            isFirstCmd = true;
-            try {
-                mAppInfoListNew = new ArrayList<>();
-                for (AppInfo info : mListDisableApps) {
-                    mAppInfoListNew.add(info.clone());
-                }
-            } catch (CloneNotSupportedException e) {
-                e.printStackTrace();
-            }
-            mPresenter.commandSu(AppListPresenter.COMMAND_ENABLE, appInfo.getAppPackageName(), appInfo, true);
-            mAppInfoListNew.get(position).setEnable(true);
-        } else {
-            Intent resolveIntent = mMainActivity.getPackageManager().getLaunchIntentForPackage(appInfo.getAppPackageName());
-            startActivity(resolveIntent);
-        }
+    public List<AppInfo> getAppInfos() {
+        return mAppInfos;
     }
 
-    public void diffAppsList(boolean isRemove) {
-        getRefreshLayout().setRefreshing(true);
-        isFirstCmd = true;
-        try {
-            mAppInfoListNew = new ArrayList<>();
-            for (AppInfo info : mListDisableApps) {
-                mAppInfoListNew.add(info.clone());
-            }
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
-
-        boolean isNotCmd = true;
-        for (int i = 0; i < mAppInfoListNew.size(); i++) {
-            String packageName = mAppInfoListNew.get(i).getAppPackageName();
-            if (mMainActivity.getSelection().contains(packageName)) {
-                if (isRemove) {
-                    if (!mAppInfoListNew.get(i).isEnable()) {
-                        mPresenter.commandSu(AppListPresenter.COMMAND_ENABLE, packageName, mAppInfoListNew.get(i), false);
-                        isNotCmd = false;
-                    }
-                    mAppInfoListNew.remove(i);
-                    mMainActivity.getSelection().remove(packageName);
-                    mDisableApps.remove(packageName);
-                    i--;
-                } else {
-                    if (mAppInfoListNew.get(i).isEnable()) {
-                        mPresenter.commandSu(AppListPresenter.COMMAND_DISABLE, packageName, mAppInfoListNew.get(i), false);
-                    }
-                    mAppInfoListNew.get(i).setEnable(!mAppInfoListNew.get(i).isEnable());
-                }
-            }
-        }
-        if (isRemove) {
-            SharedPreferenceUtil.clear(mMainActivity);
-            SharedPreferenceUtil.put(mMainActivity, DISABLE_APPS, mDisableApps);
-            if (isNotCmd) {
-                disableOrEnableAppsSuccess(null, false);
-            }
-        }
+    /**
+     * 点击停用列表界面右下角的按钮，批量停用or删除app
+     *
+     * @param isRemove
+     */
+    public void batchApps(boolean isRemove) {
+        mSwipeRefreshLayout.setRefreshing(true);
+        mPresenter.batchApps(isRemove);
     }
 
     public SwipeRefreshLayout getRefreshLayout() {
@@ -213,37 +135,32 @@ public class MainFragment extends BaseFragment implements AppListContract.View {
     }
 
     public List<String> getListDisableApps() {
-        List<String> list = new ArrayList<>();
-        for (int i = 0; i < mListDisableApps.size(); i++) {
-            list.add(mListDisableApps.get(i).getAppPackageName());
-        }
-        return list;
-    }
-
-    private boolean isFirstCmd = true;
-
-    @Override
-    public void disableOrEnableAppsSuccess(AppInfo appInfo, boolean isLaunch) {
-        if (isFirstCmd) {
-            isFirstCmd = false;
-            snackBarShow(mMainActivity.mCoordinatorLayout, "完成");
-
-            DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffCallBack(mListDisableApps, mAppInfoListNew), true);
-            diffResult.dispatchUpdatesTo(mDisableAppAdapter);
-            mListDisableApps = mAppInfoListNew;
-            mDisableAppAdapter.setData(mListDisableApps);
-            mMainActivity.checkSelection();
-            setRefreshing(false);
-
-            if (isLaunch) {
-                Intent resolveIntent = mMainActivity.getPackageManager().getLaunchIntentForPackage(appInfo.getAppPackageName());
-                startActivity(resolveIntent);
-            }
-        }
+        return mPresenter.getListDisableApps();
     }
 
     @Override
-    public void getRootFailed() {
+    public void getRootSuccess(List<AppInfo> apps, List<AppInfo> appsNew) {
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffCallBack(apps, appsNew), true);
+        diffResult.dispatchUpdatesTo(mDisableAppAdapter);
+        apps = appsNew;
+        mDisableAppAdapter.setData(apps);
+        mMainActivity.checkSelection();
+        snackBarShow(mMainActivity.mCoordinatorLayout, "完成");
+        setRefreshing(false);
+        mAppInfos = apps;
+    }
+
+    @Override
+    public void upDateItemIfLaunch(AppInfo appInfo, int position) {
+        mAppInfos.get(position).setEnable(true);
+        mMainActivity.getSelection().add(appInfo.getAppPackageName());
+        mMainActivity.checkSelection();
+        appInfo.setEnable(true);
+        mDisableAppAdapter.updateItem(position, appInfo);
+    }
+
+    @Override
+    public void getRootError() {
         setRefreshing(false);
         mDisableAppAdapter.showLoadFailed(R.drawable.empty, "", getResources().getString(com.science.baserecyclerviewadapter.R.string.load_failed));
         snackBarShow(mMainActivity.mCoordinatorLayout, getString(R.string.if_want_to_use_please_grant_app_root));
