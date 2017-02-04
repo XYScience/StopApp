@@ -119,8 +119,8 @@ public class MainActivity extends BaseActivity {
         mChSelectApps.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (mMainFragment.getListDisableApps().size() != getSelection().size()) {
-                    getSelection().addAll(mMainFragment.getListDisableApps());
+                if (mMainFragment.getDisableAppPackageNames().size() != getSelection().size()) {
+                    getSelection().addAll(mMainFragment.getDisableAppPackageNames());
                     buttonView.setChecked(true);
                 } else {
                     getSelection().clear();
@@ -155,8 +155,7 @@ public class MainActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK) {
-            mMainFragment.getRefreshLayout().setRefreshing(true);
-            mMainFragment.getPresenter().start();
+            mMainFragment.refreshDisableApps();
         }
     }
 

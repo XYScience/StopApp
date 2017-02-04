@@ -117,6 +117,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
             launchAppIntent(appInfo.getAppPackageName());
         } else {
             mView.getRootSuccess(mListDisableApps, mListDisableAppsNew);
+            mListDisableApps = mListDisableAppsNew;
         }
     }
 
@@ -162,7 +163,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
     }
 
     @Override
-    public List<String> getListDisableApps() {
+    public List<String> getDisableAppPackageNames() {
         List<String> list = new ArrayList<>();
         for (int i = 0; i < mListDisableApps.size(); i++) {
             list.add(mListDisableApps.get(i).getAppPackageName());
@@ -174,6 +175,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
     public void launchApp(AppInfo appInfo, int position) {
         if (!appInfo.isEnable()) {
             isFirstCmd = true;
+            mListDisableApps.get(position).setEnable(true);
             commandSu(COMMAND_ENABLE + appInfo.getAppPackageName(), true, appInfo, position);
         } else {
             launchAppIntent(appInfo.getAppPackageName());
@@ -183,7 +185,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
     @Override
     public void batchApps(boolean isRemove) {
         try {
-            mListDisableAppsNew.clear();
+            mListDisableAppsNew = new ArrayList<>();
             for (AppInfo info : mListDisableApps) {
                 mListDisableAppsNew.add(info.clone());
             }

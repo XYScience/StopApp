@@ -84,10 +84,10 @@ public interface DisableAppsContract {
         void batchApps(boolean isRemove);
 
         /**
-         * 得到停用(待停用)列表apps
+         * 得到停用(待停用)列表apps包名
          *
          * @return
          */
-        List<String> getListDisableApps();
+        List<String> getDisableAppPackageNames();
     }
 }

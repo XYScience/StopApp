@@ -29,17 +29,17 @@ import static com.science.stopapp.util.DiffCallBack.BUNDLE_PAYLOAD;
 public class AppAdapter extends BaseCommonAdapter<List<AppInfo>> {
 
     private ColorMatrixColorFilter mColorFilterGrey, mColorFilterNormal; // 设置图片灰度
+    private ColorMatrix mMatrix;
     private Resources mResources;
 
     public AppAdapter(Activity activity, RecyclerView recyclerView) {
         super(activity, recyclerView);
         mResources = activity.getResources();
-        ColorMatrix matrix = new ColorMatrix();
-        matrix.setSaturation(0); // 参数大于1将增加饱和度，0～1之间会减少饱和度。0值将产生一幅灰度图像。
-        mColorFilterGrey = new ColorMatrixColorFilter(matrix);
-        ColorMatrix matrixNormal = new ColorMatrix();
-        matrixNormal.setSaturation(1); // 参数大于1将增加饱和度，0～1之间会减少饱和度。0值将产生一幅灰度图像。
-        mColorFilterNormal = new ColorMatrixColorFilter(matrixNormal);
+        mMatrix = new ColorMatrix();
+        mMatrix.setSaturation(0); // 参数大于1将增加饱和度，0～1之间会减少饱和度。0值将产生一幅灰度图像。
+        mColorFilterGrey = new ColorMatrixColorFilter(mMatrix);
+        mMatrix.setSaturation(1); // 参数大于1将增加饱和度，0～1之间会减少饱和度。0值将产生一幅灰度图像。
+        mColorFilterNormal = new ColorMatrixColorFilter(mMatrix);
     }
 
     @Override
@@ -63,30 +63,22 @@ public class AppAdapter extends BaseCommonAdapter<List<AppInfo>> {
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position, List payloads) {
-        if (payloads.isEmpty()) {
-            onBindViewHolder(viewHolder, position);
+    public void convertDiff(ViewHolder holder, int position, List payloads) {
+        Bundle payload = (Bundle) payloads.get(0);
+        boolean isEnable = payload.getBoolean(BUNDLE_PAYLOAD);
+        ((AppCompatCheckBox) holder.getView(R.id.cb_select_apps)).setChecked(isEnable);
+        ((TextView) holder.getView(R.id.tv_app_name)).setTextColor(isEnable
+                ? mResources.getColor(R.color.textPrimary) : mResources.getColor(R.color.translucentBg));
+        ((TextView) holder.getView(R.id.tv_app_package_name)).setTextColor(isEnable
+                ? mResources.getColor(R.color.textSecondary) : mResources.getColor(R.color.translucentBg));
+        if (isEnable) {
+            mMatrix.setSaturation(1);
+            mColorFilterNormal = new ColorMatrixColorFilter(mMatrix);
+            ((ImageView) holder.getView(R.id.iv_app_icon)).setColorFilter(mColorFilterNormal);
         } else {
-            ViewHolder holder = (ViewHolder) viewHolder;
-            Bundle payload = (Bundle) payloads.get(0);
-            boolean isEnable = payload.getBoolean(BUNDLE_PAYLOAD);
-            ((AppCompatCheckBox) holder.getView(R.id.cb_select_apps)).setChecked(isEnable);
-            ((TextView) holder.getView(R.id.tv_app_name)).setTextColor(isEnable
-                    ? mResources.getColor(R.color.textPrimary) : mResources.getColor(R.color.translucentBg));
-            ((TextView) holder.getView(R.id.tv_app_package_name)).setTextColor(isEnable
-                    ? mResources.getColor(R.color.textSecondary) : mResources.getColor(R.color.translucentBg));
-            ((ImageView) holder.getView(R.id.iv_app_icon)).getDrawable().setColorFilter(isEnable
-                    ? mColorFilterNormal : mColorFilterGrey);
+            mMatrix.setSaturation(0);
+            mColorFilterGrey = new ColorMatrixColorFilter(mMatrix);
+            ((ImageView) holder.getView(R.id.iv_app_icon)).setColorFilter(mColorFilterGrey);
         }
-    }
-
-    public interface OnItemClickListener {
-        void onItemClick(AppInfo appInfo, int position);
-    }
-
-    private OnItemClickListener mOnItemClickListener;
-
-    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
-        mOnItemClickListener = onItemClickListener;
     }
 }

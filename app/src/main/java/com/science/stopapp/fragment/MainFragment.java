@@ -5,9 +5,7 @@ import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.science.baserecyclerviewadapter.interfaces.OnItemClickListener;
 import com.science.stopapp.R;
@@ -31,7 +29,6 @@ import java.util.List;
 public class MainFragment extends BaseFragment implements DisableAppsContract.View {
 
     private DisableAppsContract.Presenter mPresenter;
-    private RecyclerView mRecyclerView;
     private DisableAppAdapter mDisableAppAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private MainActivity mMainActivity;
@@ -49,13 +46,13 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
     @Override
     protected void doCreateView(View view) {
         mMainActivity = (MainActivity) getActivity();
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
-        mRecyclerView.setHasFixedSize(true);
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+        recyclerView.setHasFixedSize(true);
         LinearLayoutManager manager = new LinearLayoutManager(mMainActivity);
-        mRecyclerView.setLayoutManager(manager);
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(mMainActivity, manager.getOrientation()));
-        mDisableAppAdapter = new DisableAppAdapter(mMainActivity, mRecyclerView);
-        mRecyclerView.setAdapter(mDisableAppAdapter);
+        recyclerView.setLayoutManager(manager);
+        recyclerView.addItemDecoration(new DividerItemDecoration(mMainActivity, manager.getOrientation()));
+        mDisableAppAdapter = new DisableAppAdapter(mMainActivity, recyclerView);
+        recyclerView.setAdapter(mDisableAppAdapter);
 
         mSwipeRefreshLayout = initRefreshLayout(view);
         setSwipeRefreshEnable(false);
@@ -92,8 +89,12 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         }
     }
 
-    public DisableAppsContract.Presenter getPresenter() {
-        return mPresenter;
+    /**
+     * 在用户应用/系统应用 界面选中添加应用后，回调界面刷新
+     */
+    public void refreshDisableApps() {
+        mSwipeRefreshLayout.setRefreshing(true);
+        mPresenter.start();
     }
 
     @Override
@@ -107,9 +108,6 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         mMainActivity.checkSelection();
         setSwipeRefreshEnable(true);
         setRefreshing(false);
-
-        View view = LayoutInflater.from(mMainActivity).inflate(R.layout.view_empty, (ViewGroup) mRecyclerView.getParent(), false);
-        mDisableAppAdapter.setCustomNoDataView(view);
     }
 
     public List<AppInfo> getAppInfos() {
@@ -134,20 +132,23 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         return mDisableAppAdapter;
     }
 
-    public List<String> getListDisableApps() {
-        return mPresenter.getListDisableApps();
+    public List<String> getDisableAppPackageNames() {
+        return mPresenter.getDisableAppPackageNames();
     }
 
     @Override
     public void getRootSuccess(List<AppInfo> apps, List<AppInfo> appsNew) {
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffCallBack(apps, appsNew), true);
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffCallBack(apps, appsNew), false);
         diffResult.dispatchUpdatesTo(mDisableAppAdapter);
-        apps = appsNew;
-        mDisableAppAdapter.setData(apps);
+        mDisableAppAdapter.setData(appsNew);
         mMainActivity.checkSelection();
         snackBarShow(mMainActivity.mCoordinatorLayout, "完成");
+        mAppInfos = appsNew;
         setRefreshing(false);
-        mAppInfos = apps;
+        if (appsNew.isEmpty()) {
+            mDisableAppAdapter.showLoadFailed(R.drawable.no_data, "", getResources().getString(R.string.no_disable_apps));
+            snackBarShow(mMainActivity.mCoordinatorLayout, getString(R.string.no_disable_apps));
+        }
     }
 
     @Override
@@ -162,7 +163,7 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
     @Override
     public void getRootError() {
         setRefreshing(false);
-        mDisableAppAdapter.showLoadFailed(R.drawable.empty, "", getResources().getString(com.science.baserecyclerviewadapter.R.string.load_failed));
+        mDisableAppAdapter.showLoadFailed();
         snackBarShow(mMainActivity.mCoordinatorLayout, getString(R.string.if_want_to_use_please_grant_app_root));
     }
 }

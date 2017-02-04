@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:src="@drawable/empty"
+        android:src="@drawable/no_data"
         android:textColor="@color/textPrimary"
         android:textSize="16sp"/>
 
