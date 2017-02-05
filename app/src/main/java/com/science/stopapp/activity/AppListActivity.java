@@ -99,7 +99,7 @@ public class AppListActivity extends BaseActivity {
                 } else {
                     getSelection().clear();
                 }
-                appListFragment.mAppListAdapter.notifyDataSetChanged();
+                appListFragment.reFreshAppAdapter();
                 checkSelection();
             }
         });

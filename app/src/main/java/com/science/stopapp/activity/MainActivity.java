@@ -25,6 +25,7 @@ import com.science.stopapp.util.CommonUtil;
 import com.science.stopapp.util.ScrollAwareFABBehavior;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class MainActivity extends BaseActivity {
@@ -119,13 +120,14 @@ public class MainActivity extends BaseActivity {
         mChSelectApps.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (mMainFragment.getDisableAppPackageNames().size() != getSelection().size()) {
-                    getSelection().addAll(mMainFragment.getDisableAppPackageNames());
+                List<String> listApps = mMainFragment.getDisableAppPackageNames();
+                if (listApps.size() != getSelection().size()) {
+                    getSelection().addAll(listApps);
                     buttonView.setChecked(true);
                 } else {
                     getSelection().clear();
                 }
-                mMainFragment.getDisableAppAdapter().notifyDataSetChanged();
+                mMainFragment.reFreshAppAdapter();
                 checkSelection();
             }
         });
@@ -155,7 +157,7 @@ public class MainActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK) {
-            mMainFragment.refreshDisableApps();
+            mMainFragment.reLoadDisableApps();
         }
     }
 

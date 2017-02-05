@@ -1,6 +1,5 @@
 package com.science.stopapp.fragment;
 
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -30,7 +29,6 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
 
     private DisableAppsContract.Presenter mPresenter;
     private DisableAppAdapter mDisableAppAdapter;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
     private MainActivity mMainActivity;
     private List<AppInfo> mAppInfos;
 
@@ -54,18 +52,18 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         mDisableAppAdapter = new DisableAppAdapter(mMainActivity, recyclerView);
         recyclerView.setAdapter(mDisableAppAdapter);
 
-        mSwipeRefreshLayout = initRefreshLayout(view);
+        mAppInfos = new ArrayList<>();
+        initRefreshLayout(view);
         setSwipeRefreshEnable(false);
         initListener();
         mPresenter.start();
-
-        mAppInfos = new ArrayList<>();
     }
 
     private void initListener() {
         mDisableAppAdapter.setOnItemClickListener(new OnItemClickListener<AppInfo>() {
             @Override
             public void onItemClick(AppInfo appInfo, int position) {
+                setRefreshing(true);
                 mPresenter.launchApp(appInfo, position);
             }
 
@@ -87,14 +85,6 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         if (presenter != null) {
             mPresenter = presenter;
         }
-    }
-
-    /**
-     * 在用户应用/系统应用 界面选中添加应用后，回调界面刷新
-     */
-    public void refreshDisableApps() {
-        mSwipeRefreshLayout.setRefreshing(true);
-        mPresenter.start();
     }
 
     @Override
@@ -120,16 +110,23 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
      * @param isRemove
      */
     public void batchApps(boolean isRemove) {
-        mSwipeRefreshLayout.setRefreshing(true);
+        setRefreshing(true);
         mPresenter.batchApps(isRemove);
     }
 
-    public SwipeRefreshLayout getRefreshLayout() {
-        return mSwipeRefreshLayout;
+    /**
+     * 在用户应用/系统应用 界面选中添加应用后，回调界面刷新
+     */
+    public void reLoadDisableApps() {
+        setRefreshing(true);
+        mPresenter.start();
     }
 
-    public DisableAppAdapter getDisableAppAdapter() {
-        return mDisableAppAdapter;
+    /**
+     * 点击ToolBar里的选择框时，更新列表的选择
+     */
+    public void reFreshAppAdapter() {
+        mDisableAppAdapter.notifyDataSetChanged();
     }
 
     public List<String> getDisableAppPackageNames() {
@@ -142,9 +139,9 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         diffResult.dispatchUpdatesTo(mDisableAppAdapter);
         mDisableAppAdapter.setData(appsNew);
         mMainActivity.checkSelection();
+        setRefreshing(false);
         snackBarShow(mMainActivity.mCoordinatorLayout, "完成");
         mAppInfos = appsNew;
-        setRefreshing(false);
         if (appsNew.isEmpty()) {
             mDisableAppAdapter.showLoadFailed(R.drawable.no_data, "", getResources().getString(R.string.no_disable_apps));
             snackBarShow(mMainActivity.mCoordinatorLayout, getString(R.string.no_disable_apps));
@@ -153,11 +150,12 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
 
     @Override
     public void upDateItemIfLaunch(AppInfo appInfo, int position) {
+        appInfo.setEnable(true);
+        mDisableAppAdapter.updateItem(position, appInfo);
         mAppInfos.get(position).setEnable(true);
         mMainActivity.getSelection().add(appInfo.getAppPackageName());
         mMainActivity.checkSelection();
-        appInfo.setEnable(true);
-        mDisableAppAdapter.updateItem(position, appInfo);
+        setRefreshing(false);
     }
 
     @Override

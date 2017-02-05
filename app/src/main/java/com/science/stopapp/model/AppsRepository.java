@@ -2,7 +2,6 @@ package com.science.stopapp.model;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 
@@ -16,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -52,43 +52,56 @@ public class AppsRepository {
         new AsyncTask<Boolean, Boolean, List<AppInfo>>() {
             @Override
             protected List<AppInfo> doInBackground(Boolean... params) {
-                ArrayList<AppInfo> appListSystem = new ArrayList<>();
-                ArrayList<AppInfo> appListUser = new ArrayList<>();
                 PackageManager packageManager = mContext.getPackageManager();
-                List<PackageInfo> packages = packageManager.getInstalledPackages(0);
-                for (PackageInfo packageInfo : packages) {
-                    AppInfo appInfo = new AppInfo();
-                    ApplicationInfo applicationInfo = packageInfo.applicationInfo;
-                    if (!applicationInfo.packageName.equals(mContext.getPackageName())) {
-                        appInfo.setAppName(applicationInfo.loadLabel(packageManager).toString());
-                        appInfo.setAppPackageName(applicationInfo.packageName);
-                        appInfo.setAppIcon(applicationInfo.loadIcon(packageManager));
-                        appInfo.setEnable(applicationInfo.enabled);
-                        appInfo.setSystemApp((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
-                        if ((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                            appListSystem.add(appInfo);
-                        } else {
-                            appListUser.add(appInfo);
+                // 查询所有已经安装的应用程序
+                List<ApplicationInfo> applications = packageManager
+                        .getInstalledApplications(PackageManager.MATCH_UNINSTALLED_PACKAGES);
+                Collections.sort(applications,
+                        new ApplicationInfo.DisplayNameComparator(packageManager));// 排序
+                List<AppInfo> appInfos = new ArrayList<>(); // 保存过滤查到的AppInfo
+                switch (appFlag) {
+                    case APPS_FLAG_ALL:
+                        appInfos.clear();
+                        for (ApplicationInfo app : applications) {
+                            appInfos.add(getAppInfo(app, packageManager));
                         }
-                    }
-                }
-                if (appFlag == APPS_FLAG_ALL) {
-                    appListSystem.addAll(appListUser);
-                    return appListSystem;
-                } else if (appFlag == APPS_FLAG_SYSTEM) {
-                    return appListSystem;
-                } else {
-                    return appListUser;
+                        return appInfos;
+                    case APPS_FLAG_SYSTEM:
+                        appInfos.clear();
+                        for (ApplicationInfo app : applications) {
+                            if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                                appInfos.add(getAppInfo(app, packageManager));
+                            }
+                        }
+                        return appInfos;
+                    case APPS_FLAG_USER:
+                        appInfos.clear();
+                        for (ApplicationInfo app : applications) {
+                            if ((app.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+                                appInfos.add(getAppInfo(app, packageManager));
+                            }
+                        }
+                        return appInfos;
+                    default:
+                        return appInfos;
                 }
             }
 
             @Override
             protected void onPostExecute(List<AppInfo> appList) {
-                if (!appList.isEmpty()) {
-                    callback.onAppsLoaded(appList);
-                }
+                callback.onAppsLoaded(appList);
             }
         }.execute();
+    }
+
+    private AppInfo getAppInfo(ApplicationInfo applicationInfo, PackageManager packageManager) {
+        AppInfo appInfo = new AppInfo();
+        appInfo.setAppName(applicationInfo.loadLabel(packageManager).toString());
+        appInfo.setAppPackageName(applicationInfo.packageName);
+        appInfo.setAppIcon(applicationInfo.loadIcon(packageManager));
+        appInfo.setEnable(applicationInfo.enabled);
+        appInfo.setSystemApp((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
+        return appInfo;
     }
 
     public void commandSu(final String cmd, final GetAppsCmdCallback callback) {
@@ -116,14 +129,8 @@ public class AppsRepository {
                             String msg = "";
                             BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
                             while ((msg = br.readLine()) != null) {
-                                AppInfo appInfo = new AppInfo();
                                 ApplicationInfo applicationInfo = packageManager.getPackageInfo(msg.replace("package:", ""), 0).applicationInfo;
-                                appInfo.setAppName(applicationInfo.loadLabel(packageManager).toString());
-                                appInfo.setAppPackageName(applicationInfo.packageName);
-                                appInfo.setAppIcon(applicationInfo.loadIcon(packageManager));
-                                appInfo.setEnable(applicationInfo.enabled);
-                                appInfo.setSystemApp((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
-                                appList.add(appInfo);
+                                appList.add(getAppInfo(applicationInfo, packageManager));
                             }
                         } else {
                             // 停用or启用

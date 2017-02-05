@@ -119,4 +119,11 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
     public List<String> getPackageNames() {
         return mPresenter.getPackageNames();
     }
+
+    /**
+     * 点击ToolBar里的选择框时，更新列表的选择
+     */
+    public void reFreshAppAdapter() {
+        mAppListAdapter.notifyDataSetChanged();
+    }
 }
