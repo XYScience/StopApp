@@ -28,6 +28,6 @@ public class AppInfoComparator implements Comparator<AppInfo> {
         if (TextUtils.isEmpty(sb)) {
             sb = appInfo2.getAppPackageName();
         }
-        return sCollator.compare(sa, sb);
+        return sCollator.compare(sa, sb); // 参考自ApplicationInfo.java中的DisplayNameComparator
     }
 }

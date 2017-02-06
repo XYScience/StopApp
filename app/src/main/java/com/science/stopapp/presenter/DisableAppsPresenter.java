@@ -214,6 +214,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                     if (mListDisableAppsNew.get(i).isEnable()) {
                         mListDisableAppsNew.get(i).setEnable(false);
                         commandSu(DisableAppsPresenter.COMMAND_DISABLE + packageName, false, null, -1);
+                        ((MainActivity) mActivity).getSelection().remove(packageName);
                     }
                 }
             }

@@ -144,6 +144,7 @@ public class MainActivity extends BaseActivity {
                 SettingActivity.actionStartActivity(this);
                 break;
             case R.id.menu_about:
+                AboutActivity.actionStartActivity(this);
                 break;
             case R.id.menu_add:
                 AppListActivity.actionStartActivity(this);

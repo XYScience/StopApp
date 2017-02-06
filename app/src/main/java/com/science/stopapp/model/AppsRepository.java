@@ -54,14 +54,16 @@ public class AppsRepository {
                 PackageManager packageManager = mContext.getPackageManager();
                 // 查询所有已经安装的应用程序
                 List<ApplicationInfo> applications = packageManager
-                        .getInstalledApplications(PackageManager.GET_UNINSTALLED_PACKAGES);
+                        .getInstalledApplications(PackageManager.MATCH_UNINSTALLED_PACKAGES);
                 List<AppInfo> appInfos = new ArrayList<>(); // 保存过滤查到的AppInfo
                 switch (appFlag) {
                     case APPS_FLAG_ALL:
                         appInfos.clear();
                         for (ApplicationInfo app : applications) {
                             if (!app.packageName.equals(mContext.getPackageName())) {
-                                appInfos.add(getAppInfo(app, packageManager));
+                                if (!app.packageName.contains("supersu")) {
+                                    appInfos.add(getAppInfo(app, packageManager));
+                                }
                             }
                         }
                         return appInfos;
@@ -78,7 +80,9 @@ public class AppsRepository {
                         for (ApplicationInfo app : applications) {
                             if ((app.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
                                 if (!app.packageName.equals(mContext.getPackageName())) {
-                                    appInfos.add(getAppInfo(app, packageManager));
+                                    if (!app.packageName.contains("supersu")) {
+                                        appInfos.add(getAppInfo(app, packageManager));
+                                    }
                                 }
                             }
                         }

@@ -28,4 +28,5 @@
     <string name="add_apps">添加应用</string>
     <string name="add_finish">添加完成！</string>
     <string name="app_ready_add_disable">该应用已经加入小黑屋(*^_^*)</string>
+    <string name="version">V %s</string>
 </resources>
