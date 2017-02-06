@@ -10,9 +10,11 @@ import com.science.stopapp.R;
 import com.science.stopapp.activity.MainActivity;
 import com.science.stopapp.bean.AppInfo;
 import com.science.stopapp.model.AppsRepository;
+import com.science.stopapp.util.AppInfoComparator;
 import com.science.stopapp.util.SharedPreferenceUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -159,6 +161,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                 }
             }
         }
+        Collections.sort(mListDisableApps, new AppInfoComparator());// 排序
         mView.getApps(mListDisableApps);
     }
 
