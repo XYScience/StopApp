@@ -12,6 +12,7 @@ import com.science.stopapp.bean.AppInfo;
 import com.science.stopapp.model.AppsRepository;
 import com.science.stopapp.util.AppInfoComparator;
 import com.science.stopapp.util.SharedPreferenceUtil;
+import com.science.stopapp.util.ShortcutsManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,6 +42,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
     private List<AppInfo> mListDisableAppsNew;
     private Set<String> mSetDisableApps;
     private Activity mActivity;
+    private ShortcutsManager mShortcutsManager;
     private boolean isFirstCmd = true;
 
     public DisableAppsPresenter(Activity activity, DisableAppsContract.View view) {
@@ -51,6 +53,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
         mListDisableAppsNew = new ArrayList<>();
         mSetDisableApps = new HashSet<>();
         mAppsRepository = new AppsRepository(activity);
+        mShortcutsManager = new ShortcutsManager(activity);
     }
 
     @Override
@@ -115,11 +118,13 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
      */
     private void updateApps(boolean isLaunchApp, AppInfo appInfo, int position) {
         if (isLaunchApp) {
+            mShortcutsManager.addShortcut(appInfo);
             mView.upDateItemIfLaunch(appInfo, position);
             launchAppIntent(appInfo.getAppPackageName());
         } else {
             mView.getRootSuccess(mListDisableApps, mListDisableAppsNew);
             mListDisableApps = mListDisableAppsNew;
+
         }
     }
 
