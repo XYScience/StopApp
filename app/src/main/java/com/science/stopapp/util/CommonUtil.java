@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -54,5 +55,16 @@ public class CommonUtil {
             e.printStackTrace();
         }
         return version;
+    }
+
+    //android 获取当前手机型号
+    public static String getPhoneModel() {
+        Build bd = new Build();
+        return bd.MODEL;
+    }
+
+    //android 获取当前手机Android版本
+    public static String getAndroidVersion() {
+        return android.os.Build.VERSION.RELEASE;
     }
 }
