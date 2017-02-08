@@ -1,9 +1,10 @@
 package com.science.stopapp.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import com.science.myloggerlibrary.MyLogger;
+import com.science.stopapp.service.RootActionIntentService;
 
 /**
  * @author SScience
@@ -14,11 +15,15 @@ import com.science.myloggerlibrary.MyLogger;
 
 public class ShortcutActivity extends AppCompatActivity {
 
+    public static final String EXTRA_PACKAGE_NAME = "extra_package_name";
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        AppInfo appInfo = (AppInfo) getIntent().getSerializableExtra("EXTRA_SHORTCUT");
-        MyLogger.e("-----------");
+        String packageName = getIntent().getStringExtra(EXTRA_PACKAGE_NAME);
+        Intent component = new Intent(this, RootActionIntentService.class);
+        component.putExtra(EXTRA_PACKAGE_NAME, packageName);
+        startService(component);
         finish();
     }
 }

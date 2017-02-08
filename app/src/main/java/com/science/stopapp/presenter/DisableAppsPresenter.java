@@ -3,6 +3,7 @@ package com.science.stopapp.presenter;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.support.v7.app.AlertDialog;
 
 import com.science.myloggerlibrary.MyLogger;
@@ -32,7 +33,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
     public static final String SP_DISABLE_APPS = "sp_disable_apps";
     public static final String COMMAND_APP_LIST = "list packages ";
     private static final String COMMAND_DISABLE = "disable ";
-    private static final String COMMAND_ENABLE = "enable ";
+    public static final String COMMAND_ENABLE = "enable ";
     public static final int APP_STYLE_ALL = 0;
     public static final int APP_STYLE_SYSTEM = 1;
     public static final int APP_STYLE_USER = 2;
@@ -118,7 +119,13 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
      */
     private void updateApps(boolean isLaunchApp, AppInfo appInfo, int position) {
         if (isLaunchApp) {
-            mShortcutsManager.addShortcut(appInfo);
+            Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+            mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+            mainIntent.setPackage(appInfo.getAppPackageName());
+            List<ResolveInfo> infoList = mActivity.getPackageManager().queryIntentActivities(mainIntent, 0);
+            if (infoList != null && !infoList.isEmpty()) {
+                mShortcutsManager.addShortcut(appInfo);
+            }
             mView.upDateItemIfLaunch(appInfo, position);
             launchAppIntent(appInfo.getAppPackageName());
         } else {

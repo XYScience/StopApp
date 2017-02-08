@@ -70,7 +70,7 @@
         <activity
             android:name=".activity.AppListActivity"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
         <activity
             android:name=".activity.AboutActivity"
@@ -79,14 +79,23 @@
 
         <activity
             android:name=".activity.ShortcutActivity"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait">
+            android:clearTaskOnLaunch="true"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:taskAffinity=":shortcut"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen">
 
             <intent-filter>
                 <action android:name="com.science.stopapp.OPEN_APP_SHORTCUT" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".service.RootActionIntentService"
+            android:process=":RootService" />
     </application>
 
 </manifest>
