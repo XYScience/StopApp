@@ -15,6 +15,7 @@ import com.science.stopapp.service.RootActionIntentService;
 
 public class ShortcutActivity extends AppCompatActivity {
 
+    public static final String OPEN_APP_SHORTCUT = "com.science.stopapp.OPEN_APP_SHORTCUT";
     public static final String EXTRA_PACKAGE_NAME = "extra_package_name";
 
     public void onCreate(Bundle savedInstanceState) {

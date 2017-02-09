@@ -8,10 +8,11 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Icon;
 import android.os.Build;
 
+import com.science.myloggerlibrary.MyLogger;
+import com.science.stopapp.activity.ShortcutActivity;
 import com.science.stopapp.bean.AppInfo;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.science.stopapp.activity.ShortcutActivity.EXTRA_PACKAGE_NAME;
@@ -37,11 +38,22 @@ public class ShortcutsManager {
 
     public void addShortcut(AppInfo appInfo) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            List<ShortcutInfo> shortcutList = mShortcutManager.getDynamicShortcuts();
+            if (shortcutList.size() == 3) {
+                shortcutList.remove(shortcutList.size() - 1);
+                MyLogger.e("shortcut最多显示4个");
+            }
+            for (ShortcutInfo info : shortcutList) {
+                if (appInfo.getAppPackageName().equals(info.getId())) {
+                    MyLogger.e("已经存在的shortcut:" + info.getId());
+                    return;
+                }
+            }
             ShortcutInfo shortcut = new ShortcutInfo.Builder(mContext, appInfo.getAppPackageName())
                     .setShortLabel(appInfo.getAppName())
                     .setIcon(Icon.createWithBitmap(((BitmapDrawable) appInfo.getAppIcon()).getBitmap()))
                     .setIntent(
-                            new Intent("com.science.stopapp.OPEN_APP_SHORTCUT")
+                            new Intent(ShortcutActivity.OPEN_APP_SHORTCUT)
                                     .putExtra(EXTRA_PACKAGE_NAME, appInfo.getAppPackageName())
                             // this dynamic shortcut set up a back stack using Intents, when pressing back, will go to MainActivity
                             // the last Intent is what the shortcut really opened
@@ -53,7 +65,8 @@ public class ShortcutsManager {
                     )
                     .build();
 
-            mShortcutManager.setDynamicShortcuts(Arrays.asList(shortcut));
+            shortcutList.add(shortcut);
+            mShortcutManager.setDynamicShortcuts(shortcutList);
         }
     }
 
