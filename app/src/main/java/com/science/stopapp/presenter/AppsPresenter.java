@@ -16,6 +16,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.science.stopapp.model.AppsRepository.COMMAND_UNINSTALL;
+
 /**
  * @author SScience
  * @description
@@ -65,7 +67,24 @@ public class AppsPresenter implements AppsContract.Presenter {
     }
 
     @Override
-    public void addDisableApps(final AppInfo appInfo) {
+    public void operationApps(final AppInfo appInfo, final int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setTitle(appInfo.getAppName());
+        final String[] Items = {mContext.getString(R.string.add_disable_apps), mContext.getString(R.string.uninstall_app)};
+        builder.setItems(Items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if (i == 0) {
+                    addDisableApps(appInfo, dialogInterface);
+                } else if (i == 1) {
+                    uninstallApp(appInfo, position);
+                }
+            }
+        });
+        builder.show();
+    }
+
+    private void addDisableApps(AppInfo appInfo, DialogInterface dialogInterface) {
         Set<String> disableApps = new HashSet<>();
         disableApps = (Set<String>) SharedPreferenceUtil.get(mContext, DisableAppsPresenter.SP_DISABLE_APPS, disableApps);
         for (String packageName : disableApps) {
@@ -74,21 +93,29 @@ public class AppsPresenter implements AppsContract.Presenter {
                 return;
             }
         }
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setTitle(R.string.tip);
-        builder.setMessage(appInfo.isEnable() ? mContext.getString(R.string.whether_add_disable_app, appInfo.getAppName())
-                : mContext.getString(R.string.whether_enable_app, appInfo.getAppName()));
-        builder.setNegativeButton(R.string.cancel, null);
-        builder.setPositiveButton(mContext.getString(R.string.confirm), new DialogInterface.OnClickListener() {
+        Set<String> addDisable = new HashSet<>();
+        addDisable.add(appInfo.getAppPackageName());
+        addDisableAppsSuccess(addDisable);
+        dialogInterface.dismiss();
+    }
+
+    private void uninstallApp(final AppInfo appInfo, final int position) {
+        mAppsRepository.commandSu(COMMAND_UNINSTALL + appInfo.getAppPackageName(), new AppsRepository.GetAppsCmdCallback() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Set<String> disableApps = new HashSet<>();
-                disableApps.add(appInfo.getAppPackageName());
-                addDisableAppsSuccess(disableApps);
-                dialog.dismiss();
+            public void onRootAppsLoaded(List<AppInfo> apps) {
+
+            }
+
+            @Override
+            public void onRootError() {
+                mView.getRootError();
+            }
+
+            @Override
+            public void onRootSuccess() {
+                mView.uninstallSuccess(appInfo.getAppName(), position);
             }
         });
-        builder.show();
     }
 
     @Override

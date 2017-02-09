@@ -71,7 +71,7 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
         mAppListAdapter.setOnItemClickListener(new OnItemClickListener<AppInfo>() {
             @Override
             public void onItemClick(AppInfo appInfo, int position) {
-                mPresenter.addDisableApps(appInfo);
+                mPresenter.operationApps(appInfo, position);
             }
 
             @Override
@@ -106,10 +106,21 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
 
     @Override
     public void addDisableAppsSuccess() {
-        snackBarShow(((AppListActivity) getActivity()).mCoordinatorLayout, R.string.add_finish);
+//        snackBarShow(((AppListActivity) getActivity()).mCoordinatorLayout, R.string.add_finish);
         Intent intent = new Intent(getActivity(), MainActivity.class);
         getActivity().setResult(RESULT_OK, intent);
         getActivity().finish();
+    }
+
+    @Override
+    public void getRootError() {
+        snackBarShow(((AppListActivity) getActivity()).mCoordinatorLayout, getString(R.string.if_want_to_use_please_grant_app_root));
+    }
+
+    @Override
+    public void uninstallSuccess(String appName, int position) {
+        mAppListAdapter.removeData(position);
+        snackBarShow(((AppListActivity) getActivity()).mCoordinatorLayout, getString(R.string.uninstall_success, appName));
     }
 
     public void addDisableApps(Set<String> packageNames) {

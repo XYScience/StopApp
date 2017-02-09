@@ -14,7 +14,7 @@ import com.science.stopapp.model.AppsRepository;
 
 import java.util.List;
 
-import static com.science.stopapp.presenter.DisableAppsPresenter.COMMAND_ENABLE;
+import static com.science.stopapp.model.AppsRepository.COMMAND_ENABLE;
 
 /**
  * @author SScience

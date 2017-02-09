@@ -40,7 +40,7 @@ public class ShortcutsManager {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
             List<ShortcutInfo> shortcutList = mShortcutManager.getDynamicShortcuts();
             if (shortcutList.size() == 3) {
-                shortcutList.remove(shortcutList.size() - 1);
+                removeShortcut(shortcutList.get(shortcutList.size() - 1).getId());
                 MyLogger.e("shortcut最多显示4个");
             }
             for (ShortcutInfo info : shortcutList) {
@@ -75,6 +75,14 @@ public class ShortcutsManager {
             List<String> list = new ArrayList<>();
             list.add(shortcutID);
             mShortcutManager.disableShortcuts(list);
+        }
+    }
+
+    public void removeShortcut(String shortcutID) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            List<String> list = new ArrayList<>();
+            list.add(shortcutID);
+            mShortcutManager.removeDynamicShortcuts(list);
         }
     }
 }

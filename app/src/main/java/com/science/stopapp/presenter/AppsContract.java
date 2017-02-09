@@ -22,12 +22,16 @@ public interface AppsContract {
         void hadAddDisableApps();
 
         void addDisableAppsSuccess();
+
+        void getRootError();
+
+        void uninstallSuccess(String appName, int position);
     }
 
     interface Presenter extends BasePresenter {
         void getApps(int appStyle);
 
-        void addDisableApps(AppInfo appInfo);
+        void operationApps(AppInfo appInfo, int position);
 
         void addDisableAppsSuccess(Set<String> packageNames);
 

@@ -7,7 +7,6 @@ import android.os.AsyncTask;
 
 import com.science.myloggerlibrary.MyLogger;
 import com.science.stopapp.bean.AppInfo;
-import com.science.stopapp.presenter.DisableAppsPresenter;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -29,6 +28,10 @@ public class AppsRepository {
     private static final int APPS_FLAG_ALL = 0;
     private static final int APPS_FLAG_SYSTEM = 1;
     private static final int APPS_FLAG_USER = 2;
+    public static final String COMMAND_APP_LIST = "list packages ";
+    public static final String COMMAND_DISABLE = "disable ";
+    public static final String COMMAND_ENABLE = "enable ";
+    public static final String COMMAND_UNINSTALL = "uninstall ";
     private Context mContext;
 
     public AppsRepository(Context context) {
@@ -130,7 +133,7 @@ public class AppsRepository {
                     int i = process.waitFor();
                     if (i == 0) { // 正确获取root权限
                         appList = new ArrayList<>();
-                        if (cmd.contains(DisableAppsPresenter.COMMAND_APP_LIST)) { // 获取应用
+                        if (cmd.contains(COMMAND_APP_LIST)) { // 获取应用
                             String msg = "";
                             BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
                             while ((msg = br.readLine()) != null) {
@@ -138,7 +141,7 @@ public class AppsRepository {
                                 appList.add(getAppInfo(applicationInfo, packageManager));
                             }
                         } else {
-                            // 停用or启用
+                            // 停用or启用or卸载
                             MyLogger.e(cmd + " success");
                         }
                     }

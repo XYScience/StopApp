@@ -18,8 +18,8 @@
     <string name="user_apps">用户应用</string>
     <string name="disable_apps">停用应用</string>
     <string name="whether_disable_app">要把 [ %s ] 关进小黑屋吗？</string>
-    <string name="whether_add_disable_app">要把 [ %s ] 加入小黑屋吗？</string>
-    <string name="whether_enable_app">要解封 [ %s ] 吗？</string>
+    <string name="add_disable_apps">加入小黑屋</string>
+    <string name="uninstall_app">卸载应用</string>
     <string name="if_want_to_use_please_grant_app_root">暂时没有root权限！请授予本应用root权限！</string>
     <string name="quick_disable">一键停用</string>
     <string name="quick_enable">一键启用</string>
@@ -48,4 +48,5 @@
     <string name="leave_feedback">\n在下面写下您的反馈建议：</string>
     <string name="choose_email_app">请选择邮件发送软件</string>
     <string name="add_disable_app">添加停用应用</string>
+    <string name="uninstall_success">卸载[%s]成功</string>
 </resources>
