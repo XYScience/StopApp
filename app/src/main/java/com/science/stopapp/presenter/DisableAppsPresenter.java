@@ -234,13 +234,9 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
             }
         }
         if (isRemove) {
-            if (!isFirstCmd) {
-                SharedPreferenceUtil.clear(mActivity);
-                SharedPreferenceUtil.put(mActivity, SP_DISABLE_APPS, setDisableApps);
-            }
+            SharedPreferenceUtil.clear(mActivity);
+            SharedPreferenceUtil.put(mActivity, SP_DISABLE_APPS, setDisableApps);
             if (isNotCmd) {
-                SharedPreferenceUtil.clear(mActivity);
-                SharedPreferenceUtil.put(mActivity, SP_DISABLE_APPS, setDisableApps);
                 updateApps(false, null, -1);
             }
         }
