@@ -195,6 +195,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
             commandSu(COMMAND_ENABLE + appInfo.getAppPackageName(), true, appInfo, position);
         } else {
             launchAppIntent(appInfo.getAppPackageName());
+            mView.upDateItemIfLaunch(null, -1);
         }
     }
 

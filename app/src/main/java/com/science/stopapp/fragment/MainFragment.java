@@ -150,11 +150,13 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
 
     @Override
     public void upDateItemIfLaunch(AppInfo appInfo, int position) {
-        appInfo.setEnable(true);
-        mDisableAppAdapter.updateItem(position, appInfo);
-        mAppInfos.get(position).setEnable(true);
-        mMainActivity.getSelection().add(appInfo.getAppPackageName());
-        mMainActivity.checkSelection();
+        if (appInfo != null) {
+            appInfo.setEnable(true);
+            mDisableAppAdapter.updateItem(position, appInfo);
+            mAppInfos.get(position).setEnable(true);
+            mMainActivity.getSelection().add(appInfo.getAppPackageName());
+            mMainActivity.checkSelection();
+        }
         setRefreshing(false);
     }
 
