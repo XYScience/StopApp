@@ -50,6 +50,10 @@ public class AppsRepository {
         void onRootSuccess();
     }
 
+    public interface GetRootCallback {
+        void onRoot(Boolean isRoot);
+    }
+
     public void getApps(final int appFlag, final GetAppsCallback callback) {
         new AsyncTask<Boolean, Boolean, List<AppInfo>>() {
             @Override
@@ -173,6 +177,53 @@ public class AppsRepository {
                 } else {
                     callback.onRootError();
                 }
+            }
+        }.execute();
+    }
+
+    /**
+     * 应用程序运行命令获取 Root权限，设备必须已破解(获得ROOT权限)
+     * <p>
+     * command 命令： String apkRoot="chmod 777 "+getPackageCodePath();
+     * RootCommand(apkRoot);
+     *
+     * @return 应用程序是/否获取Root权限
+     */
+    public void getRoot(final GetRootCallback callback) {
+        new AsyncTask<Boolean, Object, Boolean>() {
+
+            @Override
+            protected Boolean doInBackground(Boolean... params) {
+                Process process = null;
+                DataOutputStream os = null;
+                try {
+                    process = Runtime.getRuntime().exec("su");
+                    os = new DataOutputStream(process.getOutputStream());
+                    os.writeBytes("chmod 777 " + mContext.getPackageCodePath() + "\n");
+                    os.writeBytes("exit\n");
+                    os.flush();
+                    int i = process.waitFor();
+                    if (i == 0) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } catch (Exception e) {
+                    return false;
+                } finally {
+                    try {
+                        if (os != null) {
+                            os.close();
+                        }
+                        process.destroy();
+                    } catch (Exception e) {
+                    }
+                }
+            }
+
+            @Override
+            protected void onPostExecute(Boolean isRoot) {
+                callback.onRoot(isRoot);
             }
         }.execute();
     }

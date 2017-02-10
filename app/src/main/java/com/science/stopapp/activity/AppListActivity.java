@@ -91,13 +91,13 @@ public class AppListActivity extends BaseActivity {
         mCbSelectAllApps.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                AppListFragment appListFragment = ((MyPagerAdapter) mViewPager.getAdapter()).getFragments(mViewPager.getCurrentItem());
+                AppListFragment appListFragment = ((MyPagerAdapter) mViewPager.getAdapter()).getFragments(0);
                 List<String> listApps = appListFragment.getPackageNames();
-                if (listApps.size() != getSelection().size()) {
-                    getSelection().addAll(listApps);
+                if (listApps.size() != getSelection(0).size()) {
+                    getSelection(0).addAll(listApps);
                     buttonView.setChecked(true);
                 } else {
-                    getSelection().clear();
+                    getSelection(0).clear();
                 }
                 appListFragment.reFreshAppAdapter();
                 checkSelection();
@@ -107,25 +107,41 @@ public class AppListActivity extends BaseActivity {
         mFabConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Set<String> appInfos = new HashSet<>();
+                appInfos.addAll(getSelection(0));
+                appInfos.addAll(getSelection(1));
                 ((MyPagerAdapter) mViewPager.getAdapter()).
-                        getFragments(mViewPager.getCurrentItem()).addDisableApps(getSelection());
+                        getFragments(mViewPager.getCurrentItem()).addDisableApps(appInfos);
             }
         });
     }
 
+    public Set<String> getSelection(int page) {
+        return mSelection.get(page);
+    }
+
     public Set<String> getSelection() {
-        return mSelection.get(mViewPager.getCurrentItem());
+        return getSelection(mViewPager.getCurrentItem());
     }
 
     public void checkSelection() {
-        if (getSelection().size() == 0) {
-            DecelerateInterpolator interpolator = new DecelerateInterpolator();
-            setInterpolator(mCbSelectAllApps, 0, interpolator);
-            setInterpolator(mFabConfirm, 0, interpolator);
+        DecelerateInterpolator di = new DecelerateInterpolator();
+        AccelerateInterpolator ai = new AccelerateInterpolator();
+        if (mViewPager.getCurrentItem() == 0) {
+            if (getSelection(0).size() == 0) {
+                setInterpolator(mCbSelectAllApps, 0, di);
+                setInterpolator(mFabConfirm, 0, di);
+            } else {
+                setInterpolator(mCbSelectAllApps, 1, ai);
+                setInterpolator(mFabConfirm, 1, ai);
+            }
         } else {
-            AccelerateInterpolator interpolator = new AccelerateInterpolator();
-            setInterpolator(mCbSelectAllApps, 1, interpolator);
-            setInterpolator(mFabConfirm, 1, interpolator);
+            setInterpolator(mCbSelectAllApps, 0, di);
+        }
+        if (getSelection(0).size() == 0 && (getSelection(1).size() == 0)) {
+            setInterpolator(mFabConfirm, 0, di);
+        } else {
+            setInterpolator(mFabConfirm, 1, ai);
         }
     }
 }

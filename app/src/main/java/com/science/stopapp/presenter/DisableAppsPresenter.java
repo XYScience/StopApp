@@ -199,46 +199,55 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
     }
 
     @Override
-    public void batchApps(boolean isRemove) {
-        try {
-            mListDisableAppsNew = new ArrayList<>();
-            for (AppInfo info : mListDisableApps) {
-                mListDisableAppsNew.add(info.clone());
-            }
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
-        Set<String> setDisableApps = new HashSet<>();
-        setDisableApps = (Set<String>) SharedPreferenceUtil.get(mActivity, SP_DISABLE_APPS, new HashSet<>());
-        isFirstCmd = true;
-        boolean isNotCmd = true;
-        for (int i = 0; i < mListDisableAppsNew.size(); i++) {
-            String packageName = mListDisableAppsNew.get(i).getAppPackageName();
-            if (((MainActivity) mActivity).getSelection().contains(packageName)) {
-                if (isRemove) {
-                    if (!mListDisableAppsNew.get(i).isEnable()) {
-                        commandSu(COMMAND_ENABLE + packageName, false, null, -1);
-                        isNotCmd = false;
+    public void batchApps(final boolean isRemove) {
+        mAppsRepository.getRoot(new AppsRepository.GetRootCallback() {
+            @Override
+            public void onRoot(Boolean isRoot) {
+                if (isRoot) {
+                    try {
+                        mListDisableAppsNew = new ArrayList<>();
+                        for (AppInfo info : mListDisableApps) {
+                            mListDisableAppsNew.add(info.clone());
+                        }
+                    } catch (CloneNotSupportedException e) {
+                        e.printStackTrace();
                     }
-                    mListDisableAppsNew.remove(i);
-                    ((MainActivity) mActivity).getSelection().remove(packageName);
-                    setDisableApps.remove(packageName);
-                    i--;
+                    Set<String> setDisableApps = new HashSet<>();
+                    setDisableApps = (Set<String>) SharedPreferenceUtil.get(mActivity, SP_DISABLE_APPS, new HashSet<>());
+                    isFirstCmd = true;
+                    boolean isNotCmd = true;
+                    for (int i = 0; i < mListDisableAppsNew.size(); i++) {
+                        String packageName = mListDisableAppsNew.get(i).getAppPackageName();
+                        if (((MainActivity) mActivity).getSelection().contains(packageName)) {
+                            if (isRemove) {
+                                if (!mListDisableAppsNew.get(i).isEnable()) {
+                                    commandSu(COMMAND_ENABLE + packageName, false, null, -1);
+                                    isNotCmd = false;
+                                }
+                                mListDisableAppsNew.remove(i);
+                                ((MainActivity) mActivity).getSelection().remove(packageName);
+                                setDisableApps.remove(packageName);
+                                i--;
+                            } else {
+                                if (mListDisableAppsNew.get(i).isEnable()) {
+                                    mListDisableAppsNew.get(i).setEnable(false);
+                                    commandSu(COMMAND_DISABLE + packageName, false, null, -1);
+                                    ((MainActivity) mActivity).getSelection().remove(packageName);
+                                }
+                            }
+                        }
+                    }
+                    if (isRemove) {
+                        SharedPreferenceUtil.clear(mActivity);
+                        SharedPreferenceUtil.put(mActivity, SP_DISABLE_APPS, setDisableApps);
+                        if (isNotCmd) {
+                            updateApps(false, null, -1);
+                        }
+                    }
                 } else {
-                    if (mListDisableAppsNew.get(i).isEnable()) {
-                        mListDisableAppsNew.get(i).setEnable(false);
-                        commandSu(COMMAND_DISABLE + packageName, false, null, -1);
-                        ((MainActivity) mActivity).getSelection().remove(packageName);
-                    }
+                    mView.getRootError();
                 }
             }
-        }
-        if (isRemove) {
-            SharedPreferenceUtil.clear(mActivity);
-            SharedPreferenceUtil.put(mActivity, SP_DISABLE_APPS, setDisableApps);
-            if (isNotCmd) {
-                updateApps(false, null, -1);
-            }
-        }
+        });
     }
 }
