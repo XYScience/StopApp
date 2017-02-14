@@ -17,6 +17,22 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                if ("release".equals(buildType.name)) {
+                    // apk_渠道名-版本号-版本名称-编译时间.apk
+                    def fileName = "stopapp_release_${defaultConfig.versionCode}_v${defaultConfig.versionName}_${releaseTime()}.apk"
+                    output.outputFile = new File(outputFile.parent, fileName)
+                }
+            }
+        }
+    }
+}
+
+def releaseTime() {
+    return new Date().format("yyyyMMddHHmmss")
 }
 
 dependencies {

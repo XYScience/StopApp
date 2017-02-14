@@ -119,13 +119,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
     private void updateApps(boolean isLaunchApp, AppInfo appInfo, int position) {
         if (isLaunchApp) {
             mListDisableApps.get(position).setEnable(true);
-            Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
-            mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-            mainIntent.setPackage(appInfo.getAppPackageName());
-            List<ResolveInfo> infoList = mActivity.getPackageManager().queryIntentActivities(mainIntent, 0);
-            if (infoList != null && !infoList.isEmpty()) {
-                mShortcutsManager.addShortcut(appInfo);
-            }
+            addShortcut(appInfo);
             mView.upDateItemIfLaunch(appInfo, position);
             launchAppIntent(appInfo.getAppPackageName());
         } else {
@@ -194,8 +188,19 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
             isFirstCmd = true;
             commandSu(COMMAND_ENABLE + appInfo.getAppPackageName(), true, appInfo, position);
         } else {
+            addShortcut(appInfo);
             launchAppIntent(appInfo.getAppPackageName());
             mView.upDateItemIfLaunch(null, -1);
+        }
+    }
+
+    private void addShortcut(AppInfo appInfo) {
+        Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        mainIntent.setPackage(appInfo.getAppPackageName());
+        List<ResolveInfo> infoList = mActivity.getPackageManager().queryIntentActivities(mainIntent, 0);
+        if (infoList != null && !infoList.isEmpty()) {
+            mShortcutsManager.addShortcut(appInfo);
         }
     }
 
