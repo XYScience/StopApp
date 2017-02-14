@@ -7,11 +7,11 @@
         android:shortcutShortLabel="@string/add_disable_app">
         <intent
             android:action="android.intent.action.MAIN"
-            android:targetClass="com.science.stopapp.activity.MainActivity"
-            android:targetPackage="com.science.stopapp" />
+            android:targetClass="com.sscience.stopapp.activity.MainActivity"
+            android:targetPackage="com.sscience.stopapp" />
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetClass="com.science.stopapp.activity.AppListActivity"
-            android:targetPackage="com.science.stopapp" />
+            android:targetClass="com.sscience.stopapp.activity.AppListActivity"
+            android:targetPackage="com.sscience.stopapp" />
     </shortcut>
 </shortcuts>

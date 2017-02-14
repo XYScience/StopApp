@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.science.stopapp">
+    package="com.sscience.stopapp">
 
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
 
@@ -33,7 +33,7 @@
             android:targetActivity 属性：指定别名能够启动的目标 Activity，注意，属性值一定要对应到 <activity> 标签中的 name 属性，并且该 <activity> 标签一定要位于 <activity-alias> 标签前面；
          -->
         <activity-alias
-            android:name="com.science.stopapp.MainCircleIconActivity"
+            android:name="com.sscience.stopapp.MainCircleIconActivity"
             android:enabled="true"
             android:icon="@mipmap/ic_launcher"
             android:launchMode="singleTop"
@@ -48,7 +48,7 @@
         </activity-alias>
 
         <activity-alias
-            android:name="com.science.stopapp.MainSquareIconActivity"
+            android:name="com.sscience.stopapp.MainSquareIconActivity"
             android:enabled="false"
             android:icon="@mipmap/ic_launcher_square"
             android:launchMode="singleTop"
@@ -86,7 +86,7 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen">
 
             <intent-filter>
-                <action android:name="com.science.stopapp.OPEN_APP_SHORTCUT" />
+                <action android:name="com.sscience.stopapp.OPEN_APP_SHORTCUT" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
