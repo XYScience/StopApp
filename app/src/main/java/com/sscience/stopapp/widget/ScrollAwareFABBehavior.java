@@ -1,4 +1,4 @@
-package com.sscience.stopapp.util;
+package com.sscience.stopapp.widget;
 
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;
@@ -75,6 +75,7 @@ public class ScrollAwareFABBehavior extends FloatingActionButton.Behavior {
                 .setInterpolator(INTERPOLATOR).withLayer().setListener(null)
                 .start();
     }
+
 
     private int getMarginBottom(View v) {
         int marginBottom = 0;

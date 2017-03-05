@@ -1,8 +1,7 @@
 package com.sscience.stopapp.fragment;
 
 import android.support.v7.util.DiffUtil;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
@@ -14,9 +13,11 @@ import com.sscience.stopapp.base.BaseFragment;
 import com.sscience.stopapp.bean.AppInfo;
 import com.sscience.stopapp.presenter.DisableAppsContract;
 import com.sscience.stopapp.util.DiffCallBack;
+import com.sscience.stopapp.widget.DragSelectTouchListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author SScience
@@ -28,7 +29,9 @@ import java.util.List;
 public class MainFragment extends BaseFragment implements DisableAppsContract.View {
 
     private DisableAppsContract.Presenter mPresenter;
+    private RecyclerView mRecyclerView;
     private DisableAppAdapter mDisableAppAdapter;
+    private DragSelectTouchListener mDragSelectTouchListener;
     private MainActivity mMainActivity;
     private List<AppInfo> mAppInfos;
 
@@ -44,13 +47,13 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
     @Override
     protected void doCreateView(View view) {
         mMainActivity = (MainActivity) getActivity();
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
-        recyclerView.setHasFixedSize(true);
-        LinearLayoutManager manager = new LinearLayoutManager(mMainActivity);
-        recyclerView.setLayoutManager(manager);
-        recyclerView.addItemDecoration(new DividerItemDecoration(mMainActivity, manager.getOrientation()));
-        mDisableAppAdapter = new DisableAppAdapter(mMainActivity, recyclerView);
-        recyclerView.setAdapter(mDisableAppAdapter);
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+        mRecyclerView.setHasFixedSize(true);
+        GridLayoutManager manager = new GridLayoutManager(mMainActivity, 4);
+        mRecyclerView.setLayoutManager(manager);
+//        recyclerView.addItemDecoration(new DividerItemDecoration(mMainActivity, manager.getOrientation()));
+        mDisableAppAdapter = new DisableAppAdapter(mMainActivity, mRecyclerView);
+        mRecyclerView.setAdapter(mDisableAppAdapter);
 
         mAppInfos = new ArrayList<>();
         initRefreshLayout(view);
@@ -63,8 +66,29 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         mDisableAppAdapter.setOnItemClickListener(new OnItemClickListener<AppInfo>() {
             @Override
             public void onItemClick(AppInfo appInfo, int position) {
-                setRefreshing(true);
-                mPresenter.launchApp(appInfo, position);
+                Set<String> selection = mMainActivity.getSelection();
+                if (selection.size() == 0) {
+                    setRefreshing(true);
+                    mPresenter.launchApp(appInfo, position);
+                } else {
+                    String packageName = appInfo.getAppPackageName();
+                    if (selection.contains(packageName)) {
+                        selection.remove(packageName);
+                    } else {
+                        selection.add(packageName);
+                    }
+                    mDisableAppAdapter.notifyItemChanged(position);
+                    mMainActivity.checkSelection();
+
+                }
+            }
+
+            @Override
+            public void onItemLongClick(AppInfo data, int position) {
+                mDragSelectTouchListener.startDragSelection(position);
+                mMainActivity.getSelection().add(data.getAppPackageName());
+                mDisableAppAdapter.notifyItemChanged(position);
+                mMainActivity.checkSelection();
             }
 
             @Override
@@ -72,6 +96,23 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
                 mPresenter.start();
             }
         });
+
+        mDragSelectTouchListener = new DragSelectTouchListener()
+                .withSelectListener(new DragSelectTouchListener.OnDragSelectListener() {
+                    @Override
+                    public void onSelectChange(int start, int end, boolean isSelected) {
+                        for (int i = start; i <= end; i++) {
+                            if (isSelected) {
+                                mMainActivity.getSelection().add(mAppInfos.get(i).getAppPackageName());
+                            } else {
+                                mMainActivity.getSelection().remove(mAppInfos.get(i).getAppPackageName());
+                            }
+                        }
+                        mDisableAppAdapter.notifyItemRangeChanged(start, end - start + 1);
+                        mMainActivity.checkSelection();
+                    }
+                });
+        mRecyclerView.addOnItemTouchListener(mDragSelectTouchListener);
     }
 
     @Override
@@ -96,7 +137,7 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         mAppInfos = appList;
         mDisableAppAdapter.setData(false, appList);
         mMainActivity.checkSelection();
-        setSwipeRefreshEnable(true);
+        setSwipeRefreshEnable(false);
         setRefreshing(false);
     }
 

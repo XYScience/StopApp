@@ -40,7 +40,7 @@ public class ShortcutsManager {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
             List<ShortcutInfo> shortcutList = mShortcutManager.getDynamicShortcuts();
             if (shortcutList.size() == 3) {
-                ShortcutInfo shortcutInfo = shortcutList.get(1);
+                ShortcutInfo shortcutInfo = shortcutList.get(0);
                 removeShortcut(shortcutInfo.getId());
                 shortcutList.remove(shortcutInfo);
                 MyLogger.e("shortcut最多显示4个");

@@ -27,7 +27,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/activity_horizontal_margin"
         android:alpha="0"
-        app:layout_behavior="com.sscience.stopapp.util.ScrollAwareFABBehavior"
+        app:layout_behavior="com.sscience.stopapp.widget.ScrollAwareFABBehavior"
         app:srcCompat="@drawable/ic_white_fab_disable" />
 
 </android.support.design.widget.CoordinatorLayout>

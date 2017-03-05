@@ -42,5 +42,5 @@ dependencies {
     })
     testCompile 'junit:junit:4.12'
     compile 'com.github.XYScience:MyLogger:0.1.1'
-    compile 'com.github.XYScience:BaseRecyclerViewAdapter:1.1.0'
+    compile 'com.github.XYScience:BaseRecyclerViewAdapter:1.1.2'
 }
