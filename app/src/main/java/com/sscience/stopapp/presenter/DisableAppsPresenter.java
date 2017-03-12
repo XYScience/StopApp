@@ -10,16 +10,14 @@ import com.science.myloggerlibrary.MyLogger;
 import com.sscience.stopapp.R;
 import com.sscience.stopapp.activity.MainActivity;
 import com.sscience.stopapp.bean.AppInfo;
+import com.sscience.stopapp.database.AppInfoDBController;
 import com.sscience.stopapp.model.AppsRepository;
 import com.sscience.stopapp.util.AppInfoComparator;
-import com.sscience.stopapp.util.SharedPreferenceUtil;
 import com.sscience.stopapp.util.ShortcutsManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static com.sscience.stopapp.model.AppsRepository.COMMAND_APP_LIST;
 import static com.sscience.stopapp.model.AppsRepository.COMMAND_DISABLE;
@@ -27,7 +25,7 @@ import static com.sscience.stopapp.model.AppsRepository.COMMAND_ENABLE;
 
 /**
  * @author SScience
- * @description
+ * @description 首页停用（待停用）apps列表
  * @email chentushen.science@gmail.com
  * @data 2017/1/15
  */
@@ -44,7 +42,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
     private List<AppInfo> mListDisableAppsNew;
     private Activity mActivity;
     private ShortcutsManager mShortcutsManager;
-    private boolean isFirstCmd = true;
+    private AppInfoDBController mAppInfoDBController;
 
     public DisableAppsPresenter(Activity activity, DisableAppsContract.View view) {
         mActivity = activity;
@@ -54,16 +52,24 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
         mListDisableAppsNew = new ArrayList<>();
         mAppsRepository = new AppsRepository(activity);
         mShortcutsManager = new ShortcutsManager(activity);
+        mAppInfoDBController = new AppInfoDBController(activity);
     }
 
     @Override
     public void start() {
-        Set<String> setDisableApps = new HashSet<>();
-        setDisableApps = (Set<String>) SharedPreferenceUtil.get(mActivity, SP_DISABLE_APPS, new HashSet<>());
-        if (setDisableApps.isEmpty()) {
+//        Set<String> setDisableApps = new HashSet<>();
+//        setDisableApps = (Set<String>) SharedPreferenceUtil.get(mActivity, SP_DISABLE_APPS, new HashSet<>());
+//        if (setDisableApps.isEmpty()) {
+//            commandSu(COMMAND_APP_LIST + "-d", false, null, -1);
+//        } else {
+//            getApps(DisableAppsPresenter.APP_STYLE_ALL);
+//        }
+        List<AppInfo> disableApps = mAppInfoDBController.getDisableApps();
+        if (disableApps.isEmpty() && disableApps.size() == 0) {
             commandSu(COMMAND_APP_LIST + "-d", false, null, -1);
         } else {
-            getApps(DisableAppsPresenter.APP_STYLE_ALL);
+//            getApps(DisableAppsPresenter.APP_STYLE_ALL);
+            getDisableApps(disableApps);
         }
     }
 
@@ -76,8 +82,8 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
         builder.setPositiveButton(mActivity.getString(R.string.confirm), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                appInfo.setEnable(!appInfo.isEnable());
-                commandSu(appInfo.isEnable() ? COMMAND_ENABLE : COMMAND_DISABLE + appInfo.appPackageName,
+                appInfo.setEnable(appInfo.isEnable() == 1 ? 0 : 1);
+                commandSu(appInfo.isEnable() == 1 ? COMMAND_ENABLE : COMMAND_DISABLE + appInfo.appPackageName,
                         false, null, -1);
                 dialog.dismiss();
             }
@@ -100,33 +106,14 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
 
             @Override
             public void onRootSuccess() {
-                if (isFirstCmd) {
-                    isFirstCmd = false;
-                    updateApps(isLaunchApp, appInfo, position);
+                if (isLaunchApp) {
+                    mListDisableApps.get(position).setEnable(1);
+                    addShortcut(appInfo);
+                    mView.upDateItemIfLaunch(appInfo, position);
+                    launchAppIntent(appInfo.getAppPackageName());
                 }
             }
         });
-    }
-
-    /**
-     * 停用or启用apps成功后更新列表
-     *
-     * @param isLaunchApp enable app包括在小黑屋列表(批量)启用并删除app和点击item启动app，
-     *                    如果为true，则操作是点击item启动app。
-     * @param appInfo
-     * @param position
-     */
-    private void updateApps(boolean isLaunchApp, AppInfo appInfo, int position) {
-        if (isLaunchApp) {
-            mListDisableApps.get(position).setEnable(true);
-            addShortcut(appInfo);
-            mView.upDateItemIfLaunch(appInfo, position);
-            launchAppIntent(appInfo.getAppPackageName());
-        } else {
-            mView.getRootSuccess(mListDisableApps, mListDisableAppsNew);
-            mListDisableApps = mListDisableAppsNew;
-
-        }
     }
 
     private void launchAppIntent(String packageName) {
@@ -150,25 +137,32 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
 
     private void getDisableApps(List<AppInfo> appList) {
         mListDisableApps.clear();
-        Set<String> setDisableApps = new HashSet<>();
-        setDisableApps = (Set<String>) SharedPreferenceUtil.get(mActivity, SP_DISABLE_APPS, new HashSet<>());
-        if (setDisableApps.isEmpty()) {
-            for (AppInfo appInfo : appList) {
-                setDisableApps.add(appInfo.getAppPackageName());
-            }
-            SharedPreferenceUtil.put(mActivity, SP_DISABLE_APPS, setDisableApps);
-            mListDisableApps = appList;
-        } else {
-            for (AppInfo appInfo : appList) {
-                String packageName = appInfo.getAppPackageName();
-                if (setDisableApps.contains(packageName)) {
-                    mListDisableApps.add(appInfo);
-                    if (appInfo.isEnable()) {
-                        ((MainActivity) mActivity).getSelection().add(packageName);
-                    }
-                }
+//        Set<String> setDisableApps = new HashSet<>();
+//        setDisableApps = (Set<String>) SharedPreferenceUtil.get(mActivity, SP_DISABLE_APPS, new HashSet<>());
+//        if (setDisableApps.isEmpty()) {
+//            for (AppInfo appInfo : appList) {
+//                setDisableApps.add(appInfo.getAppPackageName());
+//            }
+//            SharedPreferenceUtil.put(mActivity, SP_DISABLE_APPS, setDisableApps);
+//            mListDisableApps = appList;
+//        } else {
+//            for (AppInfo appInfo : appList) {
+//                String packageName = appInfo.getAppPackageName();
+//                if (setDisableApps.contains(packageName)) {
+//                    mListDisableApps.add(appInfo);
+//                    if (appInfo.isEnable() == 1) {
+//                        ((MainActivity) mActivity).getSelection().add(packageName);
+//                    }
+//                }
+//            }
+//        }
+        for (AppInfo appInfo : appList) {
+            mAppInfoDBController.addDisableApp(appInfo);
+            if (appInfo.isEnable() == 1) {
+                ((MainActivity) mActivity).getSelection().add(appInfo);
             }
         }
+        mListDisableApps = appList;
         Collections.sort(mListDisableApps, new AppInfoComparator());// 排序
         mView.getApps(mListDisableApps);
     }
@@ -184,9 +178,9 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
 
     @Override
     public void launchApp(AppInfo appInfo, int position) {
-        if (!appInfo.isEnable()) {
-            isFirstCmd = true;
+        if (appInfo.isEnable() == 0) {
             commandSu(COMMAND_ENABLE + appInfo.getAppPackageName(), true, appInfo, position);
+            mAppInfoDBController.updateDisableApp(appInfo.getAppPackageName(), 1);
         } else {
             addShortcut(appInfo);
             launchAppIntent(appInfo.getAppPackageName());
@@ -218,38 +212,27 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                     } catch (CloneNotSupportedException e) {
                         e.printStackTrace();
                     }
-                    Set<String> setDisableApps = new HashSet<>();
-                    setDisableApps = (Set<String>) SharedPreferenceUtil.get(mActivity, SP_DISABLE_APPS, new HashSet<>());
-                    isFirstCmd = true;
-                    boolean isNotCmd = true;
-                    for (int i = 0; i < mListDisableAppsNew.size(); i++) {
-                        String packageName = mListDisableAppsNew.get(i).getAppPackageName();
-                        if (((MainActivity) mActivity).getSelection().contains(packageName)) {
-                            if (isRemove) {
-                                if (!mListDisableAppsNew.get(i).isEnable()) {
-                                    commandSu(COMMAND_ENABLE + packageName, false, null, -1);
-                                    isNotCmd = false;
-                                }
-                                mListDisableAppsNew.remove(i);
-                                ((MainActivity) mActivity).getSelection().remove(packageName);
-                                setDisableApps.remove(packageName);
-                                i--;
-                            } else {
-                                if (mListDisableAppsNew.get(i).isEnable()) {
-                                    mListDisableAppsNew.get(i).setEnable(false);
-                                    commandSu(COMMAND_DISABLE + packageName, false, null, -1);
-                                    ((MainActivity) mActivity).getSelection().remove(packageName);
-                                }
+                    List<AppInfo> appList = new ArrayList<>(((MainActivity) mActivity).getSelection());
+                    for (int i = 0; i < appList.size(); i++) {
+                        AppInfo appInfo = appList.get(i);
+                        if (isRemove) {
+                            if (appInfo.isEnable() == 0) {
+                                commandSu(COMMAND_ENABLE + appInfo.getAppPackageName(), false, null, -1);
+                            }
+                            ((MainActivity) mActivity).getSelection().remove(appInfo);
+                            mListDisableAppsNew.remove(appInfo);
+                            mAppInfoDBController.deleteDisableApp(appInfo.getAppPackageName());
+                        } else {
+                            if (appInfo.isEnable() == 1) {
+                                mListDisableAppsNew.get(mListDisableAppsNew.indexOf(appInfo)).setEnable(0);
+                                commandSu(COMMAND_DISABLE + appInfo.getAppPackageName(), false, null, -1);
+                                ((MainActivity) mActivity).getSelection().remove(appInfo);
+                                mAppInfoDBController.updateDisableApp(appInfo.getAppPackageName(), 0);
                             }
                         }
                     }
-                    if (isRemove) {
-                        SharedPreferenceUtil.clear(mActivity);
-                        SharedPreferenceUtil.put(mActivity, SP_DISABLE_APPS, setDisableApps);
-                        if (isNotCmd) {
-                            updateApps(false, null, -1);
-                        }
-                    }
+                    mView.getRootSuccess(mListDisableApps, mListDisableAppsNew);
+                    mListDisableApps = mListDisableAppsNew;
                 } else {
                     mView.getRootError();
                 }

@@ -66,16 +66,15 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         mDisableAppAdapter.setOnItemClickListener(new OnItemClickListener<AppInfo>() {
             @Override
             public void onItemClick(AppInfo appInfo, int position) {
-                Set<String> selection = mMainActivity.getSelection();
+                Set<AppInfo> selection = mMainActivity.getSelection();
                 if (selection.size() == 0) {
                     setRefreshing(true);
                     mPresenter.launchApp(appInfo, position);
                 } else {
-                    String packageName = appInfo.getAppPackageName();
-                    if (selection.contains(packageName)) {
-                        selection.remove(packageName);
+                    if (selection.contains(appInfo)) {
+                        selection.remove(appInfo);
                     } else {
-                        selection.add(packageName);
+                        selection.add(appInfo);
                     }
                     mDisableAppAdapter.notifyItemChanged(position);
                     mMainActivity.checkSelection();
@@ -84,9 +83,9 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
             }
 
             @Override
-            public void onItemLongClick(AppInfo data, int position) {
+            public void onItemLongClick(AppInfo appInfo, int position) {
                 mDragSelectTouchListener.startDragSelection(position);
-                mMainActivity.getSelection().add(data.getAppPackageName());
+                mMainActivity.getSelection().add(appInfo);
                 mDisableAppAdapter.notifyItemChanged(position);
                 mMainActivity.checkSelection();
             }
@@ -103,9 +102,9 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
                     public void onSelectChange(int start, int end, boolean isSelected) {
                         for (int i = start; i <= end; i++) {
                             if (isSelected) {
-                                mMainActivity.getSelection().add(mAppInfos.get(i).getAppPackageName());
+                                mMainActivity.getSelection().add(mAppInfos.get(i));
                             } else {
-                                mMainActivity.getSelection().remove(mAppInfos.get(i).getAppPackageName());
+                                mMainActivity.getSelection().remove(mAppInfos.get(i));
                             }
                         }
                         mDisableAppAdapter.notifyItemRangeChanged(start, end - start + 1);
@@ -163,17 +162,6 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         mPresenter.start();
     }
 
-    /**
-     * 点击ToolBar里的选择框时，更新列表的选择
-     */
-    public void reFreshAppAdapter() {
-        mDisableAppAdapter.notifyDataSetChanged();
-    }
-
-    public List<String> getDisableAppPackageNames() {
-        return mPresenter.getDisableAppPackageNames();
-    }
-
     @Override
     public void getRootSuccess(List<AppInfo> apps, List<AppInfo> appsNew) {
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffCallBack(apps, appsNew), false);
@@ -192,10 +180,10 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
     @Override
     public void upDateItemIfLaunch(AppInfo appInfo, int position) {
         if (appInfo != null) {
-            appInfo.setEnable(true);
+            appInfo.setEnable(1);
             mDisableAppAdapter.updateItem(position, appInfo);
-            mAppInfos.get(position).setEnable(true);
-            mMainActivity.getSelection().add(appInfo.getAppPackageName());
+            mAppInfos.get(position).setEnable(1);
+            mMainActivity.getSelection().add(appInfo);
             mMainActivity.checkSelection();
         }
         setRefreshing(false);

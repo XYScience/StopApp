@@ -29,8 +29,7 @@ public class MainActivity extends BaseActivity {
 
     public CoordinatorLayout mCoordinatorLayout;
     private MainFragment mMainFragment;
-    private Set<String> mSelection;
-    //    private AppCompatCheckBox mChSelectApps;
+    private Set<AppInfo> mSelection;
     private FloatingActionButton mFabDisable, mFabRemove;
     private boolean isWindowFocusChangedFirst = true;
 
@@ -79,22 +78,20 @@ public class MainActivity extends BaseActivity {
         });
     }
 
-    public Set<String> getSelection() {
+    public Set<AppInfo> getSelection() {
         return mSelection;
     }
 
     public void checkSelection() {
         DecelerateInterpolator di = new DecelerateInterpolator();
         if (mSelection.isEmpty()) {
-//            setInterpolator(mChSelectApps, 0, di);
             setInterpolator(mFabDisable, 0, di);
             setInterpolator(mFabRemove, 0, di);
         } else {
             AccelerateInterpolator ai = new AccelerateInterpolator();
-//            setInterpolator(mChSelectApps, 1, ai);
             for (AppInfo appInfo : mMainFragment.getAppInfos()) {
-                if (mSelection.contains(appInfo.getAppPackageName())) {
-                    if (appInfo.isEnable()) {
+                if (mSelection.contains(appInfo)) {
+                    if (appInfo.isEnable() == 1) {
                         setInterpolator(mFabDisable, 1, ai);
                         setFabMargins(mFabRemove.getHeight(), 32);
                         break;
@@ -112,22 +109,6 @@ public class MainActivity extends BaseActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
-//        mChSelectApps = (AppCompatCheckBox) menu.findItem(R.id.menu_select_all).getActionView();
-//        mChSelectApps.setAlpha(0);
-//        mChSelectApps.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                List<String> listApps = mMainFragment.getDisableAppPackageNames();
-//                if (listApps.size() != mSelection.size()) {
-//                    mSelection.addAll(listApps);
-//                    buttonView.setChecked(true);
-//                } else {
-//                    mSelection.clear();
-//                }
-//                mMainFragment.reFreshAppAdapter();
-//                checkSelection();
-//            }
-//        });
         return true;
     }
 

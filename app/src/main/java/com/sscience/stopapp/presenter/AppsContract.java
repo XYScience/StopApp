@@ -5,7 +5,6 @@ import com.sscience.stopapp.base.BaseView;
 import com.sscience.stopapp.bean.AppInfo;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author SScience
@@ -33,8 +32,8 @@ public interface AppsContract {
 
         void operationApps(AppInfo appInfo, int position);
 
-        void addDisableAppsSuccess(Set<String> packageNames);
+        void addDisableAppsSuccess(List<AppInfo>  appList);
 
-        List<String> getPackageNames();
+        List<AppInfo> getApps();
     }
 }

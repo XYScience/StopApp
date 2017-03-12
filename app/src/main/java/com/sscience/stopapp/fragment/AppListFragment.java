@@ -20,7 +20,6 @@ import com.sscience.stopapp.presenter.AppsPresenter;
 import com.sscience.stopapp.presenter.DisableAppsPresenter;
 
 import java.util.List;
-import java.util.Set;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -123,12 +122,12 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
         snackBarShow(((AppListActivity) getActivity()).mCoordinatorLayout, getString(R.string.uninstall_success, appName));
     }
 
-    public void addDisableApps(Set<String> packageNames) {
-        mPresenter.addDisableAppsSuccess(packageNames);
+    public void addDisableApps(List<AppInfo> appList) {
+        mPresenter.addDisableAppsSuccess(appList);
     }
 
-    public List<String> getPackageNames() {
-        return mPresenter.getPackageNames();
+    public List<AppInfo> getApps() {
+        return mPresenter.getApps();
     }
 
     /**

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.sscience.stopapp">
+          package="com.sscience.stopapp">
 
     <application
         android:allowBackup="true"
@@ -15,11 +15,11 @@
             android:screenOrientation="portrait"
             android:theme="@style/SplashScreenTheme">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
             </intent-filter>
             <meta-data
                 android:name="android.app.shortcuts"
-                android:resource="@xml/shortcuts" />
+                android:resource="@xml/shortcuts"/>
         </activity>
 
         <!--
@@ -37,12 +37,12 @@
             android:launchMode="singleTop"
             android:targetActivity=".activity.MainActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <meta-data
                 android:name="android.app.shortcuts"
-                android:resource="@xml/shortcuts" />
+                android:resource="@xml/shortcuts"/>
         </activity-alias>
 
         <activity-alias
@@ -52,28 +52,28 @@
             android:launchMode="singleTop"
             android:targetActivity=".activity.MainActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <meta-data
                 android:name="android.app.shortcuts"
-                android:resource="@xml/shortcuts" />
+                android:resource="@xml/shortcuts"/>
         </activity-alias>
 
         <activity
             android:name=".activity.SettingActivity"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".activity.AppListActivity"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".activity.AboutActivity"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".activity.ShortcutActivity"
@@ -84,16 +84,16 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen">
 
             <intent-filter>
-                <action android:name="com.sscience.stopapp.OPEN_APP_SHORTCUT" />
+                <action android:name="com.sscience.stopapp.OPEN_APP_SHORTCUT"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
             </intent-filter>
         </activity>
 
         <service
             android:name=".service.RootActionIntentService"
-            android:process=":RootService" />
+            android:process=":RootService"/>
     </application>
 
 </manifest>

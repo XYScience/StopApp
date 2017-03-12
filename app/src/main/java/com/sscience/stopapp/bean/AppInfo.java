@@ -1,6 +1,6 @@
 package com.sscience.stopapp.bean;
 
-import android.graphics.drawable.Drawable;
+import android.graphics.Bitmap;
 
 import java.io.Serializable;
 
@@ -14,11 +14,17 @@ import java.io.Serializable;
 
 public class AppInfo implements Serializable, Cloneable {
 
+    public final static String APP_PACKAGE_NAME = "appPackageName";
+    public final static String APP_NAME = "appName";
+    public final static String APP_ICON = "appIcon";
+    public final static String IS_ENABLE = "isEnable";
+    public final static String IS_SYSTEM_APP = "isSystemApp";
+
     public String appName;
     public String appPackageName;
-    public Drawable appIcon;
-    public boolean isEnable;
-    public boolean isSystemApp;
+    public Bitmap appIcon;
+    public int isEnable;
+    public int isSystemApp;
 
     public String getAppName() {
         return appName;
@@ -36,27 +42,27 @@ public class AppInfo implements Serializable, Cloneable {
         this.appPackageName = appPackageName;
     }
 
-    public Drawable getAppIcon() {
+    public Bitmap getAppIcon() {
         return appIcon;
     }
 
-    public void setAppIcon(Drawable appIcon) {
+    public void setAppIcon(Bitmap appIcon) {
         this.appIcon = appIcon;
     }
 
-    public boolean isEnable() {
+    public int isEnable() {
         return isEnable;
     }
 
-    public void setEnable(boolean enable) {
+    public void setEnable(int enable) {
         isEnable = enable;
     }
 
-    public boolean isSystemApp() {
+    public int isSystemApp() {
         return isSystemApp;
     }
 
-    public void setSystemApp(boolean systemApp) {
+    public void setSystemApp(int systemApp) {
         isSystemApp = systemApp;
     }
 
@@ -70,5 +76,18 @@ public class AppInfo implements Serializable, Cloneable {
             e.printStackTrace();
         }
         return appInfo;
+    }
+
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final AppInfo other = (AppInfo) obj;
+        if (!this.getAppPackageName().contains(other.getAppPackageName()))
+            return false;
+        return true;
     }
 }

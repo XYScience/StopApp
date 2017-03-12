@@ -3,6 +3,10 @@ package com.sscience.stopapp.model;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 
 import com.science.myloggerlibrary.MyLogger;
@@ -110,10 +114,27 @@ public class AppsRepository {
         AppInfo appInfo = new AppInfo();
         appInfo.setAppName(applicationInfo.loadLabel(packageManager).toString());
         appInfo.setAppPackageName(applicationInfo.packageName);
-        appInfo.setAppIcon(applicationInfo.loadIcon(packageManager));
-        appInfo.setEnable(applicationInfo.enabled);
-        appInfo.setSystemApp((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
+        MyLogger.e(appInfo.getAppPackageName());
+        Drawable appDrawable = applicationInfo.loadIcon(packageManager);
+        if (appDrawable instanceof BitmapDrawable) {
+            appInfo.setAppIcon(((BitmapDrawable) appDrawable).getBitmap());
+        } else {
+            MyLogger.e("VectorDrawable:" + appInfo.getAppPackageName());
+            appInfo.setAppIcon(drawableToBitmap(appDrawable));
+        }
+        appInfo.setEnable(applicationInfo.enabled ? 1 : 0);
+        appInfo.setSystemApp((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0 ? 1 : 0);
         return appInfo;
+    }
+
+    private Bitmap drawableToBitmap(Drawable drawable) {
+        int w = drawable.getIntrinsicWidth();
+        int h = drawable.getIntrinsicHeight();
+        Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
     }
 
     public void commandSu(final String cmd, final GetAppsCmdCallback callback) {

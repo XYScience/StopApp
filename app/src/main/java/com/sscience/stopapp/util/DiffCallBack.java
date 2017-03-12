@@ -55,7 +55,7 @@ public class DiffCallBack extends DiffUtil.Callback {
         AppInfo newBean = mNewData.get(newItemPosition);
         Bundle payLoad = new Bundle();
         if (oldBean.isEnable() != newBean.isEnable()) {
-            payLoad.putBoolean(BUNDLE_PAYLOAD, newBean.isEnable());
+            payLoad.putInt(BUNDLE_PAYLOAD, newBean.isEnable());
         }
         if (payLoad == null) {
             return null;

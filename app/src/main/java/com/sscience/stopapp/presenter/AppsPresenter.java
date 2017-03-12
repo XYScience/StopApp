@@ -6,15 +6,13 @@ import android.support.v7.app.AlertDialog;
 
 import com.sscience.stopapp.R;
 import com.sscience.stopapp.bean.AppInfo;
+import com.sscience.stopapp.database.AppInfoDBController;
 import com.sscience.stopapp.model.AppsRepository;
 import com.sscience.stopapp.util.AppInfoComparator;
-import com.sscience.stopapp.util.SharedPreferenceUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static com.sscience.stopapp.model.AppsRepository.COMMAND_UNINSTALL;
 
@@ -58,12 +56,8 @@ public class AppsPresenter implements AppsContract.Presenter {
     }
 
     @Override
-    public List<String> getPackageNames() {
-        List<String> packageNames = new ArrayList<>();
-        for (AppInfo appInfo : mAppInfos) {
-            packageNames.add(appInfo.getAppPackageName());
-        }
-        return packageNames;
+    public List<AppInfo> getApps() {
+        return mAppInfos;
     }
 
     @Override
@@ -75,7 +69,8 @@ public class AppsPresenter implements AppsContract.Presenter {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 if (i == 0) {
-                    addDisableApps(appInfo, dialogInterface);
+                    addDisableApps(appInfo);
+                    dialogInterface.dismiss();
                 } else if (i == 1) {
                     uninstallApp(appInfo, position);
                 }
@@ -84,19 +79,16 @@ public class AppsPresenter implements AppsContract.Presenter {
         builder.show();
     }
 
-    private void addDisableApps(AppInfo appInfo, DialogInterface dialogInterface) {
-        Set<String> disableApps = new HashSet<>();
-        disableApps = (Set<String>) SharedPreferenceUtil.get(mContext, DisableAppsPresenter.SP_DISABLE_APPS, disableApps);
-        for (String packageName : disableApps) {
-            if (appInfo.getAppPackageName().contains(packageName)) {
-                mView.hadAddDisableApps();
-                return;
-            }
+    private void addDisableApps(AppInfo appInfo) {
+        AppInfoDBController appInfoDBController = new AppInfoDBController(mContext);
+        List<AppInfo> disableApps = appInfoDBController.getDisableApps();
+        if (disableApps.contains(appInfo)) {
+            mView.hadAddDisableApps();
+            return;
         }
-        Set<String> addDisable = new HashSet<>();
-        addDisable.add(appInfo.getAppPackageName());
-        addDisableAppsSuccess(addDisable);
-        dialogInterface.dismiss();
+        List<AppInfo> appList = new ArrayList<>();
+        appList.add(appInfo);
+        addDisableAppsSuccess(appList);
     }
 
     private void uninstallApp(final AppInfo appInfo, final int position) {
@@ -119,14 +111,11 @@ public class AppsPresenter implements AppsContract.Presenter {
     }
 
     @Override
-    public void addDisableAppsSuccess(Set<String> packageNames) {
-        Set<String> disableApps = new HashSet<>();
-        disableApps = (Set<String>) SharedPreferenceUtil.get(mContext, DisableAppsPresenter.SP_DISABLE_APPS, disableApps);
-        disableApps.addAll(packageNames);
-
-        SharedPreferenceUtil.clear(mContext);
-        SharedPreferenceUtil.put(mContext, DisableAppsPresenter.SP_DISABLE_APPS, disableApps);
-
+    public void addDisableAppsSuccess(List<AppInfo> appList) {
+        AppInfoDBController appInfoDBController = new AppInfoDBController(mContext);
+        for (AppInfo appInfo : appList) {
+            appInfoDBController.addDisableApp(appInfo);
+        }
         mView.addDisableAppsSuccess();
     }
 }

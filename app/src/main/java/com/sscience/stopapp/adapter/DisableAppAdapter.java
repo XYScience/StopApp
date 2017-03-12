@@ -39,14 +39,14 @@ public class DisableAppAdapter extends AppAdapter {
         final AppInfo info = appInfo.get(position);
         TextView tvAppName = viewHolder.getView(R.id.tv_app_name);
         ImageView ivAppIcon = viewHolder.getView(R.id.iv_app_icon);
-        if (mMainActivity.getSelection().contains(info.getAppPackageName())) {
+        if (mMainActivity.getSelection().contains(info)) {
             tvAppName.setTextColor(mMainActivity.getResources().getColor(R.color.textPrepareColor));
             ivAppIcon.getDrawable().setColorFilter(mColorFilter50);
         } else {
-            tvAppName.setTextColor(info.isEnable()
+            tvAppName.setTextColor(info.isEnable() == 1
                     ? mMainActivity.getResources().getColor(R.color.textPrimary)
                     : mMainActivity.getResources().getColor(R.color.translucentBg));
-            ivAppIcon.getDrawable().setColorFilter(info.isEnable()
+            ivAppIcon.getDrawable().setColorFilter(info.isEnable() == 1
                     ? mColorFilterNormal : mColorFilterGrey);
         }
 //        AppCompatCheckBox cb = viewHolder.getView(R.id.cb_select_apps);

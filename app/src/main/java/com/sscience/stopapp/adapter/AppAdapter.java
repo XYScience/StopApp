@@ -47,17 +47,17 @@ public abstract class AppAdapter extends BaseCommonAdapter<List<AppInfo>> {
     @Override
     public void convertCommon(final ViewHolder viewHolder, List<AppInfo> appInfo, final int position) {
         final AppInfo info = appInfo.get(position);
-        viewHolder.setImageDrawable(R.id.iv_app_icon, info.getAppIcon());
+        viewHolder.setImageBitmap(R.id.iv_app_icon, info.getAppIcon());
         viewHolder.setText(R.id.tv_app_name, info.getAppName());
     }
 
     @Override
     public void convertDiff(ViewHolder holder, int position, List payloads) {
         Bundle payload = (Bundle) payloads.get(0);
-        boolean isEnable = payload.getBoolean(BUNDLE_PAYLOAD);
-        ((TextView) holder.getView(R.id.tv_app_name)).setTextColor(isEnable
+        int isEnable = payload.getInt(BUNDLE_PAYLOAD);
+        ((TextView) holder.getView(R.id.tv_app_name)).setTextColor(isEnable == 1
                 ? mResources.getColor(R.color.textPrimary) : mResources.getColor(R.color.translucentBg));
-        if (isEnable) {
+        if (isEnable == 1) {
             mMatrix.setSaturation(1);
             mColorFilterNormal = new ColorMatrixColorFilter(mMatrix);
             ((ImageView) holder.getView(R.id.iv_app_icon)).setColorFilter(mColorFilterNormal);

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Icon;
 import android.os.Build;
 
@@ -53,7 +52,7 @@ public class ShortcutsManager {
             }
             ShortcutInfo shortcut = new ShortcutInfo.Builder(mContext, appInfo.getAppPackageName())
                     .setShortLabel(appInfo.getAppName())
-                    .setIcon(Icon.createWithBitmap(((BitmapDrawable) appInfo.getAppIcon()).getBitmap()))
+                    .setIcon(Icon.createWithBitmap(appInfo.getAppIcon()))
                     .setIntent(
                             new Intent(ShortcutActivity.OPEN_APP_SHORTCUT)
                                     .putExtra(EXTRA_PACKAGE_NAME, appInfo.getAppPackageName())

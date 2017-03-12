@@ -17,6 +17,7 @@ import android.widget.CompoundButton;
 import com.sscience.stopapp.R;
 import com.sscience.stopapp.adapter.MyPagerAdapter;
 import com.sscience.stopapp.base.BaseActivity;
+import com.sscience.stopapp.bean.AppInfo;
 import com.sscience.stopapp.fragment.AppListFragment;
 
 import java.util.ArrayList;
@@ -36,7 +37,7 @@ public class AppListActivity extends BaseActivity {
     public CoordinatorLayout mCoordinatorLayout;
     public ViewPager mViewPager;
     private AppCompatCheckBox mCbSelectAllApps;
-    private List<Set<String>> mSelection;
+    private List<Set<AppInfo>> mSelection;
     private FloatingActionButton mFabConfirm;
 
     public static void actionStartActivity(Activity activity) {
@@ -64,8 +65,8 @@ public class AppListActivity extends BaseActivity {
         tabLayout.setupWithViewPager(mViewPager);
 
         mSelection = new ArrayList<>();
-        mSelection.add(new HashSet<String>());
-        mSelection.add(new HashSet<String>());
+        mSelection.add(new HashSet<AppInfo>());
+        mSelection.add(new HashSet<AppInfo>());
 
         initListener();
     }
@@ -92,9 +93,9 @@ public class AppListActivity extends BaseActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 AppListFragment appListFragment = ((MyPagerAdapter) mViewPager.getAdapter()).getFragments(0);
-                List<String> listApps = appListFragment.getPackageNames();
-                if (listApps.size() != getSelection(0).size()) {
-                    getSelection(0).addAll(listApps);
+                List<AppInfo> appList = appListFragment.getApps();
+                if (appList.size() != getSelection(0).size()) {
+                    getSelection(0).addAll(appList);
                     buttonView.setChecked(true);
                 } else {
                     getSelection(0).clear();
@@ -107,20 +108,19 @@ public class AppListActivity extends BaseActivity {
         mFabConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Set<String> appInfos = new HashSet<>();
-                appInfos.addAll(getSelection(0));
-                appInfos.addAll(getSelection(1));
+                Set<AppInfo> appList = getSelection(0);
+                appList.addAll(getSelection(1));
                 ((MyPagerAdapter) mViewPager.getAdapter()).
-                        getFragments(mViewPager.getCurrentItem()).addDisableApps(appInfos);
+                        getFragments(mViewPager.getCurrentItem()).addDisableApps(new ArrayList<>(appList));
             }
         });
     }
 
-    public Set<String> getSelection(int page) {
+    public Set<AppInfo> getSelection(int page) {
         return mSelection.get(page);
     }
 
-    public Set<String> getSelection() {
+    public Set<AppInfo> getSelection() {
         return getSelection(mViewPager.getCurrentItem());
     }
 

@@ -40,25 +40,25 @@ public class AppListAdapter extends AppAdapter {
         super.convertCommon(viewHolder, appInfo, position);
         final AppInfo info = appInfo.get(position);
         viewHolder.setText(R.id.tv_app_package_name, info.getAppPackageName());
-        ((TextView) viewHolder.getView(R.id.tv_app_name)).setTextColor(info.isEnable()
+        ((TextView) viewHolder.getView(R.id.tv_app_name)).setTextColor(info.isEnable() == 1
                 ? mAppListActivity.getResources().getColor(R.color.textPrimary)
                 : mAppListActivity.getResources().getColor(R.color.translucentBg));
-        ((ImageView) viewHolder.getView(R.id.iv_app_icon)).getDrawable().setColorFilter(info.isEnable()
+        ((ImageView) viewHolder.getView(R.id.iv_app_icon)).getDrawable().setColorFilter(info.isEnable() == 1
                 ? mColorFilterNormal : mColorFilterGrey);
-        ((TextView) viewHolder.getView(R.id.tv_app_package_name)).setTextColor(info.isEnable()
+        ((TextView) viewHolder.getView(R.id.tv_app_package_name)).setTextColor(info.isEnable() == 1
                 ? mAppListActivity.getResources().getColor(R.color.textSecondary)
                 : mAppListActivity.getResources().getColor(R.color.translucentBg));
         AppCompatCheckBox cb = viewHolder.getView(R.id.cb_select_apps);
         cb.setOnCheckedChangeListener(null); // CheckBox在执行setChecked时会触发setOnCheckedChangeListener
-        cb.setChecked(mAppListActivity.getSelection().contains(info.getAppPackageName()));
+        cb.setChecked(mAppListActivity.getSelection().contains(info));
         cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Set<String> selections = mAppListActivity.getSelection();
+                Set<AppInfo> appList = mAppListActivity.getSelection();
                 if (isChecked) {
-                    selections.add(info.getAppPackageName());
+                    appList.add(info);
                 } else {
-                    selections.remove(info.getAppPackageName());
+                    appList.remove(info);
                 }
                 mAppListActivity.checkSelection();
             }
