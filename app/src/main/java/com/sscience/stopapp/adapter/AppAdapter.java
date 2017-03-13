@@ -40,7 +40,7 @@ public abstract class AppAdapter extends BaseCommonAdapter<List<AppInfo>> {
         mColorFilterGrey = new ColorMatrixColorFilter(mMatrix);
         mMatrix.setSaturation(1); // 参数大于1将增加饱和度，0～1之间会减少饱和度。0值将产生一幅灰度图像。
         mColorFilterNormal = new ColorMatrixColorFilter(mMatrix);
-        mMatrix.setSaturation(0.3f); // 参数大于1将增加饱和度，0～1之间会减少饱和度。0值将产生一幅灰度图像。
+        mMatrix.setSaturation(0.2f); // 参数大于1将增加饱和度，0～1之间会减少饱和度。0值将产生一幅灰度图像。
         mColorFilter50 = new ColorMatrixColorFilter(mMatrix);
     }
 

@@ -159,6 +159,7 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
      */
     public void reLoadDisableApps() {
         setRefreshing(true);
+        mMainActivity.getSelection().clear();
         mPresenter.start();
     }
 

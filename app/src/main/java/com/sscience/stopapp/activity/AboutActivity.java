@@ -129,7 +129,6 @@ public class AboutActivity extends BaseActivity {
                 intent.setType("text/plain");
                 intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_content) +
                         "https://play.google.com/store/apps/details?id=com.sscience.stopapp、\n" +
-                        "http://app.mi.com/details?id=com.sscience.stopapp、\n" +
                         "http://coolapk.com/apk/com.sscience.stopapp");
                 startActivity(Intent.createChooser(intent, getString(R.string.share_title)));
             }

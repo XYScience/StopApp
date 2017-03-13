@@ -114,7 +114,6 @@ public class AppsRepository {
         AppInfo appInfo = new AppInfo();
         appInfo.setAppName(applicationInfo.loadLabel(packageManager).toString());
         appInfo.setAppPackageName(applicationInfo.packageName);
-        MyLogger.e(appInfo.getAppPackageName());
         Drawable appDrawable = applicationInfo.loadIcon(packageManager);
         if (appDrawable instanceof BitmapDrawable) {
             appInfo.setAppIcon(((BitmapDrawable) appDrawable).getBitmap());
