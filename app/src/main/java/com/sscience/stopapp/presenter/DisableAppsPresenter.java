@@ -57,19 +57,11 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
 
     @Override
     public void start() {
-//        Set<String> setDisableApps = new HashSet<>();
-//        setDisableApps = (Set<String>) SharedPreferenceUtil.get(mActivity, SP_DISABLE_APPS, new HashSet<>());
-//        if (setDisableApps.isEmpty()) {
-//            commandSu(COMMAND_APP_LIST + "-d", false, null, -1);
-//        } else {
-//            getApps(DisableAppsPresenter.APP_STYLE_ALL);
-//        }
         List<AppInfo> disableApps = mAppInfoDBController.getDisableApps();
         if (disableApps.isEmpty() && disableApps.size() == 0) {
             commandSu(COMMAND_APP_LIST + "-d", false, null, -1);
         } else {
-//            getApps(DisableAppsPresenter.APP_STYLE_ALL);
-            getDisableApps(disableApps);
+            getDisableApps(disableApps, false);
         }
     }
 
@@ -96,7 +88,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
         mAppsRepository.commandSu(cmd, new AppsRepository.GetAppsCmdCallback() {
             @Override
             public void onRootAppsLoaded(List<AppInfo> apps) {
-                getDisableApps(apps);
+                getDisableApps(apps, true);
             }
 
             @Override
@@ -125,39 +117,12 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
         }
     }
 
-    @Override
-    public void getApps(int appStyle) {
-        mAppsRepository.getApps(appStyle, new AppsRepository.GetAppsCallback() {
-            @Override
-            public void onAppsLoaded(List<AppInfo> apps) {
-                getDisableApps(apps);
-            }
-        });
-    }
-
-    private void getDisableApps(List<AppInfo> appList) {
+    private void getDisableApps(List<AppInfo> appList, boolean isFirst) {
         mListDisableApps.clear();
-//        Set<String> setDisableApps = new HashSet<>();
-//        setDisableApps = (Set<String>) SharedPreferenceUtil.get(mActivity, SP_DISABLE_APPS, new HashSet<>());
-//        if (setDisableApps.isEmpty()) {
-//            for (AppInfo appInfo : appList) {
-//                setDisableApps.add(appInfo.getAppPackageName());
-//            }
-//            SharedPreferenceUtil.put(mActivity, SP_DISABLE_APPS, setDisableApps);
-//            mListDisableApps = appList;
-//        } else {
-//            for (AppInfo appInfo : appList) {
-//                String packageName = appInfo.getAppPackageName();
-//                if (setDisableApps.contains(packageName)) {
-//                    mListDisableApps.add(appInfo);
-//                    if (appInfo.isEnable() == 1) {
-//                        ((MainActivity) mActivity).getSelection().add(packageName);
-//                    }
-//                }
-//            }
-//        }
         for (AppInfo appInfo : appList) {
-            mAppInfoDBController.addDisableApp(appInfo);
+            if (isFirst) {
+                mAppInfoDBController.addDisableApp(appInfo);
+            }
             if (appInfo.isEnable() == 1) {
                 ((MainActivity) mActivity).getSelection().add(appInfo);
             }

@@ -61,12 +61,12 @@ public interface DisableAppsContract {
          */
         void commandSu(String cmd, boolean isLaunchApp, AppInfo appInfo, int position);
 
-        /**
-         * 通过packageManager.getInstalledPackages(0)获取所有apps。
-         *
-         * @param appStyle 0：all；1：system；2：user。
-         */
-        void getApps(int appStyle);
+//        /**
+//         * 通过packageManager.getInstalledPackages(0)获取所有apps。
+//         *
+//         * @param appStyle 0：all；1：system；2：user。
+//         */
+//        void getApps(int appStyle);
 
         /**
          * 在停用(待停用)列表点击item启动app

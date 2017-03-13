@@ -11,8 +11,8 @@
 
     <ImageView
         android:id="@+id/iv_app_icon"
-        android:layout_width="match_parent"
-        android:layout_height="46dp"
+        android:layout_width="@android:dimen/app_icon_size"
+        android:layout_height="@android:dimen/app_icon_size"
         android:layout_marginBottom="4dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"

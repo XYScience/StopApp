@@ -35,7 +35,6 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
     public static final String TAB_CATEGORY = "tab_category";
     public AppListAdapter mAppListAdapter;
     private AppsContract.Presenter mPresenter;
-    private int tabCategory;
 
     public static AppListFragment newInstance(int tabCategory) {
         AppListFragment fragment = new AppListFragment();
@@ -62,7 +61,8 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
         mAppListAdapter = new AppListAdapter(getActivity(), mRecyclerView);
         mRecyclerView.setAdapter(mAppListAdapter);
 
-        tabCategory = getArguments().getInt(TAB_CATEGORY);
+        int tabCategory = getArguments().getInt(TAB_CATEGORY);
+        mPresenter.getApps(tabCategory == 0 ? DisableAppsPresenter.APP_STYLE_USER : DisableAppsPresenter.APP_STYLE_SYSTEM);
         initListener();
     }
 
@@ -82,7 +82,6 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
 
     @Override
     public void onLazyLoad() {
-        mPresenter.getApps(tabCategory == 0 ? DisableAppsPresenter.APP_STYLE_USER : DisableAppsPresenter.APP_STYLE_SYSTEM);
     }
 
     @Override
