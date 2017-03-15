@@ -39,6 +39,8 @@ public class AppListActivity extends BaseActivity {
     private AppCompatCheckBox mCbSelectAllApps;
     private List<Set<AppInfo>> mSelection;
     private FloatingActionButton mFabConfirm;
+    private DecelerateInterpolator mDecelerateInterpolator ;
+    private AccelerateInterpolator mAccelerateInterpolator ;
 
     public static void actionStartActivity(Activity activity) {
         Intent intent = new Intent(activity, AppListActivity.class);
@@ -64,6 +66,8 @@ public class AppListActivity extends BaseActivity {
         mViewPager.setOffscreenPageLimit(2);
         tabLayout.setupWithViewPager(mViewPager);
 
+        mDecelerateInterpolator = new DecelerateInterpolator();
+        mAccelerateInterpolator = new AccelerateInterpolator();
         mSelection = new ArrayList<>();
         mSelection.add(new HashSet<AppInfo>());
         mSelection.add(new HashSet<AppInfo>());
@@ -125,23 +129,21 @@ public class AppListActivity extends BaseActivity {
     }
 
     public void checkSelection() {
-        DecelerateInterpolator di = new DecelerateInterpolator();
-        AccelerateInterpolator ai = new AccelerateInterpolator();
         if (mViewPager.getCurrentItem() == 0) {
             if (getSelection(0).size() == 0) {
-                setInterpolator(mCbSelectAllApps, 0, di);
-                setInterpolator(mFabConfirm, 0, di);
+                setInterpolator(mCbSelectAllApps, 0, mDecelerateInterpolator);
+                setInterpolator(mFabConfirm, 0, mDecelerateInterpolator);
             } else {
-                setInterpolator(mCbSelectAllApps, 1, ai);
-                setInterpolator(mFabConfirm, 1, ai);
+                setInterpolator(mCbSelectAllApps, 1, mAccelerateInterpolator);
+                setInterpolator(mFabConfirm, 1, mAccelerateInterpolator);
             }
         } else {
-            setInterpolator(mCbSelectAllApps, 0, di);
+            setInterpolator(mCbSelectAllApps, 0, mDecelerateInterpolator);
         }
         if (getSelection(0).size() == 0 && (getSelection(1).size() == 0)) {
-            setInterpolator(mFabConfirm, 0, di);
+            setInterpolator(mFabConfirm, 0, mDecelerateInterpolator);
         } else {
-            setInterpolator(mFabConfirm, 1, ai);
+            setInterpolator(mFabConfirm, 1, mAccelerateInterpolator);
         }
     }
 }
