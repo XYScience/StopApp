@@ -101,6 +101,25 @@ public class AppsRepository {
                     default:
                         return appInfos;
                 }
+//                ArrayList<AppInfo> appListSystem = new ArrayList<>();
+//                ArrayList<AppInfo> appListUser = new ArrayList<>();
+//                PackageManager packageManager = mContext.getPackageManager();
+//                List<ApplicationInfo> applications = packageManager
+//                        .getInstalledApplications(PackageManager.MATCH_UNINSTALLED_PACKAGES);
+//                for (ApplicationInfo applicationInfo : applications) {
+//                    if (!applicationInfo.packageName.equals(mContext.getPackageName())) {
+//                        if ((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+//                            appListSystem.add(getAppInfo(applicationInfo, packageManager));
+//                        } else {
+//                            appListUser.add(getAppInfo(applicationInfo, packageManager));
+//                        }
+//                    }
+//                }
+//                if (appFlag == APPS_FLAG_SYSTEM) {
+//                    return appListSystem;
+//                } else {
+//                    return appListUser;
+//                }
             }
 
             @Override

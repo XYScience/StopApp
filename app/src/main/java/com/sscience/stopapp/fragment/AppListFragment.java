@@ -25,7 +25,7 @@ import static android.app.Activity.RESULT_OK;
 
 /**
  * @author SScience
- * @description
+ * @description "添加应用"界面
  * @email chentushen.science@gmail.com
  * @data 2017/1/15
  */
@@ -104,7 +104,7 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
 
     @Override
     public void addDisableAppsSuccess() {
-//        snackBarShow(((AppListActivity) getActivity()).mCoordinatorLayout, R.string.add_finish);
+        //snackBarShow(((AppListActivity) getActivity()).mCoordinatorLayout, R.string.add_finish);
         Intent intent = new Intent(getActivity(), MainActivity.class);
         getActivity().setResult(RESULT_OK, intent);
         getActivity().finish();

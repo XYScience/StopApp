@@ -31,6 +31,8 @@ public class MainActivity extends BaseActivity {
     private MainFragment mMainFragment;
     private Set<AppInfo> mSelection;
     private FloatingActionButton mFabDisable, mFabRemove;
+    private DecelerateInterpolator mDecelerateInterpolator ;
+    private AccelerateInterpolator mAccelerateInterpolator ;
     private boolean isWindowFocusChangedFirst = true;
 
     @Override
@@ -59,6 +61,8 @@ public class MainActivity extends BaseActivity {
 
         // Create the presenter
         new DisableAppsPresenter(MainActivity.this, mMainFragment);
+        mDecelerateInterpolator = new DecelerateInterpolator();
+        mAccelerateInterpolator = new AccelerateInterpolator();
 
         initListener();
     }
@@ -83,25 +87,23 @@ public class MainActivity extends BaseActivity {
     }
 
     public void checkSelection() {
-        DecelerateInterpolator di = new DecelerateInterpolator();
         if (mSelection.isEmpty()) {
-            setInterpolator(mFabDisable, 0, di);
-            setInterpolator(mFabRemove, 0, di);
+            setInterpolator(mFabDisable, 0, mDecelerateInterpolator);
+            setInterpolator(mFabRemove, 0, mDecelerateInterpolator);
         } else {
-            AccelerateInterpolator ai = new AccelerateInterpolator();
             for (AppInfo appInfo : mMainFragment.getAppInfos()) {
                 if (mSelection.contains(appInfo)) {
                     if (appInfo.isEnable() == 1) {
-                        setInterpolator(mFabDisable, 1, ai);
+                        setInterpolator(mFabDisable, 1, mAccelerateInterpolator);
                         setFabMargins(mFabRemove.getHeight(), 32);
                         break;
                     } else {
-                        setInterpolator(mFabDisable, 0, di);
+                        setInterpolator(mFabDisable, 0, mDecelerateInterpolator);
                         setFabMargins(0, 16);
                     }
                 }
             }
-            setInterpolator(mFabRemove, 1, ai);
+            setInterpolator(mFabRemove, 1, mAccelerateInterpolator);
         }
     }
 
