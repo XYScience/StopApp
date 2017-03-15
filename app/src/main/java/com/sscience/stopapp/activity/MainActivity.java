@@ -29,7 +29,7 @@ public class MainActivity extends BaseActivity {
 
     public CoordinatorLayout mCoordinatorLayout;
     private MainFragment mMainFragment;
-    private Set<AppInfo> mSelection;
+    private Set<AppInfo> mSelection; // 选择要操作的app(停用or移除列表)
     private FloatingActionButton mFabDisable, mFabRemove;
     private boolean isWindowFocusChangedFirst = true;
 
@@ -82,6 +82,9 @@ public class MainActivity extends BaseActivity {
         return mSelection;
     }
 
+    /**
+     * 检查是否有选择了的app，以显示还是隐藏停用or移除按钮
+     */
     public void checkSelection() {
         DecelerateInterpolator di = new DecelerateInterpolator();
         if (mSelection.isEmpty()) {
@@ -89,16 +92,13 @@ public class MainActivity extends BaseActivity {
             setInterpolator(mFabRemove, 0, di);
         } else {
             AccelerateInterpolator ai = new AccelerateInterpolator();
-            for (AppInfo appInfo : mMainFragment.getAppInfos()) {
-                if (mSelection.contains(appInfo)) {
-                    if (appInfo.isEnable() == 1) {
-                        setInterpolator(mFabDisable, 1, ai);
-                        setFabMargins(mFabRemove.getHeight(), 32);
-                        break;
-                    } else {
-                        setInterpolator(mFabDisable, 0, di);
-                        setFabMargins(0, 16);
-                    }
+            for (AppInfo appInfo : mSelection) {
+                if (appInfo.isEnable() == 1) {
+                    setInterpolator(mFabDisable, 1, ai);
+                    setFabMargins(mFabDisable.getHeight(), 32);
+                    break;
+                } else {
+                    setInterpolator(mFabDisable, 0, di);
                 }
             }
             setInterpolator(mFabRemove, 1, ai);
@@ -136,6 +136,7 @@ public class MainActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK) {
+            // 在App列表界面选择要停用的apps返回后更新主界面
             mMainFragment.reLoadDisableApps();
         }
     }
@@ -145,16 +146,29 @@ public class MainActivity extends BaseActivity {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus && isWindowFocusChangedFirst) {
             isWindowFocusChangedFirst = false;
-            setFabMargins(mFabRemove.getHeight(), 32);
+            setFabMargins(mFabDisable.getHeight(), 32);
         }
     }
 
+    /**
+     * 在选中多个apps并且包含已停用和未停用apps时，调整停用和移除的按钮位置
+     *
+     * @param height
+     * @param bottom
+     */
     private void setFabMargins(int height, float bottom) {
-        CoordinatorLayout.LayoutParams params = new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        CoordinatorLayout.LayoutParams params = new CoordinatorLayout
+                .LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.setMargins(0, 0, CommonUtil.dipToPx(this, 16),
                 height + CommonUtil.dipToPx(this, bottom));
         params.gravity = Gravity.BOTTOM | Gravity.END;
         params.setBehavior(new ScrollAwareFABBehavior());
-        mFabRemove.setLayoutParams(params);
+        mFabDisable.setLayoutParams(params);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mMainFragment.cancelTask();
     }
 }

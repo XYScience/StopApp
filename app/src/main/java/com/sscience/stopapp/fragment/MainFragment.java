@@ -33,7 +33,7 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
     private DisableAppAdapter mDisableAppAdapter;
     private DragSelectTouchListener mDragSelectTouchListener;
     private MainActivity mMainActivity;
-    private List<AppInfo> mAppInfos;
+    private List<AppInfo> mAppList;
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -51,11 +51,11 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         mRecyclerView.setHasFixedSize(true);
         GridLayoutManager manager = new GridLayoutManager(mMainActivity, 4);
         mRecyclerView.setLayoutManager(manager);
-//        recyclerView.addItemDecoration(new DividerItemDecoration(mMainActivity, manager.getOrientation()));
+        //mRecyclerView.addItemDecoration(new DividerItemDecoration(mMainActivity, manager.getOrientation()));
         mDisableAppAdapter = new DisableAppAdapter(mMainActivity, mRecyclerView);
         mRecyclerView.setAdapter(mDisableAppAdapter);
 
-        mAppInfos = new ArrayList<>();
+        mAppList = new ArrayList<>();
         initRefreshLayout(view);
         setSwipeRefreshEnable(false);
         initListener();
@@ -102,9 +102,9 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
                     public void onSelectChange(int start, int end, boolean isSelected) {
                         for (int i = start; i <= end; i++) {
                             if (isSelected) {
-                                mMainActivity.getSelection().add(mAppInfos.get(i));
+                                mMainActivity.getSelection().add(mAppList.get(i));
                             } else {
-                                mMainActivity.getSelection().remove(mAppInfos.get(i));
+                                mMainActivity.getSelection().remove(mAppList.get(i));
                             }
                         }
                         mDisableAppAdapter.notifyItemRangeChanged(start, end - start + 1);
@@ -133,15 +133,11 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
 
     @Override
     public void getApps(List<AppInfo> appList) {
-        mAppInfos = appList;
-        mDisableAppAdapter.setData(false, appList);
+        mAppList = appList;
+        mDisableAppAdapter.setData(false, mAppList);
         mMainActivity.checkSelection();
         setSwipeRefreshEnable(false);
         setRefreshing(false);
-    }
-
-    public List<AppInfo> getAppInfos() {
-        return mAppInfos;
     }
 
     /**
@@ -164,15 +160,17 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
     }
 
     @Override
-    public void getRootSuccess(List<AppInfo> apps, List<AppInfo> appsNew) {
+    public void getRootSuccess(AppInfo appInfo, List<AppInfo> apps, List<AppInfo> appsNew) {
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffCallBack(apps, appsNew), false);
         diffResult.dispatchUpdatesTo(mDisableAppAdapter);
-        mDisableAppAdapter.setData(appsNew);
+        mAppList = appsNew;
+        mDisableAppAdapter.setData(mAppList);
         mMainActivity.checkSelection();
+        snackBarShow(mMainActivity.mCoordinatorLayout, appInfo == null
+                ? mMainActivity.getString(R.string.enable_success) :
+                mMainActivity.getString(R.string.disable_success, appInfo.getAppName()));
         setRefreshing(false);
-        snackBarShow(mMainActivity.mCoordinatorLayout, "完成");
-        mAppInfos = appsNew;
-        if (appsNew.isEmpty()) {
+        if (mAppList.isEmpty()) {
             mDisableAppAdapter.showLoadFailed(R.drawable.no_data, "", getResources().getString(R.string.no_disable_apps));
             snackBarShow(mMainActivity.mCoordinatorLayout, getString(R.string.no_disable_apps));
         }
@@ -183,7 +181,7 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         if (appInfo != null) {
             appInfo.setEnable(1);
             mDisableAppAdapter.updateItem(position, appInfo);
-            mAppInfos.get(position).setEnable(1);
+            mAppList.get(position).setEnable(1);
             mMainActivity.getSelection().add(appInfo);
             mMainActivity.checkSelection();
         }
@@ -195,5 +193,9 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         setRefreshing(false);
         mDisableAppAdapter.showLoadFailed();
         snackBarShow(mMainActivity.mCoordinatorLayout, getString(R.string.if_want_to_use_please_grant_app_root));
+    }
+
+    public void cancelTask() {
+        mPresenter.cancelTask();
     }
 }

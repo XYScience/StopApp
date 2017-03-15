@@ -10,12 +10,15 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 
 import com.science.myloggerlibrary.MyLogger;
+import com.sscience.stopapp.activity.AppListActivity;
+import com.sscience.stopapp.activity.MainActivity;
 import com.sscience.stopapp.bean.AppInfo;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +40,7 @@ public class AppsRepository {
     public static final String COMMAND_ENABLE = "enable ";
     public static final String COMMAND_UNINSTALL = "uninstall ";
     private Context mContext;
+    private GetAppsAsyncTask mGetAppsAsyncTask;
 
     public AppsRepository(Context context) {
         mContext = context;
@@ -58,59 +62,93 @@ public class AppsRepository {
         void onRoot(Boolean isRoot);
     }
 
+    /**
+     * “添加应用”界面获取用户or系统apps
+     *
+     * @param appFlag  用户or系统apps
+     * @param callback 成功获取后的回掉
+     */
     public void getApps(final int appFlag, final GetAppsCallback callback) {
-        new AsyncTask<Boolean, Boolean, List<AppInfo>>() {
-            @Override
-            protected List<AppInfo> doInBackground(Boolean... params) {
-                PackageManager packageManager = mContext.getPackageManager();
-                // 查询所有已经安装的应用程序
-                List<ApplicationInfo> applications = packageManager
-                        .getInstalledApplications(PackageManager.MATCH_UNINSTALLED_PACKAGES);
-                List<AppInfo> appInfos = new ArrayList<>(); // 保存过滤查到的AppInfo
-                switch (appFlag) {
-                    case APPS_FLAG_ALL:
-                        appInfos.clear();
-                        for (ApplicationInfo app : applications) {
-                            if (!app.packageName.equals(mContext.getPackageName())) {
+        mGetAppsAsyncTask = new GetAppsAsyncTask(mContext, appFlag, callback);
+        mGetAppsAsyncTask.execute();
+    }
+
+    private static class GetAppsAsyncTask extends AsyncTask<Boolean, Boolean, List<AppInfo>> {
+
+        private Context context;
+        private int appFlag;
+        private GetAppsCallback callback;
+        private WeakReference<Context> weakReference;
+
+        public GetAppsAsyncTask(Context context, int appFlag, GetAppsCallback callback) {
+            this.context = context;
+            this.appFlag = appFlag;
+            this.callback = callback;
+            weakReference = new WeakReference<>(context);
+        }
+
+        @Override
+        protected List<AppInfo> doInBackground(Boolean... params) {
+            PackageManager packageManager = context.getPackageManager();
+            // 查询所有已经安装的应用程序
+            List<ApplicationInfo> applications = packageManager
+                    .getInstalledApplications(PackageManager.MATCH_UNINSTALLED_PACKAGES);
+            List<AppInfo> appInfos = new ArrayList<>(); // 保存过滤查到的AppInfo
+            switch (appFlag) {
+                case APPS_FLAG_ALL:
+                    appInfos.clear();
+                    for (ApplicationInfo app : applications) {
+                        if (isCancelled()) {
+                            break;
+                        }
+                        if (!app.packageName.equals(context.getPackageName())) {
+                            if (!app.packageName.contains("supersu")) {
+                                appInfos.add(getAppInfo(app, packageManager));
+                            }
+                        }
+                    }
+                    return appInfos;
+                case APPS_FLAG_SYSTEM:
+                    appInfos.clear();
+                    for (ApplicationInfo app : applications) {
+                        if (isCancelled()) {
+                            break;
+                        }
+                        if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                            appInfos.add(getAppInfo(app, packageManager));
+                        }
+                    }
+                    return appInfos;
+                case APPS_FLAG_USER:
+                    appInfos.clear();
+                    for (ApplicationInfo app : applications) {
+                        if (isCancelled()) {
+                            break;
+                        }
+                        if ((app.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+                            if (!app.packageName.equals(context.getPackageName())) {
                                 if (!app.packageName.contains("supersu")) {
                                     appInfos.add(getAppInfo(app, packageManager));
                                 }
                             }
                         }
-                        return appInfos;
-                    case APPS_FLAG_SYSTEM:
-                        appInfos.clear();
-                        for (ApplicationInfo app : applications) {
-                            if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                                appInfos.add(getAppInfo(app, packageManager));
-                            }
-                        }
-                        return appInfos;
-                    case APPS_FLAG_USER:
-                        appInfos.clear();
-                        for (ApplicationInfo app : applications) {
-                            if ((app.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
-                                if (!app.packageName.equals(mContext.getPackageName())) {
-                                    if (!app.packageName.contains("supersu")) {
-                                        appInfos.add(getAppInfo(app, packageManager));
-                                    }
-                                }
-                            }
-                        }
-                        return appInfos;
-                    default:
-                        return appInfos;
-                }
+                    }
+                    return appInfos;
+                default:
+                    return appInfos;
             }
+        }
 
-            @Override
-            protected void onPostExecute(List<AppInfo> appList) {
+        @Override
+        protected void onPostExecute(List<AppInfo> appList) {
+            AppListActivity activity = (AppListActivity) weakReference.get();
+            if (activity != null) {
                 callback.onAppsLoaded(appList);
             }
-        }.execute();
+        }
     }
 
-    private AppInfo getAppInfo(ApplicationInfo applicationInfo, PackageManager packageManager) {
+    private static AppInfo getAppInfo(ApplicationInfo applicationInfo, PackageManager packageManager) {
         AppInfo appInfo = new AppInfo();
         appInfo.setAppName(applicationInfo.loadLabel(packageManager).toString());
         appInfo.setAppPackageName(applicationInfo.packageName);
@@ -126,7 +164,7 @@ public class AppsRepository {
         return appInfo;
     }
 
-    private Bitmap drawableToBitmap(Drawable drawable) {
+    private static Bitmap drawableToBitmap(Drawable drawable) {
         int w = drawable.getIntrinsicWidth();
         int h = drawable.getIntrinsicHeight();
         Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
@@ -136,69 +174,95 @@ public class AppsRepository {
         return bitmap;
     }
 
+    /**
+     * 通过root，获取停用应用列表or停用应用or启用应用
+     *
+     * @param cmd
+     * @param callback
+     */
     public void commandSu(final String cmd, final GetAppsCmdCallback callback) {
-        new AsyncTask<Boolean, Object, List<AppInfo>>() {
-            @Override
-            protected List<AppInfo> doInBackground(Boolean... params) {
-                DataOutputStream dataOutputStream = null;
-                BufferedReader errorStream = null;
-                List<AppInfo> appList = null;
-                PackageManager packageManager = mContext.getPackageManager();
-                try {
-                    // 申请su权限
-                    Process process = Runtime.getRuntime().exec("su");
-                    dataOutputStream = new DataOutputStream(process.getOutputStream());
-                    // 执行pm install命令
-                    String command = "pm " + cmd + "\n";
-                    dataOutputStream.write(command.getBytes(Charset.forName("utf-8")));
-                    dataOutputStream.flush();
-                    dataOutputStream.writeBytes("exit\n");
-                    dataOutputStream.flush();
-                    int i = process.waitFor();
-                    if (i == 0) { // 正确获取root权限
-                        appList = new ArrayList<>();
-                        if (cmd.contains(COMMAND_APP_LIST)) { // 获取应用
-                            String msg = "";
-                            BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                            while ((msg = br.readLine()) != null) {
-                                ApplicationInfo applicationInfo = packageManager.getPackageInfo(msg.replace("package:", ""), 0).applicationInfo;
-                                appList.add(getAppInfo(applicationInfo, packageManager));
-                            }
-                        } else {
-                            // 停用or启用or卸载
-                            MyLogger.e(cmd + " success");
-                        }
-                    }
-                } catch (Exception e) {
-                    MyLogger.e(e.getMessage());
-                } finally {
-                    try {
-                        if (dataOutputStream != null) {
-                            dataOutputStream.close();
-                        }
-                        if (errorStream != null) {
-                            errorStream.close();
-                        }
-                    } catch (IOException e) {
-                        MyLogger.e(e.getMessage());
-                    }
-                }
-                return appList;
-            }
+        CommandSuAsyncTask commandSuAsyncTask = new CommandSuAsyncTask(mContext, cmd, callback);
+        commandSuAsyncTask.execute();
+    }
 
-            @Override
-            protected void onPostExecute(List<AppInfo> list) {
-                if (list != null) {
-                    if (list.isEmpty() && list.size() == 0) {
-                        callback.onRootSuccess();
+    private static class CommandSuAsyncTask extends AsyncTask<Boolean, Object, List<AppInfo>> {
+
+        private Context context;
+        private String cmd;
+        private GetAppsCmdCallback callback;
+        private WeakReference<Context> weakReference;
+
+        public CommandSuAsyncTask(Context context, String cmd, GetAppsCmdCallback callback) {
+            this.context = context;
+            this.cmd = cmd;
+            this.callback = callback;
+            weakReference = new WeakReference<>(context);
+        }
+
+        @Override
+        protected List<AppInfo> doInBackground(Boolean... params) {
+            DataOutputStream dataOutputStream = null;
+            BufferedReader errorStream = null;
+            List<AppInfo> appList = null;
+            PackageManager packageManager = context.getPackageManager();
+            try {
+                // 申请su权限
+                Process process = Runtime.getRuntime().exec("su");
+                dataOutputStream = new DataOutputStream(process.getOutputStream());
+                // 执行pm install命令
+                String command = "pm " + cmd + "\n";
+                dataOutputStream.write(command.getBytes(Charset.forName("utf-8")));
+                dataOutputStream.flush();
+                dataOutputStream.writeBytes("exit\n");
+                dataOutputStream.flush();
+                int i = process.waitFor();
+                if (i == 0) { // 正确获取root权限
+                    appList = new ArrayList<>();
+                    if (cmd.contains(COMMAND_APP_LIST)) { // 获取应用
+                        String msg = "";
+                        BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                        while ((msg = br.readLine()) != null) {
+                            ApplicationInfo applicationInfo = packageManager.getPackageInfo(msg.replace("package:", ""), 0).applicationInfo;
+                            appList.add(getAppInfo(applicationInfo, packageManager));
+                        }
                     } else {
-                        callback.onRootAppsLoaded(list);
+                        // 停用or启用or卸载
+                        MyLogger.e(cmd + " success");
                     }
-                } else {
-                    callback.onRootError();
+                }
+            } catch (Exception e) {
+                MyLogger.e(e.getMessage());
+            } finally {
+                try {
+                    if (dataOutputStream != null) {
+                        dataOutputStream.close();
+                    }
+                    if (errorStream != null) {
+                        errorStream.close();
+                    }
+                } catch (IOException e) {
+                    MyLogger.e(e.getMessage());
                 }
             }
-        }.execute();
+            return appList;
+        }
+
+        @Override
+        protected void onPostExecute(List<AppInfo> list) {
+            MainActivity activity = (MainActivity) weakReference.get();
+            if (activity == null) {
+                return;
+            }
+            if (list != null) {
+                if (list.isEmpty() && list.size() == 0) {
+                    callback.onRootSuccess();
+                } else {
+                    callback.onRootAppsLoaded(list);
+                }
+            } else {
+                callback.onRootError();
+            }
+        }
     }
 
     /**
@@ -210,41 +274,63 @@ public class AppsRepository {
      * @return 应用程序是/否获取Root权限
      */
     public void getRoot(final GetRootCallback callback) {
-        new AsyncTask<Boolean, Object, Boolean>() {
+        GetRootAsyncTask getRootAsyncTask = new GetRootAsyncTask(mContext, callback);
+        getRootAsyncTask.execute();
+    }
 
-            @Override
-            protected Boolean doInBackground(Boolean... params) {
-                Process process = null;
-                DataOutputStream os = null;
-                try {
-                    process = Runtime.getRuntime().exec("su");
-                    os = new DataOutputStream(process.getOutputStream());
-                    os.writeBytes("chmod 777 " + mContext.getPackageCodePath() + "\n");
-                    os.writeBytes("exit\n");
-                    os.flush();
-                    int i = process.waitFor();
-                    if (i == 0) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                } catch (Exception e) {
+    private static class GetRootAsyncTask extends AsyncTask<Boolean, Object, Boolean> {
+
+        private Context context;
+        private GetRootCallback callback;
+        private WeakReference<Context> weakReference;
+
+        public GetRootAsyncTask(Context context, GetRootCallback callback) {
+            this.context = context;
+            this.callback = callback;
+            weakReference = new WeakReference<>(context);
+        }
+
+        @Override
+        protected Boolean doInBackground(Boolean... params) {
+            Process process = null;
+            DataOutputStream os = null;
+            try {
+                process = Runtime.getRuntime().exec("su");
+                os = new DataOutputStream(process.getOutputStream());
+                os.writeBytes("chmod 777 " + context.getPackageCodePath() + "\n");
+                os.writeBytes("exit\n");
+                os.flush();
+                int i = process.waitFor();
+                if (i == 0) {
+                    return true;
+                } else {
                     return false;
-                } finally {
-                    try {
-                        if (os != null) {
-                            os.close();
-                        }
-                        process.destroy();
-                    } catch (Exception e) {
+                }
+            } catch (Exception e) {
+                return false;
+            } finally {
+                try {
+                    if (os != null) {
+                        os.close();
                     }
+                    process.destroy();
+                } catch (Exception e) {
                 }
             }
+        }
 
-            @Override
-            protected void onPostExecute(Boolean isRoot) {
+        @Override
+        protected void onPostExecute(Boolean isRoot) {
+            MainActivity activity = (MainActivity) weakReference.get();
+            if (activity != null) {
                 callback.onRoot(isRoot);
             }
-        }.execute();
+        }
+    }
+
+    public void cancelTsk() {
+        if (mGetAppsAsyncTask != null) {
+            mGetAppsAsyncTask.cancel(true);
+        }
     }
 }

@@ -43,6 +43,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
     private Activity mActivity;
     private ShortcutsManager mShortcutsManager;
     private AppInfoDBController mAppInfoDBController;
+    private boolean isFirstRoot = true;
 
     public DisableAppsPresenter(Activity activity, DisableAppsContract.View view) {
         mActivity = activity;
@@ -103,6 +104,12 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                     addShortcut(appInfo);
                     mView.upDateItemIfLaunch(appInfo, position);
                     launchAppIntent(appInfo.getAppPackageName());
+                } else {
+                    if (isFirstRoot) {
+                        isFirstRoot = false;
+                        mView.getRootSuccess(appInfo, mListDisableApps, mListDisableAppsNew);
+                        mListDisableApps = mListDisableAppsNew;
+                    }
                 }
             }
         });
@@ -178,11 +185,14 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                         e.printStackTrace();
                     }
                     List<AppInfo> appList = new ArrayList<>(((MainActivity) mActivity).getSelection());
+                    boolean isEnable = false;
+                    isFirstRoot = true;
                     for (int i = 0; i < appList.size(); i++) {
                         AppInfo appInfo = appList.get(i);
                         if (isRemove) {
                             if (appInfo.isEnable() == 0) {
                                 commandSu(COMMAND_ENABLE + appInfo.getAppPackageName(), false, null, -1);
+                                isEnable = true;
                             }
                             ((MainActivity) mActivity).getSelection().remove(appInfo);
                             mListDisableAppsNew.remove(appInfo);
@@ -190,18 +200,25 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                         } else {
                             if (appInfo.isEnable() == 1) {
                                 mListDisableAppsNew.get(mListDisableAppsNew.indexOf(appInfo)).setEnable(0);
-                                commandSu(COMMAND_DISABLE + appInfo.getAppPackageName(), false, null, -1);
+                                commandSu(COMMAND_DISABLE + appInfo.getAppPackageName(), false, appInfo, -1);
                                 ((MainActivity) mActivity).getSelection().remove(appInfo);
                                 mAppInfoDBController.updateDisableApp(appInfo.getAppPackageName(), 0);
                             }
                         }
                     }
-                    mView.getRootSuccess(mListDisableApps, mListDisableAppsNew);
-                    mListDisableApps = mListDisableAppsNew;
+                    if (isRemove && !isEnable) {
+                        mView.getRootSuccess(null, mListDisableApps, mListDisableAppsNew);
+                        mListDisableApps = mListDisableAppsNew;
+                    }
                 } else {
                     mView.getRootError();
                 }
             }
         });
+    }
+
+    @Override
+    public void cancelTask() {
+        mAppsRepository.cancelTsk();
     }
 }
