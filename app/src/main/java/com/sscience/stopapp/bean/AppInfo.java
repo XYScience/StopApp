@@ -79,15 +79,15 @@ public class AppInfo implements Serializable, Cloneable {
     }
 
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (!(obj instanceof AppInfo))
+            return false;
+        if (obj == this)
             return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        final AppInfo other = (AppInfo) obj;
-        if (!this.getAppPackageName().contains(other.getAppPackageName()))
-            return false;
-        return true;
+        return this.appPackageName == ((AppInfo) obj).appPackageName;
+    }
+
+    @Override
+    public int hashCode() {
+        return appPackageName.length();
     }
 }

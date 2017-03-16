@@ -51,7 +51,7 @@
     <string name="choose_email_app">请选择邮件发送软件</string>
     <string name="add_disable_app">添加停用应用</string>
     <string name="uninstall_success">卸载[%s]成功</string>
-    <string name="disable_success">已为[%s]等-1s</string>
+    <string name="disable_success">已为[%s]...-1s</string>
     <string name="enable_success">完成</string>
 
 </resources>

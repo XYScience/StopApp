@@ -19,6 +19,6 @@ public class AppInfoApplication extends Application {
     public void onCreate() {
         super.onCreate();
         CONTEXT = this;
-        MyLogger.IS_DEBUG = false;
+        MyLogger.IS_DEBUG = true;
     }
 }

@@ -68,18 +68,14 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
             @Override
             public void onItemClick(AppInfo appInfo, int position) {
                 Set<AppInfo> selection = mMainActivity.getSelection();
-                MyLogger.e("onItemClick");
                 if (selection.size() == 0) {
                     setRefreshing(true);
                     mPresenter.launchApp(appInfo, position);
-                    MyLogger.e("selection.size() == 0");
                 } else {
                     if (selection.contains(appInfo)) {
                         selection.remove(appInfo);
-                        MyLogger.e("remove");
                     } else {
                         selection.add(appInfo);
-                        MyLogger.e("addClick");
                     }
                     mDisableAppAdapter.notifyItemChanged(position);
                     mMainActivity.checkSelection();
@@ -93,7 +89,6 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
                 mMainActivity.getSelection().add(appInfo);
                 mDisableAppAdapter.notifyItemChanged(position);
                 mMainActivity.checkSelection();
-                MyLogger.e("onItemLongClick");
             }
 
             @Override
