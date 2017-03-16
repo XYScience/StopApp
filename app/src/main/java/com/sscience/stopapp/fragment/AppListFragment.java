@@ -70,6 +70,7 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
         mAppListAdapter.setOnItemClickListener(new OnItemClickListener<AppInfo>() {
             @Override
             public void onItemClick(AppInfo appInfo, int position) {
+
                 mPresenter.operationApps(appInfo, position);
             }
 
@@ -117,6 +118,7 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
 
     @Override
     public void uninstallSuccess(String appName, int position) {
+        ((AppListActivity) getActivity()).setUninstallSuccess();
         mAppListAdapter.removeData(position);
         snackBarShow(((AppListActivity) getActivity()).mCoordinatorLayout, getString(R.string.uninstall_success, appName));
     }

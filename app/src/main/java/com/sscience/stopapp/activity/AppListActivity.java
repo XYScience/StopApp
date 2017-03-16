@@ -39,8 +39,9 @@ public class AppListActivity extends BaseActivity {
     private AppCompatCheckBox mCbSelectAllApps;
     private List<Set<AppInfo>> mSelection;
     private FloatingActionButton mFabConfirm;
-    private DecelerateInterpolator mDecelerateInterpolator ;
-    private AccelerateInterpolator mAccelerateInterpolator ;
+    private DecelerateInterpolator mDecelerateInterpolator;
+    private AccelerateInterpolator mAccelerateInterpolator;
+    private boolean isUninstallSuccess;
 
     public static void actionStartActivity(Activity activity) {
         Intent intent = new Intent(activity, AppListActivity.class);
@@ -144,6 +145,21 @@ public class AppListActivity extends BaseActivity {
             setInterpolator(mFabConfirm, 0, mDecelerateInterpolator);
         } else {
             setInterpolator(mFabConfirm, 1, mAccelerateInterpolator);
+        }
+    }
+
+    public void setUninstallSuccess() {
+        isUninstallSuccess = true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isUninstallSuccess) {
+            Intent intent = new Intent(this, MainActivity.class);
+            setResult(RESULT_OK, intent);
+            finish();
+        } else {
+            super.onBackPressed();
         }
     }
 }

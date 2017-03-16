@@ -10,8 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 
 import com.science.myloggerlibrary.MyLogger;
-import com.sscience.stopapp.activity.AppListActivity;
-import com.sscience.stopapp.activity.MainActivity;
+import com.sscience.stopapp.base.BaseActivity;
 import com.sscience.stopapp.bean.AppInfo;
 
 import java.io.BufferedReader;
@@ -141,7 +140,7 @@ public class AppsRepository {
 
         @Override
         protected void onPostExecute(List<AppInfo> appList) {
-            AppListActivity activity = (AppListActivity) weakReference.get();
+            BaseActivity activity = (BaseActivity) weakReference.get();
             if (activity != null) {
                 callback.onAppsLoaded(appList);
             }
@@ -249,7 +248,7 @@ public class AppsRepository {
 
         @Override
         protected void onPostExecute(List<AppInfo> list) {
-            MainActivity activity = (MainActivity) weakReference.get();
+            BaseActivity activity = (BaseActivity) weakReference.get();
             if (activity == null) {
                 return;
             }
@@ -321,7 +320,7 @@ public class AppsRepository {
 
         @Override
         protected void onPostExecute(Boolean isRoot) {
-            MainActivity activity = (MainActivity) weakReference.get();
+            BaseActivity activity = (BaseActivity) weakReference.get();
             if (activity != null) {
                 callback.onRoot(isRoot);
             }

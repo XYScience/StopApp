@@ -29,6 +29,7 @@ public class AppsPresenter implements AppsContract.Presenter {
     private AppsContract.View mView;
     private AppsRepository mAppsRepository;
     private List<AppInfo> mAppInfos;
+    private AppInfoDBController mAppInfoDBController;
 
     public AppsPresenter(Context context, AppsContract.View view) {
         mContext = context;
@@ -36,6 +37,7 @@ public class AppsPresenter implements AppsContract.Presenter {
         mView.setPresenter(this);
         mAppsRepository = new AppsRepository(context);
         mAppInfos = new ArrayList<>();
+        mAppInfoDBController = new AppInfoDBController(mContext);
     }
 
     @Override
@@ -105,6 +107,7 @@ public class AppsPresenter implements AppsContract.Presenter {
 
             @Override
             public void onRootSuccess() {
+                mAppInfoDBController.deleteDisableApp(appInfo.getAppPackageName());
                 mView.uninstallSuccess(appInfo.getAppName(), position);
             }
         });
@@ -112,9 +115,8 @@ public class AppsPresenter implements AppsContract.Presenter {
 
     @Override
     public void addDisableAppsSuccess(List<AppInfo> appList) {
-        AppInfoDBController appInfoDBController = new AppInfoDBController(mContext);
         for (AppInfo appInfo : appList) {
-            appInfoDBController.addDisableApp(appInfo);
+            mAppInfoDBController.addDisableApp(appInfo);
         }
         mView.addDisableAppsSuccess();
     }
