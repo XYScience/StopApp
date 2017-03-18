@@ -6,17 +6,19 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 import com.science.baserecyclerviewadapter.interfaces.OnItemClickListener;
-import com.science.myloggerlibrary.MyLogger;
 import com.sscience.stopapp.R;
 import com.sscience.stopapp.activity.MainActivity;
 import com.sscience.stopapp.adapter.DisableAppAdapter;
 import com.sscience.stopapp.base.BaseFragment;
 import com.sscience.stopapp.bean.AppInfo;
 import com.sscience.stopapp.presenter.DisableAppsContract;
+import com.sscience.stopapp.service.RootActionIntentService;
 import com.sscience.stopapp.util.DiffCallBack;
+import com.sscience.stopapp.util.SharedPreferenceUtil;
 import com.sscience.stopapp.widget.DragSelectTouchListener;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -104,10 +106,8 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
                         for (int i = start; i <= end; i++) {
                             if (isSelected) {
                                 mMainActivity.getSelection().add(mAppList.get(i));
-                                MyLogger.e("DragSelectTouch add");
                             } else {
                                 mMainActivity.getSelection().remove(mAppList.get(i));
-                                MyLogger.e("DragSelectTouch remove");
                             }
                         }
                         mDisableAppAdapter.notifyItemRangeChanged(start, end - start + 1);
@@ -171,10 +171,10 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         mMainActivity.checkSelection();
         snackBarShow(mMainActivity.mCoordinatorLayout, appInfo == null
                 ? mMainActivity.getString(R.string.enable_success) :
-                mMainActivity.getString(R.string.disable_success, appInfo.getAppName()));
+                mMainActivity.getString(R.string.disable_success));
         setRefreshing(false);
         if (mAppList.isEmpty()) {
-            mDisableAppAdapter.showLoadFailed(R.drawable.no_data, "", getResources().getString(R.string.no_disable_apps));
+            mDisableAppAdapter.showLoadFailed(R.drawable.empty, "", getResources().getString(R.string.no_disable_apps));
             snackBarShow(mMainActivity.mCoordinatorLayout, getString(R.string.no_disable_apps));
         }
     }
@@ -189,6 +189,23 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
             mMainActivity.checkSelection();
         }
         setRefreshing(false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Set<String> packageSet = new HashSet<>();
+        packageSet = (Set<String>) SharedPreferenceUtil.get(getActivity()
+                , RootActionIntentService.APP_SHORTCUT_PACKAGE_NAME, packageSet);
+        if (packageSet != null && packageSet.size() != 0) {
+            for (int i = 0; i < mAppList.size(); i++) {
+                AppInfo appInfo = mAppList.get(i);
+                if (packageSet.contains(appInfo.getAppPackageName()) || appInfo.isEnable() == 1) {
+                    upDateItemIfLaunch(appInfo, i);
+                }
+            }
+            SharedPreferenceUtil.remove(getActivity(), RootActionIntentService.APP_SHORTCUT_PACKAGE_NAME);
+        }
     }
 
     @Override

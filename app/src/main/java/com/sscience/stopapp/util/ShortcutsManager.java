@@ -14,8 +14,6 @@ import com.sscience.stopapp.bean.AppInfo;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.sscience.stopapp.activity.ShortcutActivity.EXTRA_PACKAGE_NAME;
-
 /**
  * @author SScience
  * @description
@@ -55,7 +53,7 @@ public class ShortcutsManager {
                     .setIcon(Icon.createWithBitmap(appInfo.getAppIcon()))
                     .setIntent(
                             new Intent(ShortcutActivity.OPEN_APP_SHORTCUT)
-                                    .putExtra(EXTRA_PACKAGE_NAME, appInfo.getAppPackageName())
+                                    .putExtra(ShortcutActivity.EXTRA_PACKAGE_NAME, appInfo.getAppPackageName())
                             // this dynamic shortcut set up a back stack using Intents, when pressing back, will go to MainActivity
                             // the last Intent is what the shortcut really opened
 //                            new Intent[]{

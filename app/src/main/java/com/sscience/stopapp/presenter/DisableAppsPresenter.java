@@ -164,6 +164,9 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
         Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         mainIntent.setPackage(appInfo.getAppPackageName());
+//        if (mainIntent.resolveActivity(mActivity.getPackageManager()) != null) {
+//            mShortcutsManager.addShortcut(appInfo);
+//        }
         List<ResolveInfo> infoList = mActivity.getPackageManager().queryIntentActivities(mainIntent, 0);
         if (infoList != null && !infoList.isEmpty()) {
             mShortcutsManager.addShortcut(appInfo);

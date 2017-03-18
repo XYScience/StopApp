@@ -12,6 +12,7 @@ import android.os.AsyncTask;
 import com.science.myloggerlibrary.MyLogger;
 import com.sscience.stopapp.base.BaseActivity;
 import com.sscience.stopapp.bean.AppInfo;
+import com.sscience.stopapp.service.RootActionIntentService;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -248,9 +249,11 @@ public class AppsRepository {
 
         @Override
         protected void onPostExecute(List<AppInfo> list) {
-            BaseActivity activity = (BaseActivity) weakReference.get();
-            if (activity == null) {
-                return;
+            Context context = weakReference.get();
+            if (context instanceof BaseActivity || context instanceof RootActionIntentService) {
+                if (context == null) {
+                    return;
+                }
             }
             if (list != null) {
                 if (list.isEmpty() && list.size() == 0) {

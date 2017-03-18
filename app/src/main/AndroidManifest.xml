@@ -93,8 +93,7 @@
         </activity>
 
         <service
-            android:name=".service.RootActionIntentService"
-            android:process=":RootService"/>
+            android:name=".service.RootActionIntentService"/>
     </application>
 
 </manifest>

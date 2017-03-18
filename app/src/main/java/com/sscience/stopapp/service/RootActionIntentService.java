@@ -10,9 +10,13 @@ import com.science.myloggerlibrary.MyLogger;
 import com.sscience.stopapp.R;
 import com.sscience.stopapp.activity.ShortcutActivity;
 import com.sscience.stopapp.bean.AppInfo;
+import com.sscience.stopapp.database.AppInfoDBController;
 import com.sscience.stopapp.model.AppsRepository;
+import com.sscience.stopapp.util.SharedPreferenceUtil;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.sscience.stopapp.model.AppsRepository.COMMAND_ENABLE;
 
@@ -26,6 +30,7 @@ import static com.sscience.stopapp.model.AppsRepository.COMMAND_ENABLE;
 public class RootActionIntentService extends IntentService {
 
     private Handler mHandler;
+    public static final String APP_SHORTCUT_PACKAGE_NAME = "app_shortcut_package_name";
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
@@ -45,7 +50,16 @@ public class RootActionIntentService extends IntentService {
         stopSelf();
     }
 
-    public void enableApp(final String cmd, final String packageName) {
+    private void launchAppIntent(String packageName) {
+        try {
+            Intent resolveIntent = getPackageManager().getLaunchIntentForPackage(packageName);
+            startActivity(resolveIntent);
+        } catch (NullPointerException e) {
+            enableApp(COMMAND_ENABLE, packageName);
+        }
+    }
+
+    private void enableApp(final String cmd, final String packageName) {
         new AppsRepository(RootActionIntentService.this).commandSu(cmd + packageName, new AppsRepository.GetAppsCmdCallback() {
             @Override
             public void onRootAppsLoaded(List<AppInfo> apps) {
@@ -59,18 +73,16 @@ public class RootActionIntentService extends IntentService {
 
             @Override
             public void onRootSuccess() {
+                Set<String> packageSet = new HashSet<>();
+                packageSet = (Set<String>) SharedPreferenceUtil.get(RootActionIntentService.this
+                        , RootActionIntentService.APP_SHORTCUT_PACKAGE_NAME, packageSet);
+                packageSet.add(packageName);
+                SharedPreferenceUtil.put(RootActionIntentService.this, APP_SHORTCUT_PACKAGE_NAME, packageSet);
+                AppInfoDBController appInfoDBController = new AppInfoDBController(RootActionIntentService.this);
+                appInfoDBController.updateDisableApp(packageName, 1);
                 launchAppIntent(packageName);
             }
         });
-    }
-
-    private void launchAppIntent(String packageName) {
-        try {
-            Intent resolveIntent = getPackageManager().getLaunchIntentForPackage(packageName);
-            startActivity(resolveIntent);
-        } catch (NullPointerException e) {
-            enableApp(COMMAND_ENABLE, packageName);
-        }
     }
 
     public class DisplayToast implements Runnable {

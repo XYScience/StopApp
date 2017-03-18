@@ -51,7 +51,7 @@
     <string name="choose_email_app">Please select email app</string>
     <string name="add_disable_app">Add disable app</string>
     <string name="uninstall_success">Uninstall [%s] successfully</string>
-    <string name="disable_apps_success">Disable [%s]... successfully</string>
-    <string name="enable_success">Enable successfully</string>
+    <string name="disable_success">Disable apps successfully</string>
+    <string name="enable_success">Enable apps successfully</string>
 
 </resources>
