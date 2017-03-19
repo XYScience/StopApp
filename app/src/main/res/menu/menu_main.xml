@@ -18,11 +18,11 @@
         android:title="@string/add"
         app:showAsAction="always"/>
 
-    <!--<item-->
-        <!--android:id="@+id/menu_setting"-->
-        <!--android:orderInCategory="1"-->
-        <!--android:title="@string/setting"-->
-        <!--app:showAsAction="never"/>-->
+    <item
+        android:id="@+id/menu_setting"
+        android:orderInCategory="1"
+        android:title="@string/setting"
+        app:showAsAction="never"/>
 
     <item
         android:id="@+id/menu_about"

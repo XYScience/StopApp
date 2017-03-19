@@ -10,6 +10,7 @@
     <string name="setting">设置</string>
     <string name="about">关于</string>
     <string name="change_launcher_icon">切换桌面图标</string>
+    <string name="add_shortcut_manual">自定义Shortcut</string>
     <string name="select">选择</string>
     <string name="cancel">取消</string>
     <string name="circle">圆形</string>
@@ -53,5 +54,9 @@
     <string name="uninstall_success">卸载[%s]成功</string>
     <string name="disable_success">冻结应用成功</string>
     <string name="enable_success">从列表移除成功</string>
+    <string name="app_had_uninstall">未安装该应用</string>
+    <string name="shortcut_num_limit">App Shortcut最多添加4个</string>
+    <string name="add_shortcut_apps">添加Shortcut应用</string>
+    <string name="dont_add_shortcut">你还未自定义Shortcut应用</string>
 
 </resources>

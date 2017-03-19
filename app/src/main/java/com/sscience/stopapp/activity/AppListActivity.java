@@ -2,6 +2,8 @@ package com.sscience.stopapp.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ShortcutManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
@@ -19,6 +21,7 @@ import com.sscience.stopapp.adapter.MyPagerAdapter;
 import com.sscience.stopapp.base.BaseActivity;
 import com.sscience.stopapp.bean.AppInfo;
 import com.sscience.stopapp.fragment.AppListFragment;
+import com.sscience.stopapp.util.ShortcutsManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -34,6 +37,7 @@ import java.util.Set;
 
 public class AppListActivity extends BaseActivity {
 
+    public static final String EXTRA_MANUAL_SHORTCUT = "extra_manual_shortcut";
     public CoordinatorLayout mCoordinatorLayout;
     public ViewPager mViewPager;
     private AppCompatCheckBox mCbSelectAllApps;
@@ -43,9 +47,10 @@ public class AppListActivity extends BaseActivity {
     private AccelerateInterpolator mAccelerateInterpolator;
     private boolean isUninstallSuccess;
 
-    public static void actionStartActivity(Activity activity) {
+    public static void actionStartActivity(Activity activity, int requestCode, boolean isManualShortcut) {
         Intent intent = new Intent(activity, AppListActivity.class);
-        activity.startActivityForResult(intent, 1);
+        intent.putExtra(EXTRA_MANUAL_SHORTCUT, isManualShortcut);
+        activity.startActivityForResult(intent, requestCode);
     }
 
     @Override
@@ -55,7 +60,12 @@ public class AppListActivity extends BaseActivity {
 
     @Override
     protected void doOnCreate(@Nullable Bundle savedInstanceState) {
-        setToolbar(getString(R.string.add_apps));
+
+        if (getIntent().getBooleanExtra(EXTRA_MANUAL_SHORTCUT, false)) {
+            setToolbar(getString(R.string.add_shortcut_apps));
+        } else {
+            setToolbar(getString(R.string.add_apps));
+        }
 
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
         mCbSelectAllApps = (AppCompatCheckBox) findViewById(R.id.cb_select_all_apps);
@@ -115,8 +125,23 @@ public class AppListActivity extends BaseActivity {
             public void onClick(View v) {
                 Set<AppInfo> appList = getSelection(0);
                 appList.addAll(getSelection(1));
-                ((MyPagerAdapter) mViewPager.getAdapter()).
-                        getFragments(mViewPager.getCurrentItem()).addDisableApps(new ArrayList<>(appList));
+                if (getIntent().getBooleanExtra(EXTRA_MANUAL_SHORTCUT, false)) {
+                    if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                        ShortcutManager manager = getSystemService(ShortcutManager.class);
+                        if (appList.size() > manager.getMaxShortcutCountPerActivity() - 1) {
+                            snackBarShow(mCoordinatorLayout, getString(R.string.shortcut_num_limit));
+                        } else {
+                            ShortcutsManager shortcutsManager = new ShortcutsManager(AppListActivity.this);
+                            shortcutsManager.addAppShortcut(new ArrayList<>(appList));
+                            Intent intent = new Intent(AppListActivity.this, SettingActivity.class);
+                            setResult(RESULT_OK, intent);
+                            finish();
+                        }
+                    }
+                } else {
+                    ((MyPagerAdapter) mViewPager.getAdapter()).getFragments(mViewPager.getCurrentItem())
+                            .addDisableApps(new ArrayList<>(appList));
+                }
             }
         });
     }

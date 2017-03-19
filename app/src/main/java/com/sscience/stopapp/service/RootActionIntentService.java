@@ -12,7 +12,9 @@ import com.sscience.stopapp.activity.ShortcutActivity;
 import com.sscience.stopapp.bean.AppInfo;
 import com.sscience.stopapp.database.AppInfoDBController;
 import com.sscience.stopapp.model.AppsRepository;
+import com.sscience.stopapp.util.CommonUtil;
 import com.sscience.stopapp.util.SharedPreferenceUtil;
+import com.sscience.stopapp.util.ShortcutsManager;
 
 import java.util.HashSet;
 import java.util.List;
@@ -51,11 +53,16 @@ public class RootActionIntentService extends IntentService {
     }
 
     private void launchAppIntent(String packageName) {
-        try {
-            Intent resolveIntent = getPackageManager().getLaunchIntentForPackage(packageName);
-            startActivity(resolveIntent);
-        } catch (NullPointerException e) {
-            enableApp(COMMAND_ENABLE, packageName);
+        if (!CommonUtil.isLauncherActivity(RootActionIntentService.this, packageName)) {
+            ShortcutsManager manager = new ShortcutsManager(RootActionIntentService.this);
+            manager.removeShortcut(packageName, true);
+        } else {
+            try {
+                Intent resolveIntent = getPackageManager().getLaunchIntentForPackage(packageName);
+                startActivity(resolveIntent);
+            } catch (NullPointerException e) {
+                enableApp(COMMAND_ENABLE, packageName);
+            }
         }
     }
 
@@ -73,6 +80,7 @@ public class RootActionIntentService extends IntentService {
 
             @Override
             public void onRootSuccess() {
+                // 已停用的app以Shortcut形势启动，则需更新主页app为启用
                 Set<String> packageSet = new HashSet<>();
                 packageSet = (Set<String>) SharedPreferenceUtil.get(RootActionIntentService.this
                         , RootActionIntentService.APP_SHORTCUT_PACKAGE_NAME, packageSet);

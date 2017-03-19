@@ -20,12 +20,12 @@ public class AppInfoDBOpenHelper extends SQLiteOpenHelper {
     // Database Name
     private static final String DATABASE_NAME = "appInfo.db";
     // Table Names
-    public static final String TABLE_NAME = "table_appInfo";
+    public static final String TABLE_NAME_APP_INFO = "table_appInfo";
 
     // Table create statement
     private static final String CREATE_TABLE_APP_INFO =
             "CREATE TABLE IF NOT EXISTS "
-                    + TABLE_NAME
+                    + TABLE_NAME_APP_INFO
                     + String.format(
                     "("
                             + "%s VARCHAR PRIMARY KEY, " // appPackageName
@@ -54,7 +54,7 @@ public class AppInfoDBOpenHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // on upgrade drop older tables
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_APP_INFO);
         // create new table
         onCreate(db);
     }

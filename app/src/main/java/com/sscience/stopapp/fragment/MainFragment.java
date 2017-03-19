@@ -194,6 +194,7 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
     @Override
     public void onResume() {
         super.onResume();
+        // 若已停用的app以Shortcut形势启动，则需更新主页app为启用
         Set<String> packageSet = new HashSet<>();
         packageSet = (Set<String>) SharedPreferenceUtil.get(getActivity()
                 , RootActionIntentService.APP_SHORTCUT_PACKAGE_NAME, packageSet);

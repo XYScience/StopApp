@@ -2,8 +2,10 @@ package com.sscience.stopapp.util;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
@@ -13,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.io.ByteArrayOutputStream;
+import java.util.List;
 
 /**
  * @author SScience
@@ -26,6 +29,11 @@ public class CommonUtil {
     public static int dipToPx(Context context, float dipValue) {
         final float scale = context.getResources().getDisplayMetrics().density;
         return (int) (dipValue * scale + 0.5f);
+    }
+
+    public static int pxToDip(Context context, float dipValue) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (dipValue / scale + 0.5f);
     }
 
     public static View setTranslucentStatusBar(Activity activity, int statusBarColor) {
@@ -82,5 +90,17 @@ public class CommonUtil {
     // convert from byte array to bitmap
     public static Bitmap getImage(byte[] image) {
         return BitmapFactory.decodeByteArray(image, 0, image.length);
+    }
+
+    public static boolean isLauncherActivity(Context context, String packageName) {
+        Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        mainIntent.setPackage(packageName);
+        List<ResolveInfo> infoList = context.getPackageManager().queryIntentActivities(mainIntent, 0);
+        if (infoList.isEmpty()) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

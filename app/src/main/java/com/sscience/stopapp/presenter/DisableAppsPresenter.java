@@ -3,8 +3,8 @@ package com.sscience.stopapp.presenter;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ResolveInfo;
 import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 
 import com.science.myloggerlibrary.MyLogger;
 import com.sscience.stopapp.R;
@@ -13,9 +13,11 @@ import com.sscience.stopapp.bean.AppInfo;
 import com.sscience.stopapp.database.AppInfoDBController;
 import com.sscience.stopapp.model.AppsRepository;
 import com.sscience.stopapp.util.AppInfoComparator;
+import com.sscience.stopapp.util.SharedPreferenceUtil;
 import com.sscience.stopapp.util.ShortcutsManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -161,15 +163,9 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
     }
 
     private void addShortcut(AppInfo appInfo) {
-        Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
-        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        mainIntent.setPackage(appInfo.getAppPackageName());
-//        if (mainIntent.resolveActivity(mActivity.getPackageManager()) != null) {
-//            mShortcutsManager.addShortcut(appInfo);
-//        }
-        List<ResolveInfo> infoList = mActivity.getPackageManager().queryIntentActivities(mainIntent, 0);
-        if (infoList != null && !infoList.isEmpty()) {
-            mShortcutsManager.addShortcut(appInfo);
+        String sp = (String) SharedPreferenceUtil.get(mActivity, ShortcutsManager.SP_ADD_SHORTCUT_MODE, "");
+        if (TextUtils.isEmpty(sp) || ShortcutsManager.SP_AUTO_SHORTCUT.equals(sp)) {
+            mShortcutsManager.addAppShortcut(Arrays.asList(appInfo));
         }
     }
 

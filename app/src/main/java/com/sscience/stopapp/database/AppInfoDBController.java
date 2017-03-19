@@ -29,7 +29,7 @@ public class AppInfoDBController {
     }
 
     public List<AppInfo> getDisableApps() {
-        final Cursor cursor = mSQLiteDatabase.rawQuery("SELECT * FROM " + AppInfoDBOpenHelper.TABLE_NAME, null);
+        final Cursor cursor = mSQLiteDatabase.rawQuery("SELECT * FROM " + AppInfoDBOpenHelper.TABLE_NAME_APP_INFO, null);
 
         final List<AppInfo> list = new ArrayList<>();
         try {
@@ -61,11 +61,11 @@ public class AppInfoDBController {
         cv.put(AppInfo.APP_ICON, CommonUtil.getBytes(appInfo.getAppIcon()));
         cv.put(AppInfo.IS_ENABLE, appInfo.isEnable());
         cv.put(AppInfo.IS_SYSTEM_APP, appInfo.isSystemApp());
-        mSQLiteDatabase.insert(AppInfoDBOpenHelper.TABLE_NAME, null, cv);
+        mSQLiteDatabase.insert(AppInfoDBOpenHelper.TABLE_NAME_APP_INFO, null, cv);
     }
 
     public void deleteDisableApp(String packageName) {
-        String deleteQuery = "DELETE FROM " + AppInfoDBOpenHelper.TABLE_NAME
+        String deleteQuery = "DELETE FROM " + AppInfoDBOpenHelper.TABLE_NAME_APP_INFO
                 + " where " + AppInfo.APP_PACKAGE_NAME + " = '" + packageName + "'";
         mSQLiteDatabase.execSQL(deleteQuery);
     }
@@ -74,7 +74,7 @@ public class AppInfoDBController {
         ContentValues cv = new ContentValues();
         cv.put(AppInfo.IS_ENABLE, isEnable);
         String[] args = {packageName};
-        mSQLiteDatabase.update(AppInfoDBOpenHelper.TABLE_NAME, cv, AppInfo.APP_PACKAGE_NAME + "=?", args);
+        mSQLiteDatabase.update(AppInfoDBOpenHelper.TABLE_NAME_APP_INFO, cv, AppInfo.APP_PACKAGE_NAME + "=?", args);
     }
 
 }
