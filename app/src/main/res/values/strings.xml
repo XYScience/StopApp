@@ -58,5 +58,6 @@
     <string name="shortcut_num_limit">App Shortcut最多添加4个</string>
     <string name="add_shortcut_apps">添加Shortcut应用</string>
     <string name="dont_add_shortcut">你还未自定义Shortcut应用</string>
+    <string name="add_desktop_shortcut">添加快捷方式</string>
 
 </resources>

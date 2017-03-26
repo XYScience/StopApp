@@ -1,6 +1,5 @@
 package com.sscience.stopapp.util;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ShortcutInfo;
@@ -25,7 +24,6 @@ import java.util.List;
  * @data 2017/2/7
  */
 
-@TargetApi(Build.VERSION_CODES.N_MR1)
 public class ShortcutsManager {
 
     private Context mContext;
@@ -36,38 +34,42 @@ public class ShortcutsManager {
     private AppInfoDBController mDBController;
 
     public ShortcutsManager(Context context) {
-        mContext = context;
-        mShortcutManager = context.getSystemService(ShortcutManager.class);
-        mDBController = new AppInfoDBController(context);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            mContext = context;
+            mShortcutManager = context.getSystemService(ShortcutManager.class);
+            mDBController = new AppInfoDBController(context);
+        }
     }
 
     /**
      * 添加App Shortcut
      */
     public void addAppShortcut(List<AppInfo> appList) {
-        List<AppInfo> appInfoDB = new ArrayList<>(
-                mDBController.getDisableApps(AppInfoDBOpenHelper.TABLE_NAME_SHORTCUT_APP_INFO));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            List<AppInfo> appInfoDB = new ArrayList<>(
+                    mDBController.getDisableApps(AppInfoDBOpenHelper.TABLE_NAME_SHORTCUT_APP_INFO));
 
-        for (AppInfo appInfo : appList) {
-            if (!CommonUtil.isLauncherActivity(mContext, appInfo.getAppPackageName())) {
-                continue;
+            for (AppInfo appInfo : appList) {
+                if (!CommonUtil.isLauncherActivity(mContext, appInfo.getAppPackageName())) {
+                    continue;
+                }
+                if (!mDBController.searchApp(AppInfoDBOpenHelper.TABLE_NAME_SHORTCUT_APP_INFO, appInfo.getAppPackageName())) {
+                    appInfoDB.add(appInfo);
+                }
             }
-            if (!mDBController.searchApp(AppInfoDBOpenHelper.TABLE_NAME_SHORTCUT_APP_INFO, appInfo.getAppPackageName())) {
-                appInfoDB.add(appInfo);
-            }
-        }
 
-        mDBController.clearDisableApp(AppInfoDBOpenHelper.TABLE_NAME_SHORTCUT_APP_INFO);
-        List<ShortcutInfo> shortcutList = new ArrayList<>();
-        for (int i = appInfoDB.size() - 1; i >= 0; i--) {
-            if (shortcutList.size() < 4) {
-                shortcutList.add(getShortcut(appInfoDB.get(i)));
-                mDBController.addDisableApp(appInfoDB.get(i), AppInfoDBOpenHelper.TABLE_NAME_SHORTCUT_APP_INFO);
-            } else {
-                removeShortcut(appInfoDB.get(i).getAppPackageName(), mContext.getString(R.string.shortcut_num_limit));
+            mDBController.clearDisableApp(AppInfoDBOpenHelper.TABLE_NAME_SHORTCUT_APP_INFO);
+            List<ShortcutInfo> shortcutList = new ArrayList<>();
+            for (int i = appInfoDB.size() - 1; i >= 0; i--) {
+                if (shortcutList.size() < 4) {
+                    shortcutList.add(getShortcut(appInfoDB.get(i)));
+                    mDBController.addDisableApp(appInfoDB.get(i), AppInfoDBOpenHelper.TABLE_NAME_SHORTCUT_APP_INFO);
+                } else {
+                    removeShortcut(appInfoDB.get(i).getAppPackageName(), mContext.getString(R.string.shortcut_num_limit));
+                }
             }
+            mShortcutManager.setDynamicShortcuts(shortcutList);
         }
-        mShortcutManager.setDynamicShortcuts(shortcutList);
     }
 
     /**
@@ -77,23 +79,27 @@ public class ShortcutsManager {
      * @return
      */
     private ShortcutInfo getShortcut(AppInfo appInfo) {
-        ShortcutInfo shortcut = new ShortcutInfo.Builder(mContext, appInfo.getAppPackageName())
-                .setShortLabel(appInfo.getAppName())
-                .setIcon(Icon.createWithBitmap(appInfo.getAppIcon()))
-                .setIntent(
-                        new Intent(ShortcutActivity.OPEN_APP_SHORTCUT)
-                                .putExtra(ShortcutActivity.EXTRA_PACKAGE_NAME, appInfo.getAppPackageName())
-                        // this dynamic shortcut set up a back stack using Intents, when pressing back, will go to MainActivity
-                        // the last Intent is what the shortcut really opened
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            ShortcutInfo shortcut = new ShortcutInfo.Builder(mContext, appInfo.getAppPackageName())
+                    .setShortLabel(appInfo.getAppName())
+                    .setIcon(Icon.createWithBitmap(appInfo.getAppIcon()))
+                    .setIntent(
+                            new Intent(ShortcutActivity.OPEN_APP_SHORTCUT)
+                                    .putExtra(ShortcutActivity.EXTRA_PACKAGE_NAME, appInfo.getAppPackageName())
+                            // this dynamic shortcut set up a back stack using Intents, when pressing back, will go to MainActivity
+                            // the last Intent is what the shortcut really opened
 //                            new Intent[]{
 //                                    new Intent(Intent.ACTION_MAIN, Uri.EMPTY, mContext, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK),
 //                                    new Intent(AppListActivity.ACTION_OPEN_DYNAMIC)
 //                                    // intent's action must be set
 //                            }
-                )
-                .build();
+                    )
+                    .build();
 
-        return shortcut;
+            return shortcut;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -102,7 +108,9 @@ public class ShortcutsManager {
      * @param shortcutID
      */
     public void removeShortcut(String shortcutID, String test) {
-        mShortcutManager.disableShortcuts(Arrays.asList(shortcutID), test);
-        mShortcutManager.removeDynamicShortcuts(Arrays.asList(shortcutID));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            mShortcutManager.disableShortcuts(Arrays.asList(shortcutID), test);
+            mShortcutManager.removeDynamicShortcuts(Arrays.asList(shortcutID));
+        }
     }
 }

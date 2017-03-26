@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 
+import com.science.myloggerlibrary.MyLogger;
 import com.sscience.stopapp.R;
 import com.sscience.stopapp.base.BaseActivity;
 import com.sscience.stopapp.bean.AppInfo;
@@ -61,6 +62,8 @@ public class MainActivity extends BaseActivity {
         new DisableAppsPresenter(MainActivity.this, mMainFragment);
 
         initListener();
+
+        MyLogger.e(getIntent().getComponent().getClassName());
     }
 
     private void initListener() {
