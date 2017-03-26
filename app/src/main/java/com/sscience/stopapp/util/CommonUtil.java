@@ -92,6 +92,12 @@ public class CommonUtil {
         return BitmapFactory.decodeByteArray(image, 0, image.length);
     }
 
+    /**
+     * 是否有启动界面，即在manifest里定义的 “action.MAIN”&“category.LAUNCHER”
+     * @param context
+     * @param packageName
+     * @return
+     */
     public static boolean isLauncherActivity(Context context, String packageName) {
         Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
@@ -102,5 +108,23 @@ public class CommonUtil {
         } else {
             return true;
         }
+    }
+
+    /**
+     * 是否安装
+     * @param context
+     * @param packageName
+     * @return
+     */
+    public static boolean isAppInstalled(Context context, String packageName) {
+        PackageManager pm = context.getPackageManager();
+        boolean installed;
+        try {
+            pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
+            installed = true;
+        } catch (PackageManager.NameNotFoundException e) {
+            installed = false;
+        }
+        return installed;
     }
 }

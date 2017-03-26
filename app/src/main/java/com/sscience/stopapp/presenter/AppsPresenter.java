@@ -7,6 +7,7 @@ import android.support.v7.app.AlertDialog;
 import com.sscience.stopapp.R;
 import com.sscience.stopapp.bean.AppInfo;
 import com.sscience.stopapp.database.AppInfoDBController;
+import com.sscience.stopapp.database.AppInfoDBOpenHelper;
 import com.sscience.stopapp.model.AppsRepository;
 import com.sscience.stopapp.util.AppInfoComparator;
 
@@ -83,7 +84,7 @@ public class AppsPresenter implements AppsContract.Presenter {
 
     private void addDisableApps(AppInfo appInfo) {
         AppInfoDBController appInfoDBController = new AppInfoDBController(mContext);
-        List<AppInfo> disableApps = appInfoDBController.getDisableApps();
+        List<AppInfo> disableApps = appInfoDBController.getDisableApps(AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
         if (disableApps.contains(appInfo)) {
             mView.hadAddDisableApps();
             return;
@@ -107,7 +108,7 @@ public class AppsPresenter implements AppsContract.Presenter {
 
             @Override
             public void onRootSuccess() {
-                mAppInfoDBController.deleteDisableApp(appInfo.getAppPackageName());
+                mAppInfoDBController.deleteDisableApp(appInfo.getAppPackageName(), AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
                 mView.uninstallSuccess(appInfo.getAppName(), position);
             }
         });
@@ -116,7 +117,7 @@ public class AppsPresenter implements AppsContract.Presenter {
     @Override
     public void addDisableAppsSuccess(List<AppInfo> appList) {
         for (AppInfo appInfo : appList) {
-            mAppInfoDBController.addDisableApp(appInfo);
+            mAppInfoDBController.addDisableApp(appInfo, AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
         }
         mView.addDisableAppsSuccess();
     }

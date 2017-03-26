@@ -11,7 +11,10 @@ import android.os.Build;
 import com.sscience.stopapp.R;
 import com.sscience.stopapp.activity.ShortcutActivity;
 import com.sscience.stopapp.bean.AppInfo;
+import com.sscience.stopapp.database.AppInfoDBController;
+import com.sscience.stopapp.database.AppInfoDBOpenHelper;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,33 +33,41 @@ public class ShortcutsManager {
     public static final String SP_MANUAL_SHORTCUT = "sp_manual_shortcut"; // shortcut手动添加
     public static final String SP_AUTO_SHORTCUT = "sp_auto_shortcut"; // shortcut自动添加
     private ShortcutManager mShortcutManager;
+    private AppInfoDBController mDBController;
 
     public ShortcutsManager(Context context) {
         mContext = context;
         mShortcutManager = context.getSystemService(ShortcutManager.class);
+        mDBController = new AppInfoDBController(context);
     }
 
     /**
      * 添加App Shortcut
      */
     public void addAppShortcut(List<AppInfo> appList) {
+        List<AppInfo> appInfoDB = new ArrayList<>(
+                mDBController.getDisableApps(AppInfoDBOpenHelper.TABLE_NAME_SHORTCUT_APP_INFO));
+
         for (AppInfo appInfo : appList) {
             if (!CommonUtil.isLauncherActivity(mContext, appInfo.getAppPackageName())) {
                 continue;
             }
-            List<ShortcutInfo> shortcutList = mShortcutManager.getDynamicShortcuts();
-            if (shortcutList.size() == 3) {
-                ShortcutInfo shortcutInfo = shortcutList.get(0);
-                removeShortcut(shortcutInfo.getId());
-                shortcutList.remove(shortcutInfo);
+            if (!mDBController.searchApp(AppInfoDBOpenHelper.TABLE_NAME_SHORTCUT_APP_INFO, appInfo.getAppPackageName())) {
+                appInfoDB.add(appInfo);
             }
-            for (ShortcutInfo info : shortcutList) {
-                if (info.getId().equals(appInfo.getAppPackageName())) {
-                    break;
-                }
-            }
-            mShortcutManager.addDynamicShortcuts(Arrays.asList(getShortcut(appInfo)));
         }
+
+        mDBController.clearDisableApp(AppInfoDBOpenHelper.TABLE_NAME_SHORTCUT_APP_INFO);
+        List<ShortcutInfo> shortcutList = new ArrayList<>();
+        for (int i = appInfoDB.size() - 1; i >= 0; i--) {
+            if (shortcutList.size() < 4) {
+                shortcutList.add(getShortcut(appInfoDB.get(i)));
+                mDBController.addDisableApp(appInfoDB.get(i), AppInfoDBOpenHelper.TABLE_NAME_SHORTCUT_APP_INFO);
+            } else {
+                removeShortcut(appInfoDB.get(i).getAppPackageName(), mContext.getString(R.string.shortcut_num_limit));
+            }
+        }
+        mShortcutManager.setDynamicShortcuts(shortcutList);
     }
 
     /**
@@ -86,34 +97,12 @@ public class ShortcutsManager {
     }
 
     /**
-     * 删除App Shortcut
-     *
-     * @param shortcutID
-     */
-    public void removeShortcut(String shortcutID) {
-        removeShortcut(shortcutID, false);
-        mShortcutManager.removeDynamicShortcuts(Arrays.asList(shortcutID));
-    }
-
-    /**
      * 如果桌面有Pinning Shortcuts，且对应的app被用户卸载，则要disable并提示
      *
      * @param shortcutID
-     * @param isUninstall
      */
-    public void removeShortcut(String shortcutID, boolean isUninstall) {
-        if (isUninstall) {
-            List<ShortcutInfo> infos = mShortcutManager.getPinnedShortcuts();
-            for (ShortcutInfo info : infos) {
-                if (info.getId().equals(shortcutID)) {
-                    // 桌面Shortcut对应的app被卸载时提示（第二个参数）
-                    mShortcutManager.disableShortcuts(Arrays.asList(info.getId())
-                            , mContext.getString(R.string.app_had_uninstall));
-                    break;
-                }
-            }
-        }
-
+    public void removeShortcut(String shortcutID, String test) {
+        mShortcutManager.disableShortcuts(Arrays.asList(shortcutID), test);
         mShortcutManager.removeDynamicShortcuts(Arrays.asList(shortcutID));
     }
 }

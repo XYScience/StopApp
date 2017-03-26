@@ -11,6 +11,7 @@ import com.sscience.stopapp.R;
 import com.sscience.stopapp.activity.ShortcutActivity;
 import com.sscience.stopapp.bean.AppInfo;
 import com.sscience.stopapp.database.AppInfoDBController;
+import com.sscience.stopapp.database.AppInfoDBOpenHelper;
 import com.sscience.stopapp.model.AppsRepository;
 import com.sscience.stopapp.util.CommonUtil;
 import com.sscience.stopapp.util.SharedPreferenceUtil;
@@ -53,9 +54,9 @@ public class RootActionIntentService extends IntentService {
     }
 
     private void launchAppIntent(String packageName) {
-        if (!CommonUtil.isLauncherActivity(RootActionIntentService.this, packageName)) {
+        if (!CommonUtil.isAppInstalled(RootActionIntentService.this, packageName)) {
             ShortcutsManager manager = new ShortcutsManager(RootActionIntentService.this);
-            manager.removeShortcut(packageName, true);
+            manager.removeShortcut(packageName, getString(R.string.app_had_uninstall));
         } else {
             try {
                 Intent resolveIntent = getPackageManager().getLaunchIntentForPackage(packageName);
@@ -87,7 +88,7 @@ public class RootActionIntentService extends IntentService {
                 packageSet.add(packageName);
                 SharedPreferenceUtil.put(RootActionIntentService.this, APP_SHORTCUT_PACKAGE_NAME, packageSet);
                 AppInfoDBController appInfoDBController = new AppInfoDBController(RootActionIntentService.this);
-                appInfoDBController.updateDisableApp(packageName, 1);
+                appInfoDBController.updateDisableApp(packageName, 1, AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
                 launchAppIntent(packageName);
             }
         });

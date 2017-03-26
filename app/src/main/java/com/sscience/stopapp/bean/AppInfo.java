@@ -83,7 +83,7 @@ public class AppInfo implements Serializable, Cloneable {
             return false;
         if (obj == this)
             return true;
-        return this.appPackageName == ((AppInfo) obj).appPackageName;
+        return this.appPackageName.equals(((AppInfo) obj).appPackageName);
     }
 
     @Override

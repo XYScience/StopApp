@@ -11,6 +11,7 @@ import com.sscience.stopapp.R;
 import com.sscience.stopapp.activity.MainActivity;
 import com.sscience.stopapp.bean.AppInfo;
 import com.sscience.stopapp.database.AppInfoDBController;
+import com.sscience.stopapp.database.AppInfoDBOpenHelper;
 import com.sscience.stopapp.model.AppsRepository;
 import com.sscience.stopapp.util.AppInfoComparator;
 import com.sscience.stopapp.util.SharedPreferenceUtil;
@@ -60,7 +61,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
 
     @Override
     public void start() {
-        List<AppInfo> disableApps = mAppInfoDBController.getDisableApps();
+        List<AppInfo> disableApps = mAppInfoDBController.getDisableApps(AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
         if (disableApps.isEmpty() && disableApps.size() == 0) {
             commandSu(COMMAND_APP_LIST + "-d", false, null, -1);
         } else {
@@ -130,7 +131,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
         mListDisableApps.clear();
         for (AppInfo appInfo : appList) {
             if (isFirst) {
-                mAppInfoDBController.addDisableApp(appInfo);
+                mAppInfoDBController.addDisableApp(appInfo, AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
             }
             if (appInfo.isEnable() == 1) {
                 ((MainActivity) mActivity).getSelection().add(appInfo);
@@ -154,7 +155,8 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
     public void launchApp(AppInfo appInfo, int position) {
         if (appInfo.isEnable() == 0) {
             commandSu(COMMAND_ENABLE + appInfo.getAppPackageName(), true, appInfo, position);
-            mAppInfoDBController.updateDisableApp(appInfo.getAppPackageName(), 1);
+            mAppInfoDBController.updateDisableApp(appInfo.getAppPackageName(), 1
+                    , AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
         } else {
             addShortcut(appInfo);
             launchAppIntent(appInfo.getAppPackageName());
@@ -195,13 +197,15 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                             }
                             ((MainActivity) mActivity).getSelection().remove(appInfo);
                             mListDisableAppsNew.remove(appInfo);
-                            mAppInfoDBController.deleteDisableApp(appInfo.getAppPackageName());
+                            mAppInfoDBController.deleteDisableApp(appInfo.getAppPackageName(),
+                                    AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
                         } else {
                             if (appInfo.isEnable() == 1) {
                                 mListDisableAppsNew.get(mListDisableAppsNew.indexOf(appInfo)).setEnable(0);
                                 commandSu(COMMAND_DISABLE + appInfo.getAppPackageName(), false, appInfo, -1);
                                 ((MainActivity) mActivity).getSelection().remove(appInfo);
-                                mAppInfoDBController.updateDisableApp(appInfo.getAppPackageName(), 0);
+                                mAppInfoDBController.updateDisableApp(appInfo.getAppPackageName(), 0,
+                                        AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
                             }
                         }
                     }
