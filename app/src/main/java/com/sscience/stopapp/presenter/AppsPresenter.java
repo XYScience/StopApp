@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 
+import com.science.myloggerlibrary.MyLogger;
 import com.sscience.stopapp.R;
 import com.sscience.stopapp.activity.ShortcutActivity;
 import com.sscience.stopapp.bean.AppInfo;
@@ -12,6 +13,7 @@ import com.sscience.stopapp.database.AppInfoDBController;
 import com.sscience.stopapp.database.AppInfoDBOpenHelper;
 import com.sscience.stopapp.model.AppsRepository;
 import com.sscience.stopapp.util.AppInfoComparator;
+import com.sscience.stopapp.util.CommonUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -79,7 +81,7 @@ public class AppsPresenter implements AppsContract.Presenter {
                 } else if (i == 1) {
                     uninstallApp(appInfo, position);
                 } else if (i == 2) {
-                    addDesttopShortcut(appInfo);
+                    addDesktopShortcut(appInfo);
                 }
             }
         });
@@ -99,22 +101,43 @@ public class AppsPresenter implements AppsContract.Presenter {
      * OPPO（Color OS 3.0）    自带桌面不支持第三方应用创建快捷方式
      * ZUK（ZUI）              安全中心 → 权限管理 → 按权限管理 → 在桌面上创建快捷方式，找到「平行空间」设置允许
      */
-    private void addDesttopShortcut(AppInfo appInfo) {
-        //创建一个添加快捷方式的Intent
-        Intent addSC = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
+    private void addDesktopShortcut(AppInfo appInfo) {
+        if (!CommonUtil.isLauncherActivity(mContext, appInfo.getAppPackageName())) {
+            mView.notSupportShortcut();
+            return;
+        }
         //创建单击快捷键启动本程序的Intent
         Intent launcherIntent = new Intent(ShortcutActivity.OPEN_APP_SHORTCUT);
         launcherIntent.putExtra(ShortcutActivity.EXTRA_PACKAGE_NAME, appInfo.getAppPackageName());
-        // 是否允许重复创建
-        addSC.putExtra("duplicate", false);
-        //设置快捷键的标题
-        addSC.putExtra(Intent.EXTRA_SHORTCUT_NAME, appInfo.getAppName());
-        //设置快捷键的图标
-        addSC.putExtra(Intent.EXTRA_SHORTCUT_ICON, appInfo.getAppIcon());
-        //设置单击此快捷键启动的程序
-        addSC.putExtra(Intent.EXTRA_SHORTCUT_INTENT, launcherIntent);
-        //向系统发送添加快捷键的广播
-        mContext.sendBroadcast(addSC);
+        try {
+            //创建一个添加快捷方式的Intent
+            Intent addSC = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
+            // 是否允许重复创建
+            addSC.putExtra("duplicate", false);
+            //设置快捷键的标题
+            addSC.putExtra(Intent.EXTRA_SHORTCUT_NAME, appInfo.getAppName());
+            //设置快捷键的图标
+            addSC.putExtra(Intent.EXTRA_SHORTCUT_ICON, appInfo.getAppIcon()); // Intent传递数据大小有限制
+            //设置单击此快捷键启动的程序
+            addSC.putExtra(Intent.EXTRA_SHORTCUT_INTENT, launcherIntent);
+            //向系统发送添加快捷键的广播
+            mContext.sendBroadcast(addSC);
+        } catch (Exception e) {
+            MyLogger.e(e.toString());
+            //创建一个添加快捷方式的Intent
+            Intent addSC = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
+            // 是否允许重复创建
+            addSC.putExtra("duplicate", false);
+            //设置快捷键的标题
+            addSC.putExtra(Intent.EXTRA_SHORTCUT_NAME, appInfo.getAppName());
+            //设置快捷键的图标
+            addSC.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, Intent.ShortcutIconResource.fromContext(
+                    mContext, R.mipmap.ic_android));
+            //设置单击此快捷键启动的程序
+            addSC.putExtra(Intent.EXTRA_SHORTCUT_INTENT, launcherIntent);
+            //向系统发送添加快捷键的广播
+            mContext.sendBroadcast(addSC);
+        }
     }
 
     private void addDisableApps(AppInfo appInfo) {
