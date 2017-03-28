@@ -2,8 +2,6 @@ package com.sscience.stopapp.adapter;
 
 import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
-import android.view.MotionEvent;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -51,25 +49,6 @@ public class DisableAppAdapter extends AppAdapter {
             ivAppIcon.getDrawable().setColorFilter(info.isEnable() == 1
                     ? mColorFilterNormal : mColorFilterGrey);
         }
-        viewHolder.getConvertView().setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (mOnTouchListener != null) {
-                    return mOnTouchListener.onTouch(v, event);
-                }
-                return false;
-            }
-        });
-
-        viewHolder.getConvertView().setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                if (mOnLongClickListener != null) {
-                    mOnLongClickListener.onLongClick(info, position);
-                }
-                return false;
-            }
-        });
 //        AppCompatCheckBox cb = viewHolder.getView(R.id.cb_select_apps);
 //        cb.setOnCheckedChangeListener(null); // CheckBox在执行setChecked时会触发setOnCheckedChangeListener
 //        cb.setChecked(mMainActivity.getSelection().contains(info.getAppPackageName()));
@@ -85,25 +64,5 @@ public class DisableAppAdapter extends AppAdapter {
 //                mMainActivity.checkSelection();
 //            }
 //        });
-    }
-
-    public interface OnTouchListener {
-        boolean onTouch(View v, MotionEvent event);
-    }
-
-    private OnTouchListener mOnTouchListener;
-
-    public void setOnTouchListener(OnTouchListener onTouchListener) {
-        mOnTouchListener = onTouchListener;
-    }
-
-    public interface OnLongClickListener {
-        void onLongClick(AppInfo appInfo, int position);
-    }
-
-    private OnLongClickListener mOnLongClickListener;
-
-    public void setOnLongClickListener(OnLongClickListener nnLongClickListener) {
-        mOnLongClickListener = nnLongClickListener;
     }
 }

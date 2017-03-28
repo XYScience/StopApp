@@ -10,7 +10,7 @@
     <string name="setting">设置</string>
     <string name="about">关于</string>
     <string name="change_launcher_icon">切换桌面图标</string>
-    <string name="add_shortcut_manual">自定义Shortcut</string>
+    <string name="add_shortcut_manual">自定义App Shortcuts</string>
     <string name="select">选择</string>
     <string name="cancel">取消</string>
     <string name="circle">圆形</string>

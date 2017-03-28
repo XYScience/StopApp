@@ -41,6 +41,7 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
     private MainActivity mMainActivity;
     private List<AppInfo> mAppList;
     private BottomSheetBehavior mSheetBehavior;
+    private boolean isLongClick = false;
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -99,12 +100,19 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
                     }
                     mDisableAppAdapter.notifyItemChanged(position);
                     mMainActivity.checkSelection();
+                    if (selection.size() == 0) {
+                        mSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                    }
                 }
             }
 
             @Override
             public void onItemLongClick(AppInfo appInfo, int position) {
-
+                mDragSelectTouchListener.startDragSelection(position);
+                mMainActivity.getSelection().add(appInfo);
+                mDisableAppAdapter.notifyItemChanged(position);
+                mMainActivity.checkSelection();
+                isLongClick = true;
             }
 
             @Override
@@ -113,22 +121,12 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
             }
         });
 
-        mDisableAppAdapter.setOnLongClickListener(new DisableAppAdapter.OnLongClickListener() {
-            @Override
-            public void onLongClick(AppInfo appInfo, int position) {
-                mDragSelectTouchListener.startDragSelection(position);
-                mMainActivity.getSelection().add(appInfo);
-                mDisableAppAdapter.notifyItemChanged(position);
-                mMainActivity.checkSelection();
-            }
-        });
-
-        mDisableAppAdapter.setOnTouchListener(new DisableAppAdapter.OnTouchListener() {
+        mRecyclerView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
+                if (event.getAction() == MotionEvent.ACTION_UP && isLongClick) {
                     mSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                    return true;
+                    isLongClick = false;
                 }
                 return false;
             }
