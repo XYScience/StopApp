@@ -1,8 +1,11 @@
 package com.sscience.stopapp.fragment;
 
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.science.baserecyclerviewadapter.interfaces.OnItemClickListener;
@@ -37,6 +40,7 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
     private DragSelectTouchListener mDragSelectTouchListener;
     private MainActivity mMainActivity;
     private List<AppInfo> mAppList;
+    private BottomSheetBehavior mSheetBehavior;
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -63,6 +67,20 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         setSwipeRefreshEnable(false);
         initListener();
         mPresenter.start();
+
+        View bottomSheet = mMainActivity.mCoordinatorLayout.findViewById(R.id.bottom_sheet);
+        mSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        mSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                //这里是bottomSheet 状态的改变，根据slideOffset可以做一些动画
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                //这里是拖拽中的回调，根据slideOffset可以做一些动画
+            }
+        });
     }
 
     private void initListener() {
@@ -81,21 +99,38 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
                     }
                     mDisableAppAdapter.notifyItemChanged(position);
                     mMainActivity.checkSelection();
-
                 }
             }
 
             @Override
             public void onItemLongClick(AppInfo appInfo, int position) {
-                mDragSelectTouchListener.startDragSelection(position);
-                mMainActivity.getSelection().add(appInfo);
-                mDisableAppAdapter.notifyItemChanged(position);
-                mMainActivity.checkSelection();
+
             }
 
             @Override
             public void onItemEmptyClick() {
                 mPresenter.start();
+            }
+        });
+
+        mDisableAppAdapter.setOnLongClickListener(new DisableAppAdapter.OnLongClickListener() {
+            @Override
+            public void onLongClick(AppInfo appInfo, int position) {
+                mDragSelectTouchListener.startDragSelection(position);
+                mMainActivity.getSelection().add(appInfo);
+                mDisableAppAdapter.notifyItemChanged(position);
+                mMainActivity.checkSelection();
+            }
+        });
+
+        mDisableAppAdapter.setOnTouchListener(new DisableAppAdapter.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    mSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                    return true;
+                }
+                return false;
             }
         });
 
