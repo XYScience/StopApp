@@ -20,6 +20,7 @@ import com.sscience.stopapp.bean.AppInfo;
 import com.sscience.stopapp.fragment.MainFragment;
 import com.sscience.stopapp.presenter.DisableAppsPresenter;
 import com.sscience.stopapp.util.CommonUtil;
+import com.sscience.stopapp.widget.MoveFloatingActionButton;
 import com.sscience.stopapp.widget.ScrollAwareFABBehavior;
 
 import java.util.HashSet;
@@ -30,7 +31,8 @@ public class MainActivity extends BaseActivity {
     public CoordinatorLayout mCoordinatorLayout;
     private MainFragment mMainFragment;
     private Set<AppInfo> mSelection; // 选择要操作的app(停用or移除列表)
-    private FloatingActionButton mFabDisable, mFabRemove;
+    private FloatingActionButton mFabDisable;
+    public MoveFloatingActionButton mFabRemove;
     private boolean isWindowFocusChangedFirst = true;
 
     @Override
@@ -45,7 +47,7 @@ public class MainActivity extends BaseActivity {
 
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
         mFabDisable = (FloatingActionButton) findViewById(R.id.fab_disable);
-        mFabRemove = (FloatingActionButton) findViewById(R.id.fab_remove);
+        mFabRemove = (MoveFloatingActionButton) findViewById(R.id.fab_remove);
         mSelection = new HashSet<>();
 
         mMainFragment = (MainFragment) getSupportFragmentManager().findFragmentById(R.id.contentFrame);

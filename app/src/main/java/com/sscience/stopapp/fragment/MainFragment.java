@@ -5,7 +5,6 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.MotionEvent;
 import android.view.View;
 
 import com.science.baserecyclerviewadapter.interfaces.OnItemClickListener;
@@ -19,6 +18,7 @@ import com.sscience.stopapp.service.RootActionIntentService;
 import com.sscience.stopapp.util.DiffCallBack;
 import com.sscience.stopapp.util.SharedPreferenceUtil;
 import com.sscience.stopapp.widget.DragSelectTouchListener;
+import com.sscience.stopapp.widget.MoveFloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -41,7 +41,6 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
     private MainActivity mMainActivity;
     private List<AppInfo> mAppList;
     private BottomSheetBehavior mSheetBehavior;
-    private boolean isLongClick = false;
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -74,12 +73,12 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         mSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                //这里是bottomSheet 状态的改变，根据slideOffset可以做一些动画
+                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                }
             }
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-                //这里是拖拽中的回调，根据slideOffset可以做一些动画
             }
         });
     }
@@ -112,7 +111,6 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
                 mMainActivity.getSelection().add(appInfo);
                 mDisableAppAdapter.notifyItemChanged(position);
                 mMainActivity.checkSelection();
-                isLongClick = true;
             }
 
             @Override
@@ -121,14 +119,14 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
             }
         });
 
-        mRecyclerView.setOnTouchListener(new View.OnTouchListener() {
+        mMainActivity.mFabRemove.setOnMoveListener(new MoveFloatingActionButton.OnMoveListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_UP && isLongClick) {
+            public void onMove(boolean isMoveUp) {
+                if (isMoveUp) {
                     mSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                    isLongClick = false;
+                } else {
+                    mSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 }
-                return false;
             }
         });
 
@@ -145,6 +143,11 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
                         }
                         mDisableAppAdapter.notifyItemRangeChanged(start, end - start + 1);
                         mMainActivity.checkSelection();
+                    }
+
+                    @Override
+                    public void onItemLongClickUp() {
+                        mSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                     }
                 });
         mRecyclerView.addOnItemTouchListener(mDragSelectTouchListener);

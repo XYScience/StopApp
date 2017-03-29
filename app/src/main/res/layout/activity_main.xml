@@ -193,7 +193,7 @@
         android:alpha="0"
         app:srcCompat="@drawable/ic_white_fab_disable"/>
 
-    <android.support.design.widget.FloatingActionButton
+    <com.sscience.stopapp.widget.MoveFloatingActionButton
         android:id="@+id/fab_remove"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
