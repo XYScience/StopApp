@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.GridView;
 
 import com.sscience.stopapp.R;
 import com.sscience.stopapp.base.BaseActivity;
@@ -33,6 +34,7 @@ public class MainActivity extends BaseActivity {
     private Set<AppInfo> mSelection; // 选择要操作的app(停用or移除列表)
     private FloatingActionButton mFabDisable;
     public MoveFloatingActionButton mFabRemove;
+    public GridView mGridMenu;
     private boolean isWindowFocusChangedFirst = true;
 
     @Override
@@ -48,6 +50,7 @@ public class MainActivity extends BaseActivity {
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
         mFabDisable = (FloatingActionButton) findViewById(R.id.fab_disable);
         mFabRemove = (MoveFloatingActionButton) findViewById(R.id.fab_remove);
+        mGridMenu = (GridView) findViewById(R.id.grid_view);
         mSelection = new HashSet<>();
 
         mMainFragment = (MainFragment) getSupportFragmentManager().findFragmentById(R.id.contentFrame);

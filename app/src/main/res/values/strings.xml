@@ -60,5 +60,10 @@
     <string name="dont_add_shortcut">你还未自定义Shortcut应用</string>
     <string name="add_desktop_shortcut">添加快捷方式</string>
     <string name="not_support_shortcut">该应用没有用户界面，不支持桌面快捷方式！</string>
+    <string name="open_app">打开应用</string>
+    <string name="cancel_select">取消选择</string>
+    <string name="enable_app">启用应用</string>
+    <string name="add_shortcut">快捷方式</string>
+    <string name="remove_list">移出列表</string>
 
 </resources>

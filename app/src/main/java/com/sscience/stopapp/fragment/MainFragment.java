@@ -6,6 +6,10 @@ import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.GridView;
+import android.widget.SimpleAdapter;
+import android.widget.Toast;
 
 import com.science.baserecyclerviewadapter.interfaces.OnItemClickListener;
 import com.sscience.stopapp.R;
@@ -21,6 +25,7 @@ import com.sscience.stopapp.widget.DragSelectTouchListener;
 import com.sscience.stopapp.widget.MoveFloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -79,6 +84,36 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+            }
+        });
+
+        initBottomGridView();
+    }
+
+    private void initBottomGridView() {
+        GridView gridMenu = mMainActivity.mGridMenu;
+        int[] icon = {R.drawable.ic_play_circle_outline_black, R.drawable.ic_delete_black,
+                R.drawable.ic_highlight_off_black, R.drawable.ic_open_in_new_black,
+                R.drawable.ic_content_copy_black, R.drawable.ic_format_indent_decrease_black};
+        String[] title = {getString(R.string.open_app), getString(R.string.uninstall_app),
+                getString(R.string.cancel_select), getString(R.string.enable_app),
+                getString(R.string.add_shortcut), getString(R.string.remove_list)};
+        ArrayList<HashMap<String, Object>> gridMenuList = new ArrayList<>();
+        for (int i = 0; i < icon.length; i++) {
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("GridMenuIcon", icon[i]);
+            map.put("GridMenuTitle", title[i]);
+            gridMenuList.add(map);
+        }
+        SimpleAdapter adapter = new SimpleAdapter(getActivity(), gridMenuList,
+                R.layout.item_grid_menu, new String[]{"GridMenuIcon", "GridMenuTitle"},
+                new int[]{R.id.iv_menu_icon, R.id.tv_menu_title});
+        gridMenu.setAdapter(adapter);
+        gridMenu.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                HashMap<String, Object> item = (HashMap<String, Object>) parent.getItemAtPosition(position);
+                Toast.makeText(getActivity(), "item:" + item.get("GridMenuTitle"), Toast.LENGTH_SHORT).show();
             }
         });
     }
