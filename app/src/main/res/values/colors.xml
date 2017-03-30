@@ -9,4 +9,5 @@
     <color name="textPrimary">#212121</color>
     <color name="textSecondary">#757575</color>
     <color name="textPrepareColor">#FFBE00</color>
+    <color name="menuIconColor">#737373</color>
 </resources>

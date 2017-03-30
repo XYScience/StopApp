@@ -3,17 +3,14 @@ package com.sscience.stopapp.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentTransaction;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
-import android.widget.GridView;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.sscience.stopapp.R;
 import com.sscience.stopapp.base.BaseActivity;
@@ -22,20 +19,18 @@ import com.sscience.stopapp.fragment.MainFragment;
 import com.sscience.stopapp.presenter.DisableAppsPresenter;
 import com.sscience.stopapp.util.CommonUtil;
 import com.sscience.stopapp.widget.MoveFloatingActionButton;
-import com.sscience.stopapp.widget.ScrollAwareFABBehavior;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     public CoordinatorLayout mCoordinatorLayout;
     private MainFragment mMainFragment;
     private Set<AppInfo> mSelection; // 选择要操作的app(停用or移除列表)
-    private FloatingActionButton mFabDisable;
-    public MoveFloatingActionButton mFabRemove;
-    public GridView mGridMenu;
-    private boolean isWindowFocusChangedFirst = true;
+    public MoveFloatingActionButton mFabDisable;
+    public LinearLayout mLlEnableApp, mLlUninstallApp, mLlAddShortcut, mLlRemoveList, mLlCancelSelect;
+    private long exitTime = 0;
 
     @Override
     protected int getContentLayout() {
@@ -48,9 +43,12 @@ public class MainActivity extends BaseActivity {
         setToolbar(getString(R.string.app_name));
 
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
-        mFabDisable = (FloatingActionButton) findViewById(R.id.fab_disable);
-        mFabRemove = (MoveFloatingActionButton) findViewById(R.id.fab_remove);
-        mGridMenu = (GridView) findViewById(R.id.grid_view);
+        mFabDisable = (MoveFloatingActionButton) findViewById(R.id.fab_disable);
+        mLlEnableApp = (LinearLayout) findViewById(R.id.ll_enable_app);
+        mLlUninstallApp = (LinearLayout) findViewById(R.id.ll_uninstall_app);
+        mLlAddShortcut = (LinearLayout) findViewById(R.id.ll_add_shortcut);
+        mLlRemoveList = (LinearLayout) findViewById(R.id.ll_remove_list);
+        mLlCancelSelect = (LinearLayout) findViewById(R.id.ll_cancel_select);
         mSelection = new HashSet<>();
 
         mMainFragment = (MainFragment) getSupportFragmentManager().findFragmentById(R.id.contentFrame);
@@ -69,18 +67,37 @@ public class MainActivity extends BaseActivity {
     }
 
     private void initListener() {
-        mFabRemove.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mMainFragment.batchApps(true);
-            }
-        });
-        mFabDisable.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mMainFragment.batchApps(false);
-            }
-        });
+        mFabDisable.setOnClickListener(this);
+    }
+
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.ll_enable_app:
+                mMainFragment.batchApps(1);
+                break;
+            case R.id.ll_uninstall_app:
+                mMainFragment.uninstallApp();
+                break;
+            case R.id.ll_add_shortcut:
+                for (AppInfo appInfo : mSelection) {
+                    CommonUtil.addDesktopShortcut(this, appInfo);
+                }
+                mMainFragment.mSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                snackBarShow(mCoordinatorLayout, getString(R.string.add_shortcut_success));
+                break;
+            case R.id.ll_remove_list:
+                mMainFragment.batchApps(2);
+                break;
+            case R.id.ll_cancel_select:
+                mSelection.clear();
+                mMainFragment.mDisableAppAdapter.notifyDataSetChanged();
+                checkSelection();
+                break;
+            case R.id.fab_disable:
+                mMainFragment.batchApps(0);
+                break;
+
+        }
     }
 
     public Set<AppInfo> getSelection() {
@@ -88,25 +105,25 @@ public class MainActivity extends BaseActivity {
     }
 
     /**
-     * 检查是否有选择了的app，以显示还是隐藏停用or移除按钮
+     * 检查是否有选择了的app
      */
     public void checkSelection() {
-        DecelerateInterpolator di = new DecelerateInterpolator();
         if (mSelection.isEmpty()) {
-            setInterpolator(mFabDisable, 0, di);
-            setInterpolator(mFabRemove, 0, di);
+            mMainFragment.mSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         } else {
-            AccelerateInterpolator ai = new AccelerateInterpolator();
+            if (mSelection.size() == 1) {
+                mLlUninstallApp.setVisibility(View.VISIBLE);
+            } else {
+                mLlUninstallApp.setVisibility(View.GONE);
+            }
             for (AppInfo appInfo : mSelection) {
-                if (appInfo.isEnable() == 1) {
-                    setInterpolator(mFabDisable, 1, ai);
-                    setFabMargins(mFabDisable.getHeight(), 32);
+                if (appInfo.isEnable() == 0) {
+                    mLlEnableApp.setVisibility(View.VISIBLE);
                     break;
                 } else {
-                    setInterpolator(mFabDisable, 0, di);
+                    mLlEnableApp.setVisibility(View.GONE);
                 }
             }
-            setInterpolator(mFabRemove, 1, ai);
         }
     }
 
@@ -147,33 +164,22 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (hasFocus && isWindowFocusChangedFirst) {
-            isWindowFocusChangedFirst = false;
-            setFabMargins(mFabDisable.getHeight(), 32);
-        }
-    }
-
-    /**
-     * 在选中多个apps并且包含已停用和未停用apps时，调整停用和移除的按钮位置
-     *
-     * @param height
-     * @param bottom
-     */
-    private void setFabMargins(int height, float bottom) {
-        CoordinatorLayout.LayoutParams params = new CoordinatorLayout
-                .LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.setMargins(0, 0, CommonUtil.dipToPx(this, 16),
-                height + CommonUtil.dipToPx(this, bottom));
-        params.gravity = Gravity.BOTTOM | Gravity.END;
-        params.setBehavior(new ScrollAwareFABBehavior());
-        mFabDisable.setLayoutParams(params);
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         mMainFragment.cancelTask();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mMainFragment.mSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+            mMainFragment.mSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        } else {
+            if ((System.currentTimeMillis() - exitTime) > 3000) {
+                Toast.makeText(this, getString(R.string.quit_again), Toast.LENGTH_SHORT).show();
+                exitTime = System.currentTimeMillis();
+            } else {
+                super.onBackPressed();
+            }
+        }
     }
 }

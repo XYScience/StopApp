@@ -128,6 +128,11 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
         snackBarShow(((AppListActivity) getActivity()).mCoordinatorLayout, getString(R.string.not_support_shortcut));
     }
 
+    @Override
+    public void addShortcutSuccess() {
+        snackBarShow(((AppListActivity) getActivity()).mCoordinatorLayout, getString(R.string.add_shortcut_success));
+    }
+
     public void addDisableApps(List<AppInfo> appList) {
         mPresenter.addDisableAppsSuccess(appList);
     }

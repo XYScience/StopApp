@@ -2,12 +2,9 @@ package com.sscience.stopapp.presenter;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 
-import com.science.myloggerlibrary.MyLogger;
 import com.sscience.stopapp.R;
-import com.sscience.stopapp.activity.ShortcutActivity;
 import com.sscience.stopapp.bean.AppInfo;
 import com.sscience.stopapp.database.AppInfoDBController;
 import com.sscience.stopapp.database.AppInfoDBOpenHelper;
@@ -81,63 +78,16 @@ public class AppsPresenter implements AppsContract.Presenter {
                 } else if (i == 1) {
                     uninstallApp(appInfo, position);
                 } else if (i == 2) {
-                    addDesktopShortcut(appInfo);
+                    if (CommonUtil.isLauncherActivity(mContext, appInfo.getAppPackageName())) {
+                        CommonUtil.addDesktopShortcut(mContext, appInfo);
+                        mView.addShortcutSuccess();
+                    } else {
+                        mView.notSupportShortcut();
+                    }
                 }
             }
         });
         builder.show();
-    }
-
-    /**
-     * 机型                    设置方法
-     * 锤子（Smartisan OS）    九宫格/十六宫格模式不支持，需切换为安卓原生（设置 → 桌面设置项 → 安卓原生）
-     * 华为（EMUI 4.0）        手机管家 → 权限管理 → 应用 → 平行空间 → 「创建桌面快捷方式」设为开启
-     * 奇酷                    设置 → 桌面 → 快捷方式，启用
-     * 小米（MIUI 7 部分版本）  安全中心 → 应用权限管理 → 应用管理 → 平行空间 → 桌面快捷方式，设为允许
-     * vivo（Funtouch）        Funtouch 2.5 以下版本，自带桌面不支持
-     * Funtouch 2.5            及以上版本：i管家 → 软件管理 → 桌面快捷方式管理 → 找到「平行空间」，设为允许
-     * 金立（amigo）           自带桌面不支持第三方应用创建快捷方式
-     * 一加（H2OS）            自带桌面不支持第三方应用创建快捷方式
-     * OPPO（Color OS 3.0）    自带桌面不支持第三方应用创建快捷方式
-     * ZUK（ZUI）              安全中心 → 权限管理 → 按权限管理 → 在桌面上创建快捷方式，找到「平行空间」设置允许
-     */
-    private void addDesktopShortcut(AppInfo appInfo) {
-        if (!CommonUtil.isLauncherActivity(mContext, appInfo.getAppPackageName())) {
-            mView.notSupportShortcut();
-            return;
-        }
-        //创建单击快捷键启动本程序的Intent
-        Intent launcherIntent = new Intent(ShortcutActivity.OPEN_APP_SHORTCUT);
-        launcherIntent.putExtra(ShortcutActivity.EXTRA_PACKAGE_NAME, appInfo.getAppPackageName());
-        try {
-            //创建一个添加快捷方式的Intent
-            Intent addSC = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
-            // 是否允许重复创建
-            addSC.putExtra("duplicate", false);
-            //设置快捷键的标题
-            addSC.putExtra(Intent.EXTRA_SHORTCUT_NAME, appInfo.getAppName());
-            //设置快捷键的图标
-            addSC.putExtra(Intent.EXTRA_SHORTCUT_ICON, appInfo.getAppIcon()); // Intent传递数据大小有限制
-            //设置单击此快捷键启动的程序
-            addSC.putExtra(Intent.EXTRA_SHORTCUT_INTENT, launcherIntent);
-            //向系统发送添加快捷键的广播
-            mContext.sendBroadcast(addSC);
-        } catch (Exception e) {
-            MyLogger.e(e.toString());
-            //创建一个添加快捷方式的Intent
-            Intent addSC = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
-            // 是否允许重复创建
-            addSC.putExtra("duplicate", false);
-            //设置快捷键的标题
-            addSC.putExtra(Intent.EXTRA_SHORTCUT_NAME, appInfo.getAppName());
-            //设置快捷键的图标
-            addSC.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, Intent.ShortcutIconResource.fromContext(
-                    mContext, R.mipmap.ic_android));
-            //设置单击此快捷键启动的程序
-            addSC.putExtra(Intent.EXTRA_SHORTCUT_INTENT, launcherIntent);
-            //向系统发送添加快捷键的广播
-            mContext.sendBroadcast(addSC);
-        }
     }
 
     private void addDisableApps(AppInfo appInfo) {

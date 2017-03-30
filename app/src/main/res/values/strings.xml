@@ -65,5 +65,7 @@
     <string name="enable_app">启用应用</string>
     <string name="add_shortcut">快捷方式</string>
     <string name="remove_list">移出列表</string>
+    <string name="quit_again">再按一次退出</string>
+    <string name="add_shortcut_success">创建快捷方式成功！</string>
 
 </resources>

@@ -27,6 +27,8 @@ public interface AppsContract {
         void uninstallSuccess(String appName, int position);
 
         void notSupportShortcut();
+
+        void addShortcutSuccess();
     }
 
     interface Presenter extends BasePresenter {

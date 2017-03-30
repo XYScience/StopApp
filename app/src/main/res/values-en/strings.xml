@@ -60,5 +60,12 @@
     <string name="dont_add_shortcut">You have not add any shortcut apps</string>
     <string name="add_desktop_shortcut">add shortcut</string>
     <string name="not_support_shortcut">Does not support shortcuts</string>
+    <string name="open_app">Open App</string>
+    <string name="cancel_select">Deselect</string>
+    <string name="enable_app">Enable App</string>
+    <string name="add_shortcut">Add Shortcut</string>
+    <string name="remove_list">Remove from List</string>
+    <string name="quit_again">Press again to exit the app</string>
+    <string name="add_shortcut_success">Successfully created shortcuts!</string>
 
 </resources>

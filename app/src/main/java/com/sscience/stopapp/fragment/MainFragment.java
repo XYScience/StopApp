@@ -6,10 +6,6 @@ import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.GridView;
-import android.widget.SimpleAdapter;
-import android.widget.Toast;
 
 import com.science.baserecyclerviewadapter.interfaces.OnItemClickListener;
 import com.sscience.stopapp.R;
@@ -25,7 +21,6 @@ import com.sscience.stopapp.widget.DragSelectTouchListener;
 import com.sscience.stopapp.widget.MoveFloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,11 +36,11 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
 
     private DisableAppsContract.Presenter mPresenter;
     private RecyclerView mRecyclerView;
-    private DisableAppAdapter mDisableAppAdapter;
+    public DisableAppAdapter mDisableAppAdapter;
     private DragSelectTouchListener mDragSelectTouchListener;
     private MainActivity mMainActivity;
     private List<AppInfo> mAppList;
-    private BottomSheetBehavior mSheetBehavior;
+    public BottomSheetBehavior mSheetBehavior;
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -59,6 +54,8 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
     @Override
     protected void doCreateView(View view) {
         mMainActivity = (MainActivity) getActivity();
+        View bottomSheet = mMainActivity.mCoordinatorLayout.findViewById(R.id.bottom_sheet);
+        mSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
         GridLayoutManager manager = new GridLayoutManager(mMainActivity, 4);
@@ -73,8 +70,6 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         initListener();
         mPresenter.start();
 
-        View bottomSheet = mMainActivity.mCoordinatorLayout.findViewById(R.id.bottom_sheet);
-        mSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         mSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -86,36 +81,15 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
             }
         });
-
-        initBottomGridView();
     }
 
     private void initBottomGridView() {
-        GridView gridMenu = mMainActivity.mGridMenu;
         int[] icon = {R.drawable.ic_play_circle_outline_black, R.drawable.ic_delete_black,
                 R.drawable.ic_highlight_off_black, R.drawable.ic_open_in_new_black,
                 R.drawable.ic_content_copy_black, R.drawable.ic_format_indent_decrease_black};
         String[] title = {getString(R.string.open_app), getString(R.string.uninstall_app),
                 getString(R.string.cancel_select), getString(R.string.enable_app),
                 getString(R.string.add_shortcut), getString(R.string.remove_list)};
-        ArrayList<HashMap<String, Object>> gridMenuList = new ArrayList<>();
-        for (int i = 0; i < icon.length; i++) {
-            HashMap<String, Object> map = new HashMap<>();
-            map.put("GridMenuIcon", icon[i]);
-            map.put("GridMenuTitle", title[i]);
-            gridMenuList.add(map);
-        }
-        SimpleAdapter adapter = new SimpleAdapter(getActivity(), gridMenuList,
-                R.layout.item_grid_menu, new String[]{"GridMenuIcon", "GridMenuTitle"},
-                new int[]{R.id.iv_menu_icon, R.id.tv_menu_title});
-        gridMenu.setAdapter(adapter);
-        gridMenu.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                HashMap<String, Object> item = (HashMap<String, Object>) parent.getItemAtPosition(position);
-                Toast.makeText(getActivity(), "item:" + item.get("GridMenuTitle"), Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     private void initListener() {
@@ -134,9 +108,6 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
                     }
                     mDisableAppAdapter.notifyItemChanged(position);
                     mMainActivity.checkSelection();
-                    if (selection.size() == 0) {
-                        mSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                    }
                 }
             }
 
@@ -154,13 +125,15 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
             }
         });
 
-        mMainActivity.mFabRemove.setOnMoveListener(new MoveFloatingActionButton.OnMoveListener() {
+        mMainActivity.mFabDisable.setOnMoveListener(new MoveFloatingActionButton.OnMoveListener() {
             @Override
             public void onMove(boolean isMoveUp) {
-                if (isMoveUp) {
-                    mSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                } else {
-                    mSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                if (!mMainActivity.getSelection().isEmpty()) {
+                    if (isMoveUp) {
+                        mSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                    } else {
+                        mSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                    }
                 }
             }
         });
@@ -217,11 +190,11 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
     /**
      * 点击停用列表界面右下角的按钮，批量停用or删除app
      *
-     * @param isRemove
+     * @param type type=0:停用应用；type=1:启用应用；type=2:移除列表
      */
-    public void batchApps(boolean isRemove) {
+    public void batchApps(int type) {
         setRefreshing(true);
-        mPresenter.batchApps(isRemove);
+        mPresenter.batchApps(type);
     }
 
     /**
@@ -233,6 +206,19 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         mPresenter.start();
     }
 
+    /**
+     * 卸载app
+     */
+    public void uninstallApp() {
+        setRefreshing(true);
+        for (int i = 0; i < mAppList.size(); i++) {
+            if (mMainActivity.getSelection().contains(mAppList.get(i))) {
+                mPresenter.uninstallApp(mAppList.get(i), i);
+                break;
+            }
+        }
+    }
+
     @Override
     public void getRootSuccess(AppInfo appInfo, List<AppInfo> apps, List<AppInfo> appsNew) {
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffCallBack(apps, appsNew), false);
@@ -240,9 +226,7 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         mAppList = appsNew;
         mDisableAppAdapter.setData(mAppList);
         mMainActivity.checkSelection();
-        snackBarShow(mMainActivity.mCoordinatorLayout, appInfo == null
-                ? mMainActivity.getString(R.string.enable_success) :
-                mMainActivity.getString(R.string.disable_success));
+//        snackBarShow(mMainActivity.mCoordinatorLayout, appInfo == null ? mMainActivity.getString(R.string.enable_success) : mMainActivity.getString(R.string.disable_success));
         setRefreshing(false);
         if (mAppList.isEmpty()) {
             mDisableAppAdapter.showLoadFailed(R.drawable.empty, "", getResources().getString(R.string.no_disable_apps));
@@ -260,6 +244,14 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
             mMainActivity.checkSelection();
         }
         setRefreshing(false);
+    }
+
+    @Override
+    public void uninstallSuccess(String appName, int position) {
+        setRefreshing(false);
+        mDisableAppAdapter.removeData(position);
+        mSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        snackBarShow(mMainActivity.mCoordinatorLayout, getString(R.string.uninstall_success, appName));
     }
 
     @Override

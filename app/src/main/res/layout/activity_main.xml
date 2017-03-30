@@ -32,194 +32,170 @@
                 android:layout_height="4dp"
                 android:background="@drawable/shadow"/>
 
-            <GridView
-                android:id="@+id/grid_view"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center"
-                android:horizontalSpacing="16dp"
-                android:numColumns="3"
-                android:paddingTop="24dp"
-                android:stretchMode="columnWidth"/>
+                android:background="@android:color/white"
+                android:orientation="vertical"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp">
 
-            <!--<com.google.android.flexbox.FlexboxLayout-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:background="@android:color/white"-->
-            <!--android:paddingBottom="24dp"-->
-            <!--android:paddingEnd="24dp"-->
-            <!--android:paddingStart="24dp"-->
-            <!--android:paddingTop="16dp"-->
-            <!--app:flexWrap="wrap"-->
-            <!--app:justifyContent="space_between">-->
+                <LinearLayout
+                    android:id="@+id/ll_enable_app"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="?android:selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:onClick="onClick"
+                    android:orientation="horizontal"
+                    android:paddingEnd="16dp"
+                    android:paddingStart="16dp">
 
-            <!--<LinearLayout-->
-            <!--android:id="@+id/ll_open_app"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:gravity="center"-->
-            <!--android:orientation="vertical">-->
+                    <ImageView
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
+                        android:layout_marginEnd="32dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_open_in_new_black"
+                        android:tint="@color/menuIconColor"/>
 
-            <!--<ImageView-->
-            <!--android:layout_width="@android:dimen/app_icon_size"-->
-            <!--android:layout_height="@android:dimen/app_icon_size"-->
-            <!--android:layout_marginBottom="8dp"-->
-            <!--android:scaleType="centerInside"-->
-            <!--android:src="@drawable/ic_play_circle_outline_black"-->
-            <!--android:tint="@color/textSecondary"/>-->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/enable_app"
+                        android:textColor="@color/textPrimary"
+                        android:textSize="16sp"/>
 
-            <!--<TextView-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="@string/open_app"-->
-            <!--android:textColor="@color/textSecondary"-->
-            <!--android:textSize="14sp"/>-->
+                </LinearLayout>
 
-            <!--</LinearLayout>-->
+                <LinearLayout
+                    android:id="@+id/ll_uninstall_app"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="?android:selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:onClick="onClick"
+                    android:orientation="horizontal"
+                    android:paddingEnd="16dp"
+                    android:paddingStart="16dp">
 
-            <!--<LinearLayout-->
-            <!--android:id="@+id/ll_uninstall_app"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:gravity="center"-->
-            <!--android:orientation="vertical">-->
+                    <ImageView
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
+                        android:layout_marginEnd="32dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_delete_black"
+                        android:tint="@color/menuIconColor"/>
 
-            <!--<ImageView-->
-            <!--android:layout_width="@android:dimen/app_icon_size"-->
-            <!--android:layout_height="@android:dimen/app_icon_size"-->
-            <!--android:layout_marginBottom="8dp"-->
-            <!--android:scaleType="centerInside"-->
-            <!--android:src="@drawable/ic_delete_black"-->
-            <!--android:tint="@color/textSecondary"/>-->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/uninstall_app"
+                        android:textColor="@color/textPrimary"
+                        android:textSize="16sp"/>
 
-            <!--<TextView-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="@string/uninstall_app"-->
-            <!--android:textColor="@color/textSecondary"-->
-            <!--android:textSize="14sp"/>-->
+                </LinearLayout>
 
-            <!--</LinearLayout>-->
+                <LinearLayout
+                    android:id="@+id/ll_add_shortcut"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="?android:selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:onClick="onClick"
+                    android:orientation="horizontal"
+                    android:paddingEnd="16dp"
+                    android:paddingStart="16dp">
 
-            <!--<LinearLayout-->
-            <!--android:id="@+id/ll_cancel_select"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:gravity="center"-->
-            <!--android:orientation="vertical">-->
+                    <ImageView
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
+                        android:layout_marginEnd="32dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_content_copy_black"
+                        android:tint="@color/menuIconColor"/>
 
-            <!--<ImageView-->
-            <!--android:layout_width="@android:dimen/app_icon_size"-->
-            <!--android:layout_height="@android:dimen/app_icon_size"-->
-            <!--android:layout_marginBottom="8dp"-->
-            <!--android:scaleType="centerInside"-->
-            <!--android:src="@drawable/ic_highlight_off_black"-->
-            <!--android:tint="@color/textSecondary"/>-->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/add_shortcut"
+                        android:textColor="@color/textPrimary"
+                        android:textSize="16sp"/>
 
-            <!--<TextView-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="@string/cancel_select"-->
-            <!--android:textColor="@color/textSecondary"-->
-            <!--android:textSize="14sp"/>-->
+                </LinearLayout>
 
-            <!--</LinearLayout>-->
+                <LinearLayout
+                    android:id="@+id/ll_remove_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="?android:selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:onClick="onClick"
+                    android:orientation="horizontal"
+                    android:paddingEnd="16dp"
+                    android:paddingStart="16dp">
 
-            <!--<LinearLayout-->
-            <!--android:id="@+id/ll_enable_app"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:gravity="center"-->
-            <!--android:orientation="vertical">-->
+                    <ImageView
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
+                        android:layout_marginEnd="32dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_format_indent_decrease_black"
+                        android:tint="@color/menuIconColor"/>
 
-            <!--<ImageView-->
-            <!--android:layout_width="@android:dimen/app_icon_size"-->
-            <!--android:layout_height="@android:dimen/app_icon_size"-->
-            <!--android:layout_marginBottom="8dp"-->
-            <!--android:scaleType="centerInside"-->
-            <!--android:src="@drawable/ic_open_in_new_black"-->
-            <!--android:tint="@color/textSecondary"/>-->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/remove_list"
+                        android:textColor="@color/textPrimary"
+                        android:textSize="16sp"/>
 
-            <!--<TextView-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="@string/enable_app"-->
-            <!--android:textColor="@color/textSecondary"-->
-            <!--android:textSize="14sp"/>-->
+                </LinearLayout>
 
-            <!--</LinearLayout>-->
+                <LinearLayout
+                    android:id="@+id/ll_cancel_select"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="?android:selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:onClick="onClick"
+                    android:orientation="horizontal"
+                    android:paddingEnd="16dp"
+                    android:paddingStart="16dp">
 
-            <!--<LinearLayout-->
-            <!--android:id="@+id/ll_shortcut"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:gravity="center"-->
-            <!--android:orientation="vertical">-->
+                    <ImageView
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
+                        android:layout_marginEnd="32dp"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/ic_highlight_off_black"
+                        android:tint="@color/menuIconColor"/>
 
-            <!--<ImageView-->
-            <!--android:layout_width="@android:dimen/app_icon_size"-->
-            <!--android:layout_height="@android:dimen/app_icon_size"-->
-            <!--android:layout_marginBottom="8dp"-->
-            <!--android:scaleType="centerInside"-->
-            <!--android:src="@drawable/ic_content_copy_black"-->
-            <!--android:tint="@color/textSecondary"/>-->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/cancel_select"
+                        android:textColor="@color/textPrimary"
+                        android:textSize="16sp"/>
 
-            <!--<TextView-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="@string/add_shortcut"-->
-            <!--android:textColor="@color/textSecondary"-->
-            <!--android:textSize="14sp"/>-->
+                </LinearLayout>
 
-            <!--</LinearLayout>-->
-
-            <!--<LinearLayout-->
-            <!--android:id="@+id/ll_remove_list"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:gravity="center"-->
-            <!--android:orientation="vertical">-->
-
-            <!--<ImageView-->
-            <!--android:layout_width="@android:dimen/app_icon_size"-->
-            <!--android:layout_height="@android:dimen/app_icon_size"-->
-            <!--android:layout_marginBottom="8dp"-->
-            <!--android:scaleType="centerInside"-->
-            <!--android:src="@drawable/ic_format_indent_decrease_black"-->
-            <!--android:tint="@color/textSecondary"/>-->
-
-            <!--<TextView-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="@string/remove_list"-->
-            <!--android:textColor="@color/textSecondary"-->
-            <!--android:textSize="14sp"/>-->
-
-            <!--</LinearLayout>-->
-
-            <!--</com.google.android.flexbox.FlexboxLayout>-->
+            </LinearLayout>
 
         </LinearLayout>
 
     </android.support.v4.widget.NestedScrollView>
 
-    <android.support.design.widget.FloatingActionButton
+    <com.sscience.stopapp.widget.MoveFloatingActionButton
         android:id="@+id/fab_disable"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:alpha="0"
-        app:srcCompat="@drawable/ic_white_fab_disable"/>
-
-    <com.sscience.stopapp.widget.MoveFloatingActionButton
-        android:id="@+id/fab_remove"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_margin="@dimen/activity_horizontal_margin"
-        android:alpha="0"
+        android:onClick="onClick"
         app:layout_anchor="@id/bottom_sheet"
         app:layout_anchorGravity="right|top"
         app:layout_behavior="com.sscience.stopapp.widget.ScrollAwareFABBehavior"
-        app:srcCompat="@drawable/ic_white_fab_enable"/>
+        app:srcCompat="@drawable/ic_white_fab_disable"/>
 
 
 </android.support.design.widget.CoordinatorLayout>

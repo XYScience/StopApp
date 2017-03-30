@@ -37,6 +37,13 @@ public interface DisableAppsContract {
          * 获取root失败
          */
         void getRootError();
+
+        /**
+         * 卸载app
+         * @param appName
+         * @param position
+         */
+        void uninstallSuccess(String appName, int position);
     }
 
     interface Presenter extends BasePresenter {
@@ -80,9 +87,8 @@ public interface DisableAppsContract {
         /**
          * 停用(待停用)列表批量操作app：停用apps or 清除apps
          *
-         * @param isRemove
          */
-        void batchApps(boolean isRemove);
+        void batchApps(int type);
 
         /**
          * 得到停用(待停用)列表apps包名
@@ -90,6 +96,8 @@ public interface DisableAppsContract {
          * @return
          */
         List<String> getDisableAppPackageNames();
+
+        void uninstallApp(AppInfo appInfo, int position);
 
         void cancelTask();
     }

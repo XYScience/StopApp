@@ -25,6 +25,7 @@ import java.util.List;
 import static com.sscience.stopapp.model.AppsRepository.COMMAND_APP_LIST;
 import static com.sscience.stopapp.model.AppsRepository.COMMAND_DISABLE;
 import static com.sscience.stopapp.model.AppsRepository.COMMAND_ENABLE;
+import static com.sscience.stopapp.model.AppsRepository.COMMAND_UNINSTALL;
 
 /**
  * @author SScience
@@ -172,7 +173,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
     }
 
     @Override
-    public void batchApps(final boolean isRemove) {
+    public void batchApps(final int type) {
         mAppsRepository.getRoot(new AppsRepository.GetRootCallback() {
             @Override
             public void onRoot(Boolean isRoot) {
@@ -190,7 +191,24 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                     isFirstRoot = true;
                     for (int i = 0; i < appList.size(); i++) {
                         AppInfo appInfo = appList.get(i);
-                        if (isRemove) {
+                        if (type == 0) { // 停用应用
+                            if (appInfo.isEnable() == 1) {
+                                mListDisableAppsNew.get(mListDisableAppsNew.indexOf(appInfo)).setEnable(0);
+                                commandSu(COMMAND_DISABLE + appInfo.getAppPackageName(), false, appInfo, -1);
+                                ((MainActivity) mActivity).getSelection().remove(appInfo);
+                                mAppInfoDBController.updateDisableApp(appInfo.getAppPackageName(), 0,
+                                        AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
+                                isEnable = true;
+                            }
+                        } else if (type == 1) { // 启用应用
+                            if (appInfo.isEnable() == 0) {
+                                mListDisableAppsNew.get(mListDisableAppsNew.indexOf(appInfo)).setEnable(1);
+                                commandSu(COMMAND_ENABLE + appInfo.getAppPackageName(), false, appInfo, -1);
+                                ((MainActivity) mActivity).getSelection().remove(appInfo);
+                                mAppInfoDBController.updateDisableApp(appInfo.getAppPackageName(), 1,
+                                        AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
+                            }
+                        } else if (type == 2) { // 移除列表
                             if (appInfo.isEnable() == 0) {
                                 commandSu(COMMAND_ENABLE + appInfo.getAppPackageName(), false, null, -1);
                                 isEnable = true;
@@ -199,23 +217,40 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                             mListDisableAppsNew.remove(appInfo);
                             mAppInfoDBController.deleteDisableApp(appInfo.getAppPackageName(),
                                     AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
-                        } else {
-                            if (appInfo.isEnable() == 1) {
-                                mListDisableAppsNew.get(mListDisableAppsNew.indexOf(appInfo)).setEnable(0);
-                                commandSu(COMMAND_DISABLE + appInfo.getAppPackageName(), false, appInfo, -1);
-                                ((MainActivity) mActivity).getSelection().remove(appInfo);
-                                mAppInfoDBController.updateDisableApp(appInfo.getAppPackageName(), 0,
-                                        AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
-                            }
                         }
                     }
-                    if (isRemove && !isEnable) {
+                    if (type == 0 && !isEnable) {
+                        mView.getRootSuccess(null, mListDisableApps, mListDisableAppsNew);
+                        mListDisableApps = mListDisableAppsNew;
+                    }
+                    if (type == 2 && !isEnable) {
                         mView.getRootSuccess(null, mListDisableApps, mListDisableAppsNew);
                         mListDisableApps = mListDisableAppsNew;
                     }
                 } else {
                     mView.getRootError();
                 }
+            }
+        });
+    }
+
+    @Override
+    public void uninstallApp(final AppInfo appInfo, final int position) {
+        mAppsRepository.commandSu(COMMAND_UNINSTALL + appInfo.getAppPackageName(), new AppsRepository.GetAppsCmdCallback() {
+            @Override
+            public void onRootAppsLoaded(List<AppInfo> apps) {
+
+            }
+
+            @Override
+            public void onRootError() {
+                mView.getRootError();
+            }
+
+            @Override
+            public void onRootSuccess() {
+                mAppInfoDBController.deleteDisableApp(appInfo.getAppPackageName(), AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
+                mView.uninstallSuccess(appInfo.getAppName(), position);
             }
         });
     }
