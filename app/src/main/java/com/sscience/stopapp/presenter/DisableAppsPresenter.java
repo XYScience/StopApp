@@ -3,6 +3,7 @@ package com.sscience.stopapp.presenter;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 
@@ -109,11 +110,11 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                     mView.upDateItemIfLaunch(appInfo, position);
                     launchAppIntent(appInfo.getAppPackageName());
                 } else {
-                    if (isFirstRoot) {
-                        isFirstRoot = false;
-                        mView.getRootSuccess(appInfo, mListDisableApps, mListDisableAppsNew);
-                        mListDisableApps = mListDisableAppsNew;
-                    }
+//                    if (isFirstRoot) {
+//                        isFirstRoot = false;
+//                        mView.getRootSuccess(appInfo, mListDisableApps, mListDisableAppsNew);
+//                        mListDisableApps = mListDisableAppsNew;
+//                    }
                 }
             }
         });
@@ -133,9 +134,6 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
         for (AppInfo appInfo : appList) {
             if (isFirst) {
                 mAppInfoDBController.addDisableApp(appInfo, AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
-            }
-            if (appInfo.isEnable() == 1) {
-                ((MainActivity) mActivity).getSelection().add(appInfo);
             }
         }
         mListDisableApps = appList;
@@ -177,59 +175,63 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
         mAppsRepository.getRoot(new AppsRepository.GetRootCallback() {
             @Override
             public void onRoot(Boolean isRoot) {
-                if (isRoot) {
-                    try {
-                        mListDisableAppsNew = new ArrayList<>();
-                        for (AppInfo info : mListDisableApps) {
-                            mListDisableAppsNew.add(info.clone());
-                        }
-                    } catch (CloneNotSupportedException e) {
-                        e.printStackTrace();
+                if (!isRoot) {
+                    mView.getRootError();
+                    return;
+                }
+                try {
+                    mListDisableAppsNew = new ArrayList<>();
+                    for (AppInfo info : mListDisableApps) {
+                        mListDisableAppsNew.add(info.clone());
                     }
-                    List<AppInfo> appList = new ArrayList<>(((MainActivity) mActivity).getSelection());
-                    boolean isEnable = false;
-                    isFirstRoot = true;
+                } catch (CloneNotSupportedException e) {
+                    e.printStackTrace();
+                }
+                List<AppInfo> appList = new ArrayList<>(((MainActivity) mActivity).getSelection());
+                if (type == 0) { // 停用应用
+                    if (appList.isEmpty()) {
+                        appList = mListDisableApps;
+                    }
                     for (int i = 0; i < appList.size(); i++) {
                         AppInfo appInfo = appList.get(i);
-                        if (type == 0) { // 停用应用
-                            if (appInfo.isEnable() == 1) {
-                                mListDisableAppsNew.get(mListDisableAppsNew.indexOf(appInfo)).setEnable(0);
-                                commandSu(COMMAND_DISABLE + appInfo.getAppPackageName(), false, appInfo, -1);
-                                ((MainActivity) mActivity).getSelection().remove(appInfo);
-                                mAppInfoDBController.updateDisableApp(appInfo.getAppPackageName(), 0,
-                                        AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
-                                isEnable = true;
-                            }
-                        } else if (type == 1) { // 启用应用
-                            if (appInfo.isEnable() == 0) {
-                                mListDisableAppsNew.get(mListDisableAppsNew.indexOf(appInfo)).setEnable(1);
-                                commandSu(COMMAND_ENABLE + appInfo.getAppPackageName(), false, appInfo, -1);
-                                ((MainActivity) mActivity).getSelection().remove(appInfo);
-                                mAppInfoDBController.updateDisableApp(appInfo.getAppPackageName(), 1,
-                                        AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
-                            }
-                        } else if (type == 2) { // 移除列表
-                            if (appInfo.isEnable() == 0) {
-                                commandSu(COMMAND_ENABLE + appInfo.getAppPackageName(), false, null, -1);
-                                isEnable = true;
-                            }
+                        if (appInfo.isEnable() == 1) {
                             ((MainActivity) mActivity).getSelection().remove(appInfo);
-                            mListDisableAppsNew.remove(appInfo);
-                            mAppInfoDBController.deleteDisableApp(appInfo.getAppPackageName(),
+                            mListDisableAppsNew.get(mListDisableAppsNew.indexOf(appInfo)).setEnable(0);
+                            commandSu(COMMAND_DISABLE + appInfo.getAppPackageName(), false, null, -1);
+                            mAppInfoDBController.updateDisableApp(appInfo.getAppPackageName(), 0,
                                     AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
                         }
                     }
-                    if (type == 0 && !isEnable) {
-                        mView.getRootSuccess(null, mListDisableApps, mListDisableAppsNew);
-                        mListDisableApps = mListDisableAppsNew;
+                } else if (type == 1) { // 启用应用
+                    for (int i = 0; i < appList.size(); i++) {
+                        AppInfo appInfo = appList.get(i);
+                        if (appInfo.isEnable() == 0) {
+                            ((MainActivity) mActivity).getSelection().remove(appInfo);
+                            mListDisableAppsNew.get(mListDisableAppsNew.indexOf(appInfo)).setEnable(1);
+                            commandSu(COMMAND_ENABLE + appInfo.getAppPackageName(), false, null, -1);
+                            mAppInfoDBController.updateDisableApp(appInfo.getAppPackageName(), 1,
+                                    AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
+                        }
                     }
-                    if (type == 2 && !isEnable) {
-                        mView.getRootSuccess(null, mListDisableApps, mListDisableAppsNew);
-                        mListDisableApps = mListDisableAppsNew;
+                } else if (type == 2) { // 移除列表
+                    for (int i = 0; i < appList.size(); i++) {
+                        AppInfo appInfo = appList.get(i);
+                        if (appInfo.isEnable() == 0) {
+                            ((MainActivity) mActivity).getSelection().remove(appInfo);
+                            commandSu(COMMAND_ENABLE + appInfo.getAppPackageName(), false, null, -1);
+                        }
+                        mListDisableAppsNew.remove(appInfo);
+                        mAppInfoDBController.deleteDisableApp(appInfo.getAppPackageName(),
+                                AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
                     }
-                } else {
-                    mView.getRootError();
                 }
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mView.getRootSuccess(null, mListDisableApps, mListDisableAppsNew);
+                        mListDisableApps = mListDisableAppsNew;
+                    }
+                }, 2000);
             }
         });
     }

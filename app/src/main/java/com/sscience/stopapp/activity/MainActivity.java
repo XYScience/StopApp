@@ -31,6 +31,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public MoveFloatingActionButton mFabDisable;
     public LinearLayout mLlEnableApp, mLlUninstallApp, mLlAddShortcut, mLlRemoveList, mLlCancelSelect;
     private long exitTime = 0;
+    public String mRootStr;
 
     @Override
     protected int getContentLayout() {
@@ -50,6 +51,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         mLlRemoveList = (LinearLayout) findViewById(R.id.ll_remove_list);
         mLlCancelSelect = (LinearLayout) findViewById(R.id.ll_cancel_select);
         mSelection = new HashSet<>();
+        mRootStr = getString(R.string.operate_success);
 
         mMainFragment = (MainFragment) getSupportFragmentManager().findFragmentById(R.id.contentFrame);
         if (mMainFragment == null) {
@@ -73,6 +75,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.ll_enable_app:
+                mRootStr = getString(R.string.enable_app_success);
                 mMainFragment.batchApps(1);
                 break;
             case R.id.ll_uninstall_app:
@@ -86,6 +89,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 snackBarShow(mCoordinatorLayout, getString(R.string.add_shortcut_success));
                 break;
             case R.id.ll_remove_list:
+                mRootStr = getString(R.string.remove_list_success);
                 mMainFragment.batchApps(2);
                 break;
             case R.id.ll_cancel_select:
@@ -94,6 +98,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 checkSelection();
                 break;
             case R.id.fab_disable:
+                mRootStr = getString(R.string.disable_success);
                 mMainFragment.batchApps(0);
                 break;
 

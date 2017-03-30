@@ -182,7 +182,6 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
     public void getApps(List<AppInfo> appList) {
         mAppList = appList;
         mDisableAppAdapter.setData(false, mAppList);
-        mMainActivity.checkSelection();
         setSwipeRefreshEnable(false);
         setRefreshing(false);
     }
@@ -225,11 +224,18 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         diffResult.dispatchUpdatesTo(mDisableAppAdapter);
         mAppList = appsNew;
         mDisableAppAdapter.setData(mAppList);
+        for (int i = 0; i < mAppList.size(); i++) {
+            AppInfo info = mAppList.get(i);
+            if (mMainActivity.getSelection().contains(info)) {
+                mMainActivity.getSelection().remove(info);
+                mDisableAppAdapter.notifyItemChanged(i);
+            }
+        }
         mMainActivity.checkSelection();
-//        snackBarShow(mMainActivity.mCoordinatorLayout, appInfo == null ? mMainActivity.getString(R.string.enable_success) : mMainActivity.getString(R.string.disable_success));
+        snackBarShow(mMainActivity.mCoordinatorLayout, mMainActivity.mRootStr);
         setRefreshing(false);
         if (mAppList.isEmpty()) {
-            mDisableAppAdapter.showLoadFailed(R.drawable.empty, "", getResources().getString(R.string.no_disable_apps));
+            mDisableAppAdapter.showLoadFailed(R.drawable.empty, getResources().getString(R.string.no_disable_apps), "");
             snackBarShow(mMainActivity.mCoordinatorLayout, getString(R.string.no_disable_apps));
         }
     }
@@ -240,8 +246,6 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
             appInfo.setEnable(1);
             mDisableAppAdapter.updateItem(position, appInfo);
             mAppList.get(position).setEnable(1);
-            mMainActivity.getSelection().add(appInfo);
-            mMainActivity.checkSelection();
         }
         setRefreshing(false);
     }

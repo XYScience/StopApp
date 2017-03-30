@@ -52,7 +52,6 @@
     <string name="choose_email_app">Please select email app</string>
     <string name="add_disable_app">Add disable app</string>
     <string name="uninstall_success">Uninstall [%s] successfully</string>
-    <string name="disable_success">Disable apps successfully</string>
     <string name="enable_success">Enable apps successfully</string>
     <string name="app_had_uninstall">The application is not installed</string>
     <string name="shortcut_num_limit">You can add shortcuts up to 4</string>
@@ -67,5 +66,9 @@
     <string name="remove_list">Remove from List</string>
     <string name="quit_again">Press again to exit the app</string>
     <string name="add_shortcut_success">Successfully created shortcuts!</string>
+    <string name="operate_success">Successfully operate!</string>
+    <string name="enable_app_success">Successfully enable app!</string>
+    <string name="remove_list_success">Successfully remove apps from list!</string>
+    <string name="disable_success">Successfully Disable apps!</string>
 
 </resources>
