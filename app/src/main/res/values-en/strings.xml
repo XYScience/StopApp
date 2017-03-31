@@ -70,5 +70,8 @@
     <string name="enable_app_success">Successfully enable app!</string>
     <string name="remove_list_success">Successfully remove apps from list!</string>
     <string name="disable_success">Successfully Disable apps!</string>
+    <string name="add_app_app_shortcut">Add App Shortcut</string>
+    <string name="manual_shortcut_subtitle">If your app targets Android 7.1 (API level 25) or higher, you can define shortcuts to specific actions in your app.</string>
+    <string name="nonsupport_app_shortcut">Your Android version does not support App Shortcut!</string>
 
 </resources>

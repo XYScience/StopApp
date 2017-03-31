@@ -131,11 +131,7 @@ public class AppListActivity extends BaseActivity {
                         if (appList.size() > manager.getMaxShortcutCountPerActivity() - 1) {
                             snackBarShow(mCoordinatorLayout, getString(R.string.shortcut_num_limit));
                         } else {
-                            ShortcutsManager shortcutsManager = new ShortcutsManager(AppListActivity.this);
-                            shortcutsManager.addAppShortcut(new ArrayList<>(appList));
-                            Intent intent = new Intent(AppListActivity.this, SettingActivity.class);
-                            setResult(RESULT_OK, intent);
-                            finish();
+                            addAppShortcut(new ArrayList<>(appList));
                         }
                     }
                 } else {
@@ -144,6 +140,14 @@ public class AppListActivity extends BaseActivity {
                 }
             }
         });
+    }
+
+    public void addAppShortcut(List<AppInfo> infoList) {
+        ShortcutsManager shortcutsManager = new ShortcutsManager(AppListActivity.this);
+        shortcutsManager.addAppShortcut(infoList);
+        Intent intent = new Intent(AppListActivity.this, SettingActivity.class);
+        setResult(RESULT_OK, intent);
+        finish();
     }
 
     public Set<AppInfo> getSelection(int page) {

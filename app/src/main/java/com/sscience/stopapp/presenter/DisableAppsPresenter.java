@@ -217,9 +217,9 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                     for (int i = 0; i < appList.size(); i++) {
                         AppInfo appInfo = appList.get(i);
                         if (appInfo.isEnable() == 0) {
-                            ((MainActivity) mActivity).getSelection().remove(appInfo);
                             commandSu(COMMAND_ENABLE + appInfo.getAppPackageName(), false, null, -1);
                         }
+                        ((MainActivity) mActivity).getSelection().remove(appInfo);
                         mListDisableAppsNew.remove(appInfo);
                         mAppInfoDBController.deleteDisableApp(appInfo.getAppPackageName(),
                                 AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);

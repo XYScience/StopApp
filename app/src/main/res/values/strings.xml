@@ -70,5 +70,8 @@
     <string name="enable_app_success">启用应用成功！</string>
     <string name="remove_list_success">移出列表成功！</string>
     <string name="disable_success">停用应用成功！</string>
+    <string name="add_app_app_shortcut">添加App Shortcut</string>
+    <string name="manual_shortcut_subtitle">长按App图标呼出常用的快捷方式列表，仅支持Android 7.1+</string>
+    <string name="nonsupport_app_shortcut">你的系统版本小于7.1，不支持App Shortcut！</string>
 
 </resources>

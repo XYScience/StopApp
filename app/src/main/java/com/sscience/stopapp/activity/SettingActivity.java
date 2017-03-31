@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
@@ -29,7 +30,7 @@ import com.sscience.stopapp.util.ShortcutsManager;
 public class SettingActivity extends BaseActivity {
 
     private CoordinatorLayout mCoordinatorLayout;
-    private SwitchCompat mSwitchMaualShrtcut;
+    private SwitchCompat mSwitchManualShortcut;
 
     public static void actionStartActivity(Context context) {
         Intent intent = new Intent(context, SettingActivity.class);
@@ -46,23 +47,27 @@ public class SettingActivity extends BaseActivity {
         setToolbar(getString(R.string.setting));
 
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
-        mSwitchMaualShrtcut = (SwitchCompat) findViewById(R.id.switch_manual_shortcut);
+        mSwitchManualShortcut = (SwitchCompat) findViewById(R.id.switch_manual_shortcut);
 
-        mSwitchMaualShrtcut.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        mSwitchManualShortcut.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (TextUtils.isEmpty((CharSequence) SharedPreferenceUtil
-                        .get(SettingActivity.this, ShortcutsManager.SP_ADD_SHORTCUT_MODE, ""))) {
-                    snackBarShow(mCoordinatorLayout, getString(R.string.dont_add_shortcut));
-                    buttonView.setChecked(false);
-                } else {
-                    if (isChecked) {
-                        SharedPreferenceUtil.put(SettingActivity.this, ShortcutsManager.SP_ADD_SHORTCUT_MODE
-                                , ShortcutsManager.SP_MANUAL_SHORTCUT);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                    if (TextUtils.isEmpty((CharSequence) SharedPreferenceUtil
+                            .get(SettingActivity.this, ShortcutsManager.SP_ADD_SHORTCUT_MODE, ""))) {
+                        AppListActivity.actionStartActivity(SettingActivity.this, 2, true);
+                        buttonView.setChecked(false);
                     } else {
-                        SharedPreferenceUtil.put(SettingActivity.this, ShortcutsManager.SP_ADD_SHORTCUT_MODE
-                                , ShortcutsManager.SP_AUTO_SHORTCUT);
+                        if (isChecked) {
+                            SharedPreferenceUtil.put(SettingActivity.this, ShortcutsManager.SP_ADD_SHORTCUT_MODE
+                                    , ShortcutsManager.SP_MANUAL_SHORTCUT);
+                        } else {
+                            SharedPreferenceUtil.put(SettingActivity.this, ShortcutsManager.SP_ADD_SHORTCUT_MODE
+                                    , ShortcutsManager.SP_AUTO_SHORTCUT);
+                        }
                     }
+                } else {
+                    snackBarShow(mCoordinatorLayout, getString(R.string.nonsupport_app_shortcut));
                 }
             }
         });
@@ -72,7 +77,7 @@ public class SettingActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         String sp = (String) SharedPreferenceUtil.get(this, ShortcutsManager.SP_ADD_SHORTCUT_MODE, "");
-        mSwitchMaualShrtcut.setChecked(ShortcutsManager.SP_MANUAL_SHORTCUT.equals(sp));
+        mSwitchManualShortcut.setChecked(ShortcutsManager.SP_MANUAL_SHORTCUT.equals(sp));
     }
 
     public void onClick(View view) {
@@ -81,7 +86,11 @@ public class SettingActivity extends BaseActivity {
                 changeLauncherIcon();
                 break;
             case R.id.ll_add_shortcut_manual:
-                AppListActivity.actionStartActivity(this, 2, true);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                    AppListActivity.actionStartActivity(this, 2, true);
+                } else {
+                    snackBarShow(mCoordinatorLayout, getString(R.string.nonsupport_app_shortcut));
+                }
                 break;
         }
     }
@@ -91,7 +100,7 @@ public class SettingActivity extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 2 && resultCode == RESULT_OK) {
             SharedPreferenceUtil.put(this, ShortcutsManager.SP_ADD_SHORTCUT_MODE, ShortcutsManager.SP_MANUAL_SHORTCUT);
-            mSwitchMaualShrtcut.setChecked(true);
+            mSwitchManualShortcut.setChecked(true);
         }
     }
 

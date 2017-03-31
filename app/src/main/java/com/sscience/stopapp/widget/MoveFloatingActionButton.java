@@ -17,8 +17,8 @@ import android.view.ViewConfiguration;
 public class MoveFloatingActionButton extends FloatingActionButton implements View.OnTouchListener {
 
     private Context mContext;
-    private float mPosX, mPosY;
-    private float mCurPosX, mCurPosY;
+    private float mPosY;
+    private float mCurPosY;
 
     public MoveFloatingActionButton(Context context) {
         super(context);
@@ -36,13 +36,11 @@ public class MoveFloatingActionButton extends FloatingActionButton implements Vi
     public boolean onTouch(View v, MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                mPosX = event.getX();
-                mPosY = event.getY();
+                mPosY = event.getRawY();
+                mCurPosY = mPosY;
                 break;
             case MotionEvent.ACTION_MOVE:
-                mCurPosX = event.getX();
-                mCurPosY = event.getY();
-
+                mCurPosY = event.getRawY();
                 break;
             case MotionEvent.ACTION_UP:
                 int touchSlop = ViewConfiguration.get(mContext).getScaledPagingTouchSlop();
@@ -51,7 +49,8 @@ public class MoveFloatingActionButton extends FloatingActionButton implements Vi
                     if (mOnMoveListener != null) {
                         mOnMoveListener.onMove(false);
                     }
-                } else if (mCurPosY - mPosY < 0 && (Math.abs(mCurPosY - mPosY) > touchSlop)) {
+                } else if (mCurPosY - mPosY < 0 &&
+                        (Math.abs(mCurPosY - mPosY) > touchSlop)) {
                     //向上滑动
                     if (mOnMoveListener != null) {
                         mOnMoveListener.onMove(true);

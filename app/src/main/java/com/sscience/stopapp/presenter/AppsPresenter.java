@@ -1,16 +1,12 @@
 package com.sscience.stopapp.presenter;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.support.v7.app.AlertDialog;
 
-import com.sscience.stopapp.R;
 import com.sscience.stopapp.bean.AppInfo;
 import com.sscience.stopapp.database.AppInfoDBController;
 import com.sscience.stopapp.database.AppInfoDBOpenHelper;
 import com.sscience.stopapp.model.AppsRepository;
 import com.sscience.stopapp.util.AppInfoComparator;
-import com.sscience.stopapp.util.CommonUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -65,32 +61,7 @@ public class AppsPresenter implements AppsContract.Presenter {
     }
 
     @Override
-    public void operationApps(final AppInfo appInfo, final int position) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setTitle(appInfo.getAppName());
-        final String[] Items = {mContext.getString(R.string.add_disable_apps), mContext.getString(R.string.uninstall_app), mContext.getString(R.string.add_desktop_shortcut)};
-        builder.setItems(Items, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                if (i == 0) {
-                    addDisableApps(appInfo);
-                    dialogInterface.dismiss();
-                } else if (i == 1) {
-                    uninstallApp(appInfo, position);
-                } else if (i == 2) {
-                    if (CommonUtil.isLauncherActivity(mContext, appInfo.getAppPackageName())) {
-                        CommonUtil.addDesktopShortcut(mContext, appInfo);
-                        mView.addShortcutSuccess();
-                    } else {
-                        mView.notSupportShortcut();
-                    }
-                }
-            }
-        });
-        builder.show();
-    }
-
-    private void addDisableApps(AppInfo appInfo) {
+    public void addDisableApps(AppInfo appInfo) {
         AppInfoDBController appInfoDBController = new AppInfoDBController(mContext);
         List<AppInfo> disableApps = appInfoDBController.getDisableApps(AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
         if (disableApps.contains(appInfo)) {
@@ -102,7 +73,8 @@ public class AppsPresenter implements AppsContract.Presenter {
         addDisableAppsSuccess(appList);
     }
 
-    private void uninstallApp(final AppInfo appInfo, final int position) {
+    @Override
+    public void uninstallApp(final AppInfo appInfo, final int position) {
         mAppsRepository.commandSu(COMMAND_UNINSTALL + appInfo.getAppPackageName(), new AppsRepository.GetAppsCmdCallback() {
             @Override
             public void onRootAppsLoaded(List<AppInfo> apps) {

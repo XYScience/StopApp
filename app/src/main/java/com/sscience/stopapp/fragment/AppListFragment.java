@@ -1,7 +1,9 @@
 package com.sscience.stopapp.fragment;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,10 +20,13 @@ import com.sscience.stopapp.bean.AppInfo;
 import com.sscience.stopapp.presenter.AppsContract;
 import com.sscience.stopapp.presenter.AppsPresenter;
 import com.sscience.stopapp.presenter.DisableAppsPresenter;
+import com.sscience.stopapp.util.CommonUtil;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
+import static com.sscience.stopapp.activity.AppListActivity.EXTRA_MANUAL_SHORTCUT;
 
 /**
  * @author SScience
@@ -35,6 +40,7 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
     public static final String TAB_CATEGORY = "tab_category";
     public AppListAdapter mAppListAdapter;
     private AppsContract.Presenter mPresenter;
+    private AppListActivity mAppListActivity;
 
     public static AppListFragment newInstance(int tabCategory) {
         AppListFragment fragment = new AppListFragment();
@@ -51,14 +57,15 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
 
     @Override
     protected void doCreateView(View view) {
-        new AppsPresenter(getActivity(), this);
+        mAppListActivity = ((AppListActivity) getActivity());
+        new AppsPresenter(mAppListActivity, this);
         RecyclerView mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
         mRecyclerView.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(layoutManager);
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), layoutManager.getOrientation()));
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(mAppListActivity, layoutManager.getOrientation()));
 
-        mAppListAdapter = new AppListAdapter(getActivity(), mRecyclerView);
+        mAppListAdapter = new AppListAdapter(mAppListActivity, mRecyclerView);
         mRecyclerView.setAdapter(mAppListAdapter);
 
         int tabCategory = getArguments().getInt(TAB_CATEGORY);
@@ -70,8 +77,7 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
         mAppListAdapter.setOnItemClickListener(new OnItemClickListener<AppInfo>() {
             @Override
             public void onItemClick(AppInfo appInfo, int position) {
-
-                mPresenter.operationApps(appInfo, position);
+                operationApps(appInfo, position);
             }
 
             @Override
@@ -79,6 +85,43 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
                 onLazyLoad();
             }
         });
+    }
+
+    private void operationApps(final AppInfo appInfo, final int position) {
+        final boolean isAddShortcut = mAppListActivity.getIntent().getBooleanExtra(EXTRA_MANUAL_SHORTCUT, false);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(appInfo.getAppName());
+        final String[] items;
+        if (isAddShortcut) {
+            items = new String[]{mAppListActivity.getString(R.string.add_app_app_shortcut)};
+        } else {
+            items = new String[]{mAppListActivity.getString(R.string.add_disable_apps)
+                    , mAppListActivity.getString(R.string.uninstall_app)
+                    , mAppListActivity.getString(R.string.add_desktop_shortcut)};
+        }
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if (i == 0) {
+                    if (isAddShortcut) {
+                        mAppListActivity.addAppShortcut(Arrays.asList(appInfo));
+                    } else {
+                        mPresenter.addDisableApps(appInfo);
+                    }
+                    dialogInterface.dismiss();
+                } else if (i == 1) {
+                    mPresenter.uninstallApp(appInfo, position);
+                } else if (i == 2) {
+                    if (CommonUtil.isLauncherActivity(mAppListActivity, appInfo.getAppPackageName())) {
+                        CommonUtil.addDesktopShortcut(mAppListActivity, appInfo);
+                        snackBarShow(mAppListActivity.mCoordinatorLayout, getString(R.string.add_shortcut_success));
+                    } else {
+                        snackBarShow(mAppListActivity.mCoordinatorLayout, getString(R.string.not_support_shortcut));
+                    }
+                }
+            }
+        });
+        builder.show();
     }
 
     @Override
@@ -100,37 +143,26 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
 
     @Override
     public void hadAddDisableApps() {
-        snackBarShow(((AppListActivity) getActivity()).mCoordinatorLayout, getString(R.string.app_ready_add_disable));
+        snackBarShow(mAppListActivity.mCoordinatorLayout, getString(R.string.app_ready_add_disable));
     }
 
     @Override
     public void addDisableAppsSuccess() {
-        //snackBarShow(((AppListActivity) getActivity()).mCoordinatorLayout, R.string.add_finish);
-        Intent intent = new Intent(getActivity(), MainActivity.class);
-        getActivity().setResult(RESULT_OK, intent);
-        getActivity().finish();
+        Intent intent = new Intent(mAppListActivity, MainActivity.class);
+        mAppListActivity.setResult(RESULT_OK, intent);
+        mAppListActivity.finish();
     }
 
     @Override
     public void getRootError() {
-        snackBarShow(((AppListActivity) getActivity()).mCoordinatorLayout, getString(R.string.if_want_to_use_please_grant_app_root));
+        snackBarShow(mAppListActivity.mCoordinatorLayout, getString(R.string.if_want_to_use_please_grant_app_root));
     }
 
     @Override
     public void uninstallSuccess(String appName, int position) {
-        ((AppListActivity) getActivity()).setUninstallSuccess();
+        mAppListActivity.setUninstallSuccess();
         mAppListAdapter.removeData(position);
-        snackBarShow(((AppListActivity) getActivity()).mCoordinatorLayout, getString(R.string.uninstall_success, appName));
-    }
-
-    @Override
-    public void notSupportShortcut() {
-        snackBarShow(((AppListActivity) getActivity()).mCoordinatorLayout, getString(R.string.not_support_shortcut));
-    }
-
-    @Override
-    public void addShortcutSuccess() {
-        snackBarShow(((AppListActivity) getActivity()).mCoordinatorLayout, getString(R.string.add_shortcut_success));
+        snackBarShow(mAppListActivity.mCoordinatorLayout, getString(R.string.uninstall_success, appName));
     }
 
     public void addDisableApps(List<AppInfo> appList) {

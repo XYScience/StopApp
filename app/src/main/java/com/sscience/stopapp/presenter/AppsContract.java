@@ -25,18 +25,16 @@ public interface AppsContract {
         void getRootError();
 
         void uninstallSuccess(String appName, int position);
-
-        void notSupportShortcut();
-
-        void addShortcutSuccess();
     }
 
     interface Presenter extends BasePresenter {
         void getApps(int appStyle);
 
-        void operationApps(AppInfo appInfo, int position);
-
         void addDisableAppsSuccess(List<AppInfo> appList);
+
+        void uninstallApp(AppInfo appInfo, int position);
+
+        void addDisableApps(AppInfo appInfo);
 
         List<AppInfo> getApps();
     }
