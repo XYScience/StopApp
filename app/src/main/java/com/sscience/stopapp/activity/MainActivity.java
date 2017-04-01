@@ -146,7 +146,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
             case R.id.menu_setting:
-                SettingActivity.actionStartActivity(this);
+                SettingActivity.actionStartActivity(this, 1);
                 break;
             case R.id.menu_about:
                 AboutActivity.actionStartActivity(this);

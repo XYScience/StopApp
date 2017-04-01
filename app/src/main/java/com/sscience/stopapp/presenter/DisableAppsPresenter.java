@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import com.science.myloggerlibrary.MyLogger;
 import com.sscience.stopapp.R;
 import com.sscience.stopapp.activity.MainActivity;
+import com.sscience.stopapp.activity.SettingActivity;
 import com.sscience.stopapp.bean.AppInfo;
 import com.sscience.stopapp.database.AppInfoDBController;
 import com.sscience.stopapp.database.AppInfoDBOpenHelper;
@@ -136,7 +137,15 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                 mAppInfoDBController.addDisableApp(appInfo, AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
             }
         }
-        mListDisableApps = appList;
+        if ((boolean) SharedPreferenceUtil.get(mActivity, SettingActivity.SP_DISPLAY_SYSTEM_APPS, false)) {
+            mListDisableApps = appList;
+        } else {
+            for (AppInfo appInfo : appList) {
+                if (appInfo.isSystemApp() == 0) {
+                    mListDisableApps.add(appInfo);
+                }
+            }
+        }
         Collections.sort(mListDisableApps, new AppInfoComparator());// 排序
         mView.getApps(mListDisableApps);
     }

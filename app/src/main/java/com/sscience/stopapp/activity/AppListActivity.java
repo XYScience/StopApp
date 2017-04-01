@@ -11,6 +11,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.AppCompatCheckBox;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
@@ -179,6 +180,16 @@ public class AppListActivity extends BaseActivity {
 
     public void setUninstallSuccess() {
         isUninstallSuccess = true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (isUninstallSuccess) {
+            Intent intent = new Intent(this, MainActivity.class);
+            setResult(RESULT_OK, intent);
+        }
+        finish();
+        return true;
     }
 
     @Override

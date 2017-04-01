@@ -26,6 +26,45 @@
             android:textSize="16sp"/>
 
         <RelativeLayout
+            android:id="@+id/ll_display_system_apps"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/selectableItemBackground"
+            android:onClick="onClick"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tv_display_system_apps"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/display_system_apps"
+                android:textColor="@color/textPrimary"
+                android:textSize="16sp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/tv_display_system_apps"
+                android:layout_marginTop="2dp"
+                android:layout_toLeftOf="@+id/switch_display_system_apps"
+                android:text="@string/display_system_apps_subtitle"
+                android:textColor="@color/textSecondary"
+                android:textSize="14sp"/>
+
+            <android.support.v7.widget.SwitchCompat
+                android:id="@+id/switch_display_system_apps"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="16dp"
+                android:background="@null"
+                android:clickable="false"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
             android:id="@+id/ll_add_shortcut_manual"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

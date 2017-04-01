@@ -1,7 +1,7 @@
 package com.sscience.stopapp.activity;
 
+import android.app.Activity;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -12,6 +12,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SwitchCompat;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
 
@@ -29,12 +30,14 @@ import com.sscience.stopapp.util.ShortcutsManager;
 
 public class SettingActivity extends BaseActivity {
 
+    public static final String SP_DISPLAY_SYSTEM_APPS = "sp_display_system_apps";
     private CoordinatorLayout mCoordinatorLayout;
-    private SwitchCompat mSwitchManualShortcut;
+    private SwitchCompat mSwitchManualShortcut, mSwitchDisplaySystemApps;
+    private boolean isSetDispalySystemApps = false;
 
-    public static void actionStartActivity(Context context) {
-        Intent intent = new Intent(context, SettingActivity.class);
-        context.startActivity(intent);
+    public static void actionStartActivity(Activity activity, int requestCode) {
+        Intent intent = new Intent(activity, SettingActivity.class);
+        activity.startActivityForResult(intent, requestCode);
     }
 
     @Override
@@ -48,6 +51,7 @@ public class SettingActivity extends BaseActivity {
 
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
         mSwitchManualShortcut = (SwitchCompat) findViewById(R.id.switch_manual_shortcut);
+        mSwitchDisplaySystemApps = (SwitchCompat) findViewById(R.id.switch_display_system_apps);
 
         mSwitchManualShortcut.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -76,8 +80,20 @@ public class SettingActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        String sp = (String) SharedPreferenceUtil.get(this, ShortcutsManager.SP_ADD_SHORTCUT_MODE, "");
-        mSwitchManualShortcut.setChecked(ShortcutsManager.SP_MANUAL_SHORTCUT.equals(sp));
+        String spShortcut = (String) SharedPreferenceUtil.get(this, ShortcutsManager.SP_ADD_SHORTCUT_MODE, "");
+        mSwitchManualShortcut.setChecked(ShortcutsManager.SP_MANUAL_SHORTCUT.equals(spShortcut));
+        boolean spDisplaySystemApps = (boolean) SharedPreferenceUtil.get(this, SP_DISPLAY_SYSTEM_APPS, false);
+        mSwitchDisplaySystemApps.setChecked(spDisplaySystemApps);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (isSetDispalySystemApps) {
+            Intent intent = new Intent(this, MainActivity.class);
+            setResult(RESULT_OK, intent);
+        }
+        finish();
+        return true;
     }
 
     public void onClick(View view) {
@@ -91,6 +107,12 @@ public class SettingActivity extends BaseActivity {
                 } else {
                     snackBarShow(mCoordinatorLayout, getString(R.string.nonsupport_app_shortcut));
                 }
+                break;
+            case R.id.ll_display_system_apps:
+                isSetDispalySystemApps = true;
+                boolean spDisplaySystemApps = (boolean) SharedPreferenceUtil.get(this, SP_DISPLAY_SYSTEM_APPS, false);
+                SharedPreferenceUtil.put(this, SP_DISPLAY_SYSTEM_APPS, !spDisplaySystemApps);
+                mSwitchDisplaySystemApps.setChecked(!spDisplaySystemApps);
                 break;
         }
     }
@@ -158,5 +180,16 @@ public class SettingActivity extends BaseActivity {
 //                am.killBackgroundProcesses(res.activityInfo.packageName);
 //            }
 //        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isSetDispalySystemApps) {
+            Intent intent = new Intent(this, MainActivity.class);
+            setResult(RESULT_OK, intent);
+            finish();
+        } else {
+            super.onBackPressed();
+        }
     }
 }

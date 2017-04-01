@@ -73,5 +73,7 @@
     <string name="add_app_app_shortcut">Add App Shortcut</string>
     <string name="manual_shortcut_subtitle">If your app targets Android 7.1 (API level 25) or higher, you can define shortcuts to specific actions in your app.</string>
     <string name="nonsupport_app_shortcut">Your Android version does not support App Shortcut!</string>
+    <string name="display_system_apps">Display System Apps</string>
+    <string name="display_system_apps_subtitle">Display the system apps on the home page</string>
 
 </resources>

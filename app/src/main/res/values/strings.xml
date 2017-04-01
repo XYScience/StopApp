@@ -73,5 +73,7 @@
     <string name="add_app_app_shortcut">添加App Shortcut</string>
     <string name="manual_shortcut_subtitle">长按App图标呼出常用的快捷方式列表，仅支持Android 7.1+</string>
     <string name="nonsupport_app_shortcut">你的系统版本小于7.1，不支持App Shortcut！</string>
+    <string name="display_system_apps">显示系统Apps</string>
+    <string name="display_system_apps_subtitle">在主页停用列表显示系统Apps</string>
 
 </resources>
