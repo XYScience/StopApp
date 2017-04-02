@@ -50,9 +50,6 @@ public class ShortcutsManager {
                     mDBController.getDisableApps(AppInfoDBOpenHelper.TABLE_NAME_SHORTCUT_APP_INFO));
 
             for (AppInfo appInfo : appList) {
-                if (!CommonUtil.isLauncherActivity(mContext, appInfo.getAppPackageName())) {
-                    continue;
-                }
                 if (!mDBController.searchApp(AppInfoDBOpenHelper.TABLE_NAME_SHORTCUT_APP_INFO, appInfo.getAppPackageName())) {
                     appInfoDB.add(appInfo);
                 }

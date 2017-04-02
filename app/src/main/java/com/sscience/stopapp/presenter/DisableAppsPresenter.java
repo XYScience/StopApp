@@ -49,7 +49,6 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
     private Activity mActivity;
     private ShortcutsManager mShortcutsManager;
     private AppInfoDBController mAppInfoDBController;
-    private boolean isFirstRoot = true;
 
     public DisableAppsPresenter(Activity activity, DisableAppsContract.View view) {
         mActivity = activity;
@@ -110,12 +109,6 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                     addShortcut(appInfo);
                     mView.upDateItemIfLaunch(appInfo, position);
                     launchAppIntent(appInfo.getAppPackageName());
-                } else {
-//                    if (isFirstRoot) {
-//                        isFirstRoot = false;
-//                        mView.getRootSuccess(appInfo, mListDisableApps, mListDisableAppsNew);
-//                        mListDisableApps = mListDisableAppsNew;
-//                    }
                 }
             }
         });
@@ -137,7 +130,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                 mAppInfoDBController.addDisableApp(appInfo, AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
             }
         }
-        if ((boolean) SharedPreferenceUtil.get(mActivity, SettingActivity.SP_DISPLAY_SYSTEM_APPS, false)) {
+        if ((boolean) SharedPreferenceUtil.get(mActivity, SettingActivity.SP_DISPLAY_SYSTEM_APPS, true)) {
             mListDisableApps = appList;
         } else {
             for (AppInfo appInfo : appList) {
@@ -268,6 +261,6 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
 
     @Override
     public void cancelTask() {
-        mAppsRepository.cancelTsk();
+        mAppsRepository.cancelTask();
     }
 }

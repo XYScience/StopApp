@@ -3,6 +3,7 @@
     <color name="colorPrimary">#FFFFFF</color>
     <color name="colorPrimaryDark">#B2B2B2</color>
     <color name="colorAccent">#000000</color>
+    <color name="colorDivider">#DCDCDC</color>
     <color name="colorBackground">#EEEEEE</color>
     <color name="translucentBg">#48000000</color>
 

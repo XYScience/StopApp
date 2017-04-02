@@ -41,6 +41,7 @@ public class AppsRepository {
     public static final String COMMAND_UNINSTALL = "uninstall ";
     private Context mContext;
     private GetAppsAsyncTask mGetAppsAsyncTask;
+    private AccessibilityAsyncTask mAccessibilityAsyncTask;
 
     public AppsRepository(Context context) {
         mContext = context;
@@ -255,14 +256,16 @@ public class AppsRepository {
                     return;
                 }
             }
-            if (list != null) {
-                if (list.isEmpty() && list.size() == 0) {
-                    callback.onRootSuccess();
+            if (callback != null) {
+                if (list != null) {
+                    if (list.isEmpty() && list.size() == 0) {
+                        callback.onRootSuccess();
+                    } else {
+                        callback.onRootAppsLoaded(list);
+                    }
                 } else {
-                    callback.onRootAppsLoaded(list);
+                    callback.onRootError();
                 }
-            } else {
-                callback.onRootError();
             }
         }
     }
@@ -330,9 +333,77 @@ public class AppsRepository {
         }
     }
 
-    public void cancelTsk() {
+    /**
+     * 自动开启无障碍服务
+     */
+    public void openAccessibilityServices(GetRootCallback callback) {
+        mAccessibilityAsyncTask = new AccessibilityAsyncTask(mContext, callback);
+        mAccessibilityAsyncTask.execute();
+    }
+
+    private static class AccessibilityAsyncTask extends AsyncTask<Boolean, Object, Boolean> {
+
+        String cmd1 = "settings put secure enabled_accessibility_services " +
+                "com.sscience.stopapp/com.sscience.stopapp.widget.MyAccessibilityService";
+        String cmd2 = "settings put secure accessibility_enabled 1";
+        private Context mContext;
+        private WeakReference<Context> weakReference;
+        private GetRootCallback callback;
+        private boolean isFirst;
+
+        public AccessibilityAsyncTask(Context context, GetRootCallback callback) {
+            mContext = context;
+            weakReference = new WeakReference<>(context);
+            this.callback = callback;
+        }
+
+        @Override
+        protected Boolean doInBackground(Boolean... params) {
+            Process process = null;
+            DataOutputStream os = null;
+            try {
+                process = Runtime.getRuntime().exec("su");
+                os = new DataOutputStream(process.getOutputStream());
+                os.writeBytes(cmd1 + "\n");
+                os.writeBytes(cmd2 + "\n");
+                os.writeBytes("exit\n");
+                os.flush();
+                int i = process.waitFor();
+                if (i == 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (Exception e) {
+                return false;
+            } finally {
+                try {
+                    if (os != null) {
+                        os.close();
+                    }
+                    process.destroy();
+                } catch (Exception e) {
+                }
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Boolean isRoot) {
+            if (!isFirst && callback != null) {
+                isFirst = true;
+                callback.onRoot(isRoot);
+            }
+        }
+    }
+
+    public void cancelTask() {
         if (mGetAppsAsyncTask != null) {
             mGetAppsAsyncTask.cancel(true);
+            mAccessibilityAsyncTask = null;
+        }
+        if (mAccessibilityAsyncTask != null) {
+            mAccessibilityAsyncTask.cancel(true);
+            mAccessibilityAsyncTask = null;
         }
     }
 }

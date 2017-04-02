@@ -83,15 +83,6 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         });
     }
 
-    private void initBottomGridView() {
-        int[] icon = {R.drawable.ic_play_circle_outline_black, R.drawable.ic_delete_black,
-                R.drawable.ic_highlight_off_black, R.drawable.ic_open_in_new_black,
-                R.drawable.ic_content_copy_black, R.drawable.ic_format_indent_decrease_black};
-        String[] title = {getString(R.string.open_app), getString(R.string.uninstall_app),
-                getString(R.string.cancel_select), getString(R.string.enable_app),
-                getString(R.string.add_shortcut), getString(R.string.remove_list)};
-    }
-
     private void initListener() {
         mDisableAppAdapter.setOnItemClickListener(new OnItemClickListener<AppInfo>() {
             @Override

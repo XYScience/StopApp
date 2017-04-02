@@ -18,6 +18,7 @@ import android.widget.CompoundButton;
 
 import com.sscience.stopapp.R;
 import com.sscience.stopapp.base.BaseActivity;
+import com.sscience.stopapp.model.AppsRepository;
 import com.sscience.stopapp.util.SharedPreferenceUtil;
 import com.sscience.stopapp.util.ShortcutsManager;
 
@@ -31,9 +32,10 @@ import com.sscience.stopapp.util.ShortcutsManager;
 public class SettingActivity extends BaseActivity {
 
     public static final String SP_DISPLAY_SYSTEM_APPS = "sp_display_system_apps";
+    public static final String SP_AUTO_DISABLE_APPS = "sp_auto_disable_apps";
     private CoordinatorLayout mCoordinatorLayout;
-    private SwitchCompat mSwitchManualShortcut, mSwitchDisplaySystemApps;
-    private boolean isSetDispalySystemApps = false;
+    private SwitchCompat mSwitchManualShortcut, mSwitchDisplaySystemApps, mSwitchAutoDisableApps;
+    private boolean isSetDisplaySystemApps = false;
 
     public static void actionStartActivity(Activity activity, int requestCode) {
         Intent intent = new Intent(activity, SettingActivity.class);
@@ -52,6 +54,7 @@ public class SettingActivity extends BaseActivity {
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
         mSwitchManualShortcut = (SwitchCompat) findViewById(R.id.switch_manual_shortcut);
         mSwitchDisplaySystemApps = (SwitchCompat) findViewById(R.id.switch_display_system_apps);
+        mSwitchAutoDisableApps = (SwitchCompat) findViewById(R.id.switch_auto_disable);
 
         mSwitchManualShortcut.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -72,9 +75,15 @@ public class SettingActivity extends BaseActivity {
                     }
                 } else {
                     snackBarShow(mCoordinatorLayout, getString(R.string.nonsupport_app_shortcut));
+                    buttonView.setChecked(false);
                 }
             }
         });
+
+        boolean spDisplaySystemApps = (boolean) SharedPreferenceUtil.get(this, SP_DISPLAY_SYSTEM_APPS, true);
+        mSwitchDisplaySystemApps.setChecked(spDisplaySystemApps);
+        boolean spAutoDisable = (boolean) SharedPreferenceUtil.get(this, SP_AUTO_DISABLE_APPS, false);
+        mSwitchAutoDisableApps.setChecked(spAutoDisable);
     }
 
     @Override
@@ -82,13 +91,11 @@ public class SettingActivity extends BaseActivity {
         super.onResume();
         String spShortcut = (String) SharedPreferenceUtil.get(this, ShortcutsManager.SP_ADD_SHORTCUT_MODE, "");
         mSwitchManualShortcut.setChecked(ShortcutsManager.SP_MANUAL_SHORTCUT.equals(spShortcut));
-        boolean spDisplaySystemApps = (boolean) SharedPreferenceUtil.get(this, SP_DISPLAY_SYSTEM_APPS, false);
-        mSwitchDisplaySystemApps.setChecked(spDisplaySystemApps);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (isSetDispalySystemApps) {
+        if (isSetDisplaySystemApps) {
             Intent intent = new Intent(this, MainActivity.class);
             setResult(RESULT_OK, intent);
         }
@@ -109,10 +116,26 @@ public class SettingActivity extends BaseActivity {
                 }
                 break;
             case R.id.ll_display_system_apps:
-                isSetDispalySystemApps = true;
-                boolean spDisplaySystemApps = (boolean) SharedPreferenceUtil.get(this, SP_DISPLAY_SYSTEM_APPS, false);
+                isSetDisplaySystemApps = true;
+                boolean spDisplaySystemApps = (boolean) SharedPreferenceUtil.get(this, SP_DISPLAY_SYSTEM_APPS, true);
                 SharedPreferenceUtil.put(this, SP_DISPLAY_SYSTEM_APPS, !spDisplaySystemApps);
                 mSwitchDisplaySystemApps.setChecked(!spDisplaySystemApps);
+                break;
+            case R.id.ll_auto_disable:
+                final boolean spAutoDisable = (boolean) SharedPreferenceUtil.get(this, SP_AUTO_DISABLE_APPS, false);
+                mSwitchAutoDisableApps.setChecked(!spAutoDisable);
+                AppsRepository appsRepository = new AppsRepository(this);
+                appsRepository.openAccessibilityServices(new AppsRepository.GetRootCallback() {
+                    @Override
+                    public void onRoot(Boolean isRoot) {
+                        if (isRoot) {
+                            SharedPreferenceUtil.put(SettingActivity.this, SP_AUTO_DISABLE_APPS, !spAutoDisable);
+                            mSwitchAutoDisableApps.setChecked(!spAutoDisable);
+                        } else {
+                            mSwitchAutoDisableApps.setChecked(spAutoDisable);
+                        }
+                    }
+                });
                 break;
         }
     }
@@ -184,7 +207,7 @@ public class SettingActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        if (isSetDispalySystemApps) {
+        if (isSetDisplaySystemApps) {
             Intent intent = new Intent(this, MainActivity.class);
             setResult(RESULT_OK, intent);
             finish();

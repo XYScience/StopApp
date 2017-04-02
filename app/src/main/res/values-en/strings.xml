@@ -75,5 +75,8 @@
     <string name="nonsupport_app_shortcut">Your Android version does not support App Shortcut!</string>
     <string name="display_system_apps">Display System Apps</string>
     <string name="display_system_apps_subtitle">Display the system apps on the home page</string>
+    <string name="automatic_disable_app_back_to_desktop">Automatically disable app when you back to desktop</string>
+    <string name="auto_disable_service">Stop App-Automatically Disable</string>
+    <string name="auto_disable">Automatically Disable</string>
 
 </resources>

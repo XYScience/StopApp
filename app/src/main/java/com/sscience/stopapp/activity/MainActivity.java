@@ -16,12 +16,16 @@ import com.sscience.stopapp.R;
 import com.sscience.stopapp.base.BaseActivity;
 import com.sscience.stopapp.bean.AppInfo;
 import com.sscience.stopapp.fragment.MainFragment;
+import com.sscience.stopapp.model.AppsRepository;
 import com.sscience.stopapp.presenter.DisableAppsPresenter;
 import com.sscience.stopapp.util.CommonUtil;
+import com.sscience.stopapp.util.SharedPreferenceUtil;
 import com.sscience.stopapp.widget.MoveFloatingActionButton;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import static com.sscience.stopapp.activity.SettingActivity.SP_AUTO_DISABLE_APPS;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener {
 
@@ -65,6 +69,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         // Create the presenter
         new DisableAppsPresenter(MainActivity.this, mMainFragment);
 
+        boolean spAutoDisable = (boolean) SharedPreferenceUtil.get(this, SP_AUTO_DISABLE_APPS, false);
+        if (spAutoDisable) {
+            AppsRepository appsRepository = new AppsRepository(this);
+            appsRepository.openAccessibilityServices(null);
+        }
+
         initListener();
     }
 
@@ -85,7 +95,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 for (AppInfo appInfo : mSelection) {
                     CommonUtil.addDesktopShortcut(this, appInfo);
                 }
-                mMainFragment.mSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                mSelection.clear();
+                mMainFragment.mDisableAppAdapter.notifyDataSetChanged();
+                checkSelection();
                 snackBarShow(mCoordinatorLayout, getString(R.string.add_shortcut_success));
                 break;
             case R.id.ll_remove_list:

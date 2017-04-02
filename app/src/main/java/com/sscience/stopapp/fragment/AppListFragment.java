@@ -20,7 +20,6 @@ import com.sscience.stopapp.bean.AppInfo;
 import com.sscience.stopapp.presenter.AppsContract;
 import com.sscience.stopapp.presenter.AppsPresenter;
 import com.sscience.stopapp.presenter.DisableAppsPresenter;
-import com.sscience.stopapp.util.CommonUtil;
 
 import java.util.Arrays;
 import java.util.List;
@@ -96,8 +95,7 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
             items = new String[]{mAppListActivity.getString(R.string.add_app_app_shortcut)};
         } else {
             items = new String[]{mAppListActivity.getString(R.string.add_disable_apps)
-                    , mAppListActivity.getString(R.string.uninstall_app)
-                    , mAppListActivity.getString(R.string.add_desktop_shortcut)};
+                    , mAppListActivity.getString(R.string.uninstall_app)};
         }
         builder.setItems(items, new DialogInterface.OnClickListener() {
             @Override
@@ -111,13 +109,6 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
                     dialogInterface.dismiss();
                 } else if (i == 1) {
                     mPresenter.uninstallApp(appInfo, position);
-                } else if (i == 2) {
-                    if (CommonUtil.isLauncherActivity(mAppListActivity, appInfo.getAppPackageName())) {
-                        CommonUtil.addDesktopShortcut(mAppListActivity, appInfo);
-                        snackBarShow(mAppListActivity.mCoordinatorLayout, getString(R.string.add_shortcut_success));
-                    } else {
-                        snackBarShow(mAppListActivity.mCoordinatorLayout, getString(R.string.not_support_shortcut));
-                    }
                 }
             }
         });

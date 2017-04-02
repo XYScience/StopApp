@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.sscience.stopapp.activity.SettingActivity.SP_AUTO_DISABLE_APPS;
 import static com.sscience.stopapp.model.AppsRepository.COMMAND_ENABLE;
 
 /**
@@ -63,6 +64,11 @@ public class RootActionIntentService extends IntentService {
                 startActivity(resolveIntent);
             } catch (NullPointerException e) {
                 enableApp(COMMAND_ENABLE, packageName);
+            }
+            boolean spAutoDisable = (boolean) SharedPreferenceUtil.get(this, SP_AUTO_DISABLE_APPS, false);
+            if (spAutoDisable) {
+                AppsRepository appsRepository = new AppsRepository(this);
+                appsRepository.openAccessibilityServices(null);
             }
         }
     }

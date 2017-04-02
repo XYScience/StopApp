@@ -99,9 +99,10 @@ public class CommonUtil {
 
     /**
      * 是否有启动界面，即在manifest里定义的 “action.MAIN”&“category.LAUNCHER”
+     *
      * @param context
      * @param packageName
-     * @return
+     * @return 停用应用返回也是false
      */
     public static boolean isLauncherActivity(Context context, String packageName) {
         Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
@@ -117,6 +118,7 @@ public class CommonUtil {
 
     /**
      * 是否安装
+     *
      * @param context
      * @param packageName
      * @return
@@ -179,5 +181,15 @@ public class CommonUtil {
             //向系统发送添加快捷键的广播
             context.sendBroadcast(addSC);
         }
+    }
+
+    /**
+     * 获取正在运行桌面包名
+     */
+    public static String getLauncherPackageName(Context context) {
+        final Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        final ResolveInfo res = context.getPackageManager().resolveActivity(intent, 0);
+        return res.activityInfo.packageName;
     }
 }

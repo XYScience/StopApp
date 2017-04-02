@@ -197,5 +197,4 @@
         app:layout_behavior="com.sscience.stopapp.widget.ScrollAwareFABBehavior"
         app:srcCompat="@drawable/ic_white_fab_disable"/>
 
-
 </android.support.design.widget.CoordinatorLayout>
