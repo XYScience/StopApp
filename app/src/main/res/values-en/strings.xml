@@ -78,5 +78,6 @@
     <string name="automatic_disable_app_back_to_desktop">Automatically disable app when you back to desktop</string>
     <string name="auto_disable_service">Stop App-Automatically Disable</string>
     <string name="auto_disable">Automatically Disable</string>
+    <string name="search_no_app">Did not find anything</string>
 
 </resources>

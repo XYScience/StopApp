@@ -78,5 +78,6 @@
     <string name="automatic_disable_app_back_to_desktop">回到桌面时，通过无障碍服务自动停用App</string>
     <string name="auto_disable_service">小黑屋-自动冻结</string>
     <string name="auto_disable">自动冻结</string>
+    <string name="search_no_app">暂时无此应用！</string>
 
 </resources>

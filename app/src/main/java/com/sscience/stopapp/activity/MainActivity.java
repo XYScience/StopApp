@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,6 +37,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public LinearLayout mLlEnableApp, mLlUninstallApp, mLlAddShortcut, mLlRemoveList, mLlCancelSelect;
     private long exitTime = 0;
     public String mRootStr;
+    private SearchView mSearchView;
 
     @Override
     protected int getContentLayout() {
@@ -148,8 +150,42 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        MenuItem searchMenuItem = menu.findItem(R.id.menu_search);
+        mSearchView = (SearchView) searchMenuItem.getActionView();
+        mSearchView.setOnQueryTextListener(mQueryListener);
+//        // Get the search close button image view
+//        ImageView closeButton = (ImageView) mSearchView.findViewById(R.id.search_close_btn);
+//        // Set on click listener
+//        closeButton.setOnClickListener(mCloseListener);
         return true;
     }
+
+    SearchView.OnQueryTextListener mQueryListener = new SearchView.OnQueryTextListener() {
+        @Override
+        public boolean onQueryTextSubmit(String query) {
+            return false;
+        }
+
+        @Override
+        public boolean onQueryTextChange(String newText) {
+//            newText is text entered by user to SearchView
+//            if (!TextUtils.isEmpty(newText.trim())) {
+//            }
+            mMainFragment.mDisableAppAdapter.getFilter().filter(newText);
+            return true;
+        }
+    };
+
+//    View.OnClickListener mCloseListener = new View.OnClickListener() {
+//        @Override
+//        public void onClick(View v) {
+//            //Find EditText view
+//            EditText et = (EditText) mSearchView.findViewById(R.id.search_src_text);
+//            //Clear the text from EditText view
+//            et.setText("");
+//            mMainFragment.mDisableAppAdapter.getFilter().filter("");
+//        }
+//    };
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

@@ -184,12 +184,16 @@ public class AppListActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (isUninstallSuccess) {
-            Intent intent = new Intent(this, MainActivity.class);
-            setResult(RESULT_OK, intent);
+        if (item.getItemId() == android.R.id.home) {
+            if (isUninstallSuccess) {
+                Intent intent = new Intent(this, MainActivity.class);
+                setResult(RESULT_OK, intent);
+            }
+            finish();
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
-        finish();
-        return true;
     }
 
     @Override

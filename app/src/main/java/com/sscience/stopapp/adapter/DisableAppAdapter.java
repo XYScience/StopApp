@@ -2,14 +2,18 @@ package com.sscience.stopapp.adapter;
 
 import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.science.baserecyclerviewadapter.base.ViewHolder;
 import com.sscience.stopapp.R;
 import com.sscience.stopapp.activity.MainActivity;
 import com.sscience.stopapp.bean.AppInfo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,9 +23,11 @@ import java.util.List;
  * @data 2017/1/15
  */
 
-public class DisableAppAdapter extends AppAdapter {
+public class DisableAppAdapter extends AppAdapter implements Filterable {
 
     private MainActivity mMainActivity;
+    private AppFilter mAppFilter;
+    public List<AppInfo> mOriginalAppInfo;
 
     public DisableAppAdapter(Activity activity, RecyclerView recyclerView) {
         super(activity, recyclerView);
@@ -64,5 +70,46 @@ public class DisableAppAdapter extends AppAdapter {
 //                mMainActivity.checkSelection();
 //            }
 //        });
+    }
+
+    @Override
+    public Filter getFilter() {
+        if (mAppFilter == null) {
+            mAppFilter = new AppFilter();
+            mOriginalAppInfo = getData();
+        }
+        return mAppFilter;
+    }
+
+    class AppFilter extends Filter {
+
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<AppInfo> newAppInfo = new ArrayList<>();
+            if (constraint != null && constraint.toString().trim().length() > 0) {
+                for (AppInfo appInfo : mOriginalAppInfo) {
+                    if (appInfo.getAppName().toLowerCase().contains(constraint.toString().toLowerCase())) {
+                        newAppInfo.add(appInfo);
+                    }
+                }
+            } else {
+                newAppInfo = mOriginalAppInfo;
+            }
+            FilterResults filterResults = new FilterResults();
+            filterResults.count = newAppInfo.size();
+            filterResults.values = newAppInfo;
+            return filterResults;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            List<AppInfo> newAppInfo = (List) results.values;
+            setData(false, newAppInfo);
+            if (newAppInfo.size() > 0) {
+                notifyDataSetChanged();
+            } else {
+                Toast.makeText(mMainActivity, R.string.search_no_app, Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }

@@ -7,6 +7,10 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.science.baserecyclerviewadapter.interfaces.OnItemClickListener;
@@ -56,6 +60,7 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
 
     @Override
     protected void doCreateView(View view) {
+        setHasOptionsMenu(true);
         mAppListActivity = ((AppListActivity) getActivity());
         new AppsPresenter(mAppListActivity, this);
         RecyclerView mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
@@ -170,4 +175,27 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
     public void reFreshAppAdapter() {
         mAppListAdapter.notifyDataSetChanged();
     }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        inflater.inflate(R.menu.menu_search, menu);
+        MenuItem searchMenuItem = menu.findItem(R.id.menu_search);
+        SearchView searchView = (SearchView) searchMenuItem.getActionView();
+        searchView.setOnQueryTextListener(mQueryListener);
+    }
+
+    SearchView.OnQueryTextListener mQueryListener = new SearchView.OnQueryTextListener() {
+        @Override
+        public boolean onQueryTextSubmit(String query) {
+            return false;
+        }
+
+        @Override
+        public boolean onQueryTextChange(String newText) {
+            // newText is text entered by user to SearchView
+            mAppListAdapter.getFilter().filter(newText);
+            return true;
+        }
+    };
 }
