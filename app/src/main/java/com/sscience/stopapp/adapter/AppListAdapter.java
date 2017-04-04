@@ -90,7 +90,7 @@ public class AppListAdapter extends AppAdapter implements Filterable {
             List<AppInfo> newAppInfo = new ArrayList<>();
             if (constraint != null && constraint.toString().trim().length() > 0) {
                 for (AppInfo appInfo : mOriginalAppInfo) {
-                    if (appInfo.getAppName().contains(constraint)) {
+                    if (appInfo.getAppName().toLowerCase().contains(constraint.toString().toLowerCase())) {
                         newAppInfo.add(appInfo);
                     }
                 }
