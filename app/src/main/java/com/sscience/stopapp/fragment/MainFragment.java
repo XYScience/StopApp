@@ -236,7 +236,7 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         if (appInfo != null) {
             appInfo.setEnable(1);
             mDisableAppAdapter.updateItem(position, appInfo);
-            mAppList.get(position).setEnable(1);
+//            mAppList.get(position).setEnable(1);
         }
         setRefreshing(false);
     }

@@ -17,13 +17,14 @@ import com.science.baserecyclerviewadapter.interfaces.OnItemClickListener;
 import com.science.myloggerlibrary.MyLogger;
 import com.sscience.stopapp.R;
 import com.sscience.stopapp.activity.AppListActivity;
+import com.sscience.stopapp.activity.ComponentDetailsActivity;
 import com.sscience.stopapp.activity.MainActivity;
 import com.sscience.stopapp.adapter.AppListAdapter;
 import com.sscience.stopapp.base.BaseFragment;
 import com.sscience.stopapp.bean.AppInfo;
+import com.sscience.stopapp.model.AppsRepository;
 import com.sscience.stopapp.presenter.AppsContract;
 import com.sscience.stopapp.presenter.AppsPresenter;
-import com.sscience.stopapp.presenter.DisableAppsPresenter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -73,7 +74,7 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
         mRecyclerView.setAdapter(mAppListAdapter);
 
         int tabCategory = getArguments().getInt(TAB_CATEGORY);
-        mPresenter.getApps(tabCategory == 0 ? DisableAppsPresenter.APP_STYLE_USER : DisableAppsPresenter.APP_STYLE_SYSTEM);
+        mPresenter.getApps(tabCategory == 0 ? AppsRepository.APPS_FLAG_USER : AppsRepository.APPS_FLAG_SYSTEM);
         initListener();
     }
 
@@ -99,8 +100,7 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
         if (isAddShortcut) {
             items = new String[]{mAppListActivity.getString(R.string.add_app_app_shortcut)};
         } else {
-            items = new String[]{mAppListActivity.getString(R.string.add_disable_apps)
-                    , mAppListActivity.getString(R.string.uninstall_app)};
+            items = new String[]{mAppListActivity.getString(R.string.add_disable_apps), mAppListActivity.getString(R.string.uninstall_app), getString(R.string.component_details)};
         }
         builder.setItems(items, new DialogInterface.OnClickListener() {
             @Override
@@ -114,6 +114,8 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
                     dialogInterface.dismiss();
                 } else if (i == 1) {
                     mPresenter.uninstallApp(appInfo, position);
+                } else if (i == 2) {
+                    ComponentDetailsActivity.actionStartActivity(mAppListActivity, appInfo);
                 }
             }
         });

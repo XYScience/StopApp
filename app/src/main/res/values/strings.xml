@@ -23,6 +23,7 @@
     <string name="whether_disable_app">要把 [ %s ] 关进小黑屋吗？</string>
     <string name="add_disable_apps">加入小黑屋</string>
     <string name="uninstall_app">卸载应用</string>
+    <string name="component_details">组件详情</string>
     <string name="if_want_to_use_please_grant_app_root">暂时没有root权限！请授予本应用root权限！</string>
     <string name="quick_disable">一键停用</string>
     <string name="quick_enable">一键启用</string>
@@ -79,5 +80,10 @@
     <string name="auto_disable_service">小黑屋-自动冻结</string>
     <string name="auto_disable">自动冻结</string>
     <string name="search_no_app">暂时无此应用！</string>
+    <string name="component_activity">界面</string>
+    <string name="component_service">服务</string>
+    <string name="component_receiver">广播接收器</string>
+    <string name="component_provider">内容提供者</string>
+    <string name="no_data">没有任何数据！</string>
 
 </resources>

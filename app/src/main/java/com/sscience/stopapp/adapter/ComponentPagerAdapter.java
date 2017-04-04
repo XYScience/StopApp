@@ -7,7 +7,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.view.ViewGroup;
 
 import com.sscience.stopapp.R;
-import com.sscience.stopapp.fragment.AppListFragment;
+import com.sscience.stopapp.fragment.ComponentDetailsFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,32 +19,34 @@ import java.util.List;
  * @data 2017/1/15
  */
 
-public class MyPagerAdapter extends FragmentStatePagerAdapter {
+public class ComponentPagerAdapter extends FragmentStatePagerAdapter {
 
     private List<String> tabNames;
-    private List<AppListFragment> mFragments;
+    private List<ComponentDetailsFragment> mFragments;
 
-    public MyPagerAdapter(FragmentManager fm, Context context) {
+    public ComponentPagerAdapter(FragmentManager fm, Context context) {
         super(fm);
         mFragments = new ArrayList<>();
         tabNames = new ArrayList<>();
-        tabNames.add(context.getString(R.string.user_apps));
-        tabNames.add(context.getString(R.string.system_apps));
+        tabNames.add(context.getString(R.string.component_activity));
+        tabNames.add(context.getString(R.string.component_service));
+        tabNames.add(context.getString(R.string.component_receiver));
+        tabNames.add(context.getString(R.string.component_provider));
     }
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
-        AppListFragment fragment = (AppListFragment) super.instantiateItem(container, position);
+        ComponentDetailsFragment fragment = (ComponentDetailsFragment) super.instantiateItem(container, position);
         mFragments.add(fragment);
         return fragment;
     }
 
     @Override
     public Fragment getItem(int position) {
-        return AppListFragment.newInstance(position);
+        return ComponentDetailsFragment.newInstance(position);
     }
 
-    public AppListFragment getFragments(int position) {
+    public ComponentDetailsFragment getFragments(int position) {
         return mFragments.get(position);
     }
 

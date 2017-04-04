@@ -1,4 +1,4 @@
-package com.sscience.stopapp.util;
+package com.sscience.stopapp.widget;
 
 import android.text.TextUtils;
 

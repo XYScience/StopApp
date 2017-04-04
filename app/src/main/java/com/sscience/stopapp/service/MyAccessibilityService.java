@@ -1,4 +1,4 @@
-package com.sscience.stopapp.widget;
+package com.sscience.stopapp.service;
 
 import android.accessibilityservice.AccessibilityService;
 import android.content.Intent;
@@ -34,7 +34,7 @@ public class MyAccessibilityService extends AccessibilityService {
             for (int i = 0; i < disableApps.size(); i++) {
                 AppInfo appInfo = disableApps.get(i);
                 if (appInfo.isEnable() == 1) {
-                    appsRepository.commandSu(AppsRepository.COMMAND_DISABLE + appInfo.getAppPackageName(), null);
+                    appsRepository.getRoot(AppsRepository.COMMAND_DISABLE + appInfo.getAppPackageName(), null);
                     appInfoDBController.updateDisableApp(appInfo.getAppPackageName(), 0,
                             AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
                     MyLogger.e("回到桌面已自动冻结的App：" + appInfo.getAppPackageName());

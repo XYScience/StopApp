@@ -23,6 +23,7 @@
     <string name="whether_disable_app">Would you like to disable [ % s ] ?</string>
     <string name="add_disable_apps">Stop app</string>
     <string name="uninstall_app">Uninstall app</string>
+    <string name="component_details">Component details</string>
     <string name="if_want_to_use_please_grant_app_root">Failure to get root permission!Please grant the root permission!</string>
     <string name="quick_disable">Quick disable</string>
     <string name="quick_enable">Quick enable</string>
@@ -79,5 +80,10 @@
     <string name="auto_disable_service">Stop App-Automatically Disable</string>
     <string name="auto_disable">Automatically Disable</string>
     <string name="search_no_app">Did not find anything</string>
+    <string name="component_activity">Activity</string>
+    <string name="component_service">Service</string>
+    <string name="component_receiver">Receiver</string>
+    <string name="component_provider">Provider</string>
+    <string name="no_data">No data!</string>
 
 </resources>

@@ -29,7 +29,7 @@ public interface DisableAppsContract {
          * 停用或启用app成功
          *
          * @param appInfo 停用or启用的第一个app
-         * @param apps 停用或启用app成功后需要更新列表(app停用or启用状态)
+         * @param apps    停用或启用app成功后需要更新列表(app停用or启用状态)
          */
         void getRootSuccess(AppInfo appInfo, List<AppInfo> apps, List<AppInfo> appsNew);
 
@@ -40,6 +40,7 @@ public interface DisableAppsContract {
 
         /**
          * 卸载app
+         *
          * @param appName
          * @param position
          */
@@ -48,33 +49,14 @@ public interface DisableAppsContract {
 
     interface Presenter extends BasePresenter {
 
-        void disableApp(AppInfo appInfo, int position);
-
         /**
-         * 调用软件包管理器 (pm)
+         * 获取apps。
          *
-         * @param cmd         可用的软件包管理器命令：list packages; disable; install。
-         *                    命令的具体操作：list packages -d(进行过滤以仅显示已停用的软件包);
-         *                    disable package_or_component(停用给定软件包或组件)。
-         * @param appInfo     命令enable or disable对应的app信息。
-         * @param isLaunchApp 命令enable时，是否是启动app操作。
-         *                    list packages:
-         *                    -d：进行过滤以仅显示已停用的软件包。
-         *                    -e：进行过滤以仅显示已启用的软件包。
-         *                    -s：进行过滤以仅显示系统软件包。
-         *                    -3：进行过滤以仅显示第三方软件包。
-         *                    -i：查看软件包的安装程序。
-         *                    -u：也包括卸载的软件包。
-         * @param position    启动app时的列表位置
+         * @param appFlag 0：all；1：system；2：user；3：disable
          */
-        void commandSu(String cmd, boolean isLaunchApp, AppInfo appInfo, int position);
+        void getDisableAppsFromRoot(int appFlag);
 
-//        /**
-//         * 通过packageManager.getInstalledPackages(0)获取所有apps。
-//         *
-//         * @param appStyle 0：all；1：system；2：user。
-//         */
-//        void getApps(int appStyle);
+        void pmCommand(String cmd, int flag, AppInfo appInfo, int position);
 
         /**
          * 在停用(待停用)列表点击item启动app
@@ -86,7 +68,6 @@ public interface DisableAppsContract {
 
         /**
          * 停用(待停用)列表批量操作app：停用apps or 清除apps
-         *
          */
         void batchApps(int type);
 

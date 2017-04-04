@@ -18,7 +18,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.CompoundButton;
 
 import com.sscience.stopapp.R;
-import com.sscience.stopapp.adapter.MyPagerAdapter;
+import com.sscience.stopapp.adapter.AppListPagerAdapter;
 import com.sscience.stopapp.base.BaseActivity;
 import com.sscience.stopapp.bean.AppInfo;
 import com.sscience.stopapp.fragment.AppListFragment;
@@ -73,7 +73,7 @@ public class AppListActivity extends BaseActivity {
         mFabConfirm = (FloatingActionButton) findViewById(R.id.fab);
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
-        final MyPagerAdapter myPagerAdapter = new MyPagerAdapter(getSupportFragmentManager(), this);
+        final AppListPagerAdapter myPagerAdapter = new AppListPagerAdapter(getSupportFragmentManager(), this);
         mViewPager.setAdapter(myPagerAdapter);
         mViewPager.setOffscreenPageLimit(2);
         tabLayout.setupWithViewPager(mViewPager);
@@ -108,7 +108,7 @@ public class AppListActivity extends BaseActivity {
         mCbSelectAllApps.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                AppListFragment appListFragment = ((MyPagerAdapter) mViewPager.getAdapter()).getFragments(0);
+                AppListFragment appListFragment = ((AppListPagerAdapter) mViewPager.getAdapter()).getFragments(0);
                 List<AppInfo> appList = appListFragment.getApps();
                 if (appList.size() != getSelection(0).size()) {
                     getSelection(0).addAll(appList);
@@ -136,7 +136,7 @@ public class AppListActivity extends BaseActivity {
                         }
                     }
                 } else {
-                    ((MyPagerAdapter) mViewPager.getAdapter()).getFragments(mViewPager.getCurrentItem())
+                    ((AppListPagerAdapter) mViewPager.getAdapter()).getFragments(mViewPager.getCurrentItem())
                             .addDisableApps(new ArrayList<>(appList));
                 }
             }

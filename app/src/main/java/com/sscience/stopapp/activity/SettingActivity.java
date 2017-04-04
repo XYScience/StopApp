@@ -19,6 +19,7 @@ import android.widget.CompoundButton;
 import com.sscience.stopapp.R;
 import com.sscience.stopapp.base.BaseActivity;
 import com.sscience.stopapp.model.AppsRepository;
+import com.sscience.stopapp.model.GetRootCallback;
 import com.sscience.stopapp.util.SharedPreferenceUtil;
 import com.sscience.stopapp.util.ShortcutsManager;
 
@@ -125,9 +126,9 @@ public class SettingActivity extends BaseActivity {
                 final boolean spAutoDisable = (boolean) SharedPreferenceUtil.get(this, SP_AUTO_DISABLE_APPS, false);
                 mSwitchAutoDisableApps.setChecked(!spAutoDisable);
                 AppsRepository appsRepository = new AppsRepository(this);
-                appsRepository.openAccessibilityServices(new AppsRepository.GetRootCallback() {
+                appsRepository.openAccessibilityServices(new GetRootCallback() {
                     @Override
-                    public void onRoot(Boolean isRoot) {
+                    public void onRoot(boolean isRoot) {
                         if (isRoot) {
                             SharedPreferenceUtil.put(SettingActivity.this, SP_AUTO_DISABLE_APPS, !spAutoDisable);
                             mSwitchAutoDisableApps.setChecked(!spAutoDisable);

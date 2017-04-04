@@ -6,7 +6,9 @@ import com.sscience.stopapp.bean.AppInfo;
 import com.sscience.stopapp.database.AppInfoDBController;
 import com.sscience.stopapp.database.AppInfoDBOpenHelper;
 import com.sscience.stopapp.model.AppsRepository;
-import com.sscience.stopapp.util.AppInfoComparator;
+import com.sscience.stopapp.model.GetAppsCallback;
+import com.sscience.stopapp.model.GetRootCallback;
+import com.sscience.stopapp.widget.AppInfoComparator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,8 +46,8 @@ public class AppsPresenter implements AppsContract.Presenter {
     }
 
     @Override
-    public void getApps(int appStyle) {
-        mAppsRepository.getApps(appStyle, new AppsRepository.GetAppsCallback() {
+    public void getApps(int appFlag) {
+        mAppsRepository.getApps(appFlag, new GetAppsCallback() {
             @Override
             public void onAppsLoaded(List<AppInfo> apps) {
                 Collections.sort(apps, new AppInfoComparator());// 排序
@@ -75,21 +77,16 @@ public class AppsPresenter implements AppsContract.Presenter {
 
     @Override
     public void uninstallApp(final AppInfo appInfo, final int position) {
-        mAppsRepository.commandSu(COMMAND_UNINSTALL + appInfo.getAppPackageName(), new AppsRepository.GetAppsCmdCallback() {
-            @Override
-            public void onRootAppsLoaded(List<AppInfo> apps) {
-
-            }
+        mAppsRepository.getRoot(COMMAND_UNINSTALL + appInfo.getAppPackageName(), new GetRootCallback() {
 
             @Override
-            public void onRootError() {
-                mView.getRootError();
-            }
-
-            @Override
-            public void onRootSuccess() {
-                mAppInfoDBController.deleteDisableApp(appInfo.getAppPackageName(), AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
-                mView.uninstallSuccess(appInfo.getAppName(), position);
+            public void onRoot(boolean isRoot) {
+                if (isRoot) {
+                    mAppInfoDBController.deleteDisableApp(appInfo.getAppPackageName(), AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
+                    mView.uninstallSuccess(appInfo.getAppName(), position);
+                } else {
+                    mView.getRootError();
+                }
             }
         });
     }

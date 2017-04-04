@@ -79,6 +79,11 @@
             android:screenOrientation="portrait"/>
 
         <activity
+            android:name=".activity.ComponentDetailsActivity"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"/>
+
+        <activity
             android:name=".activity.ShortcutActivity"
             android:clearTaskOnLaunch="true"
             android:excludeFromRecents="true"
@@ -98,7 +103,7 @@
             android:name=".service.RootActionIntentService"/>
 
         <service
-            android:name=".widget.MyAccessibilityService"
+            android:name=".service.MyAccessibilityService"
             android:label="@string/auto_disable_service"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
 

@@ -1,24 +1,32 @@
 package com.sscience.stopapp.model;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
+import android.content.res.XmlResourceParser;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.text.TextUtils;
 
 import com.science.myloggerlibrary.MyLogger;
 import com.sscience.stopapp.base.BaseActivity;
 import com.sscience.stopapp.bean.AppInfo;
-import com.sscience.stopapp.service.RootActionIntentService;
+import com.sscience.stopapp.bean.ComponentInfo;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,13 +40,15 @@ import java.util.List;
 
 public class AppsRepository {
 
-    private static final int APPS_FLAG_ALL = 0;
-    private static final int APPS_FLAG_SYSTEM = 1;
-    private static final int APPS_FLAG_USER = 2;
-    public static final String COMMAND_APP_LIST = "list packages ";
-    public static final String COMMAND_DISABLE = "disable ";
-    public static final String COMMAND_ENABLE = "enable ";
-    public static final String COMMAND_UNINSTALL = "uninstall ";
+    public static final int APPS_FLAG_ALL = 0;
+    public static final int APPS_FLAG_SYSTEM = 1;
+    public static final int APPS_FLAG_USER = 2;
+    public static final int APPS_FLAG_DISABLE = 3;
+    public static final String COMMAND_APP_LIST = "pm list packages -d";
+    public static final String COMMAND_DISABLE = "pm disable ";
+    public static final String COMMAND_ENABLE = "pm enable ";
+    public static final String COMMAND_UNINSTALL = "pm uninstall ";
+    public static final String COMMAND_GET_ROOT = "chmod 777 ";
     private Context mContext;
     private GetAppsAsyncTask mGetAppsAsyncTask;
     private AccessibilityAsyncTask mAccessibilityAsyncTask;
@@ -47,29 +57,13 @@ public class AppsRepository {
         mContext = context;
     }
 
-    public interface GetAppsCallback {
-        void onAppsLoaded(List<AppInfo> apps);
-    }
-
-    public interface GetAppsCmdCallback {
-        void onRootAppsLoaded(List<AppInfo> apps);
-
-        void onRootError();
-
-        void onRootSuccess();
-    }
-
-    public interface GetRootCallback {
-        void onRoot(Boolean isRoot);
-    }
-
     /**
-     * “添加应用”界面获取用户or系统apps
+     * 获取apps
      *
-     * @param appFlag  用户or系统apps
+     * @param appFlag  用户应用or系统应用or停用应用
      * @param callback 成功获取后的回掉
      */
-    public void getApps(final int appFlag, final GetAppsCallback callback) {
+    public void getApps(int appFlag, final GetAppsCallback callback) {
         mGetAppsAsyncTask = new GetAppsAsyncTask(mContext, appFlag, callback);
         mGetAppsAsyncTask.execute();
     }
@@ -90,53 +84,10 @@ public class AppsRepository {
 
         @Override
         protected List<AppInfo> doInBackground(Boolean... params) {
-            PackageManager packageManager = context.getPackageManager();
-            // 查询所有已经安装的应用程序
-            List<ApplicationInfo> applications = packageManager
-                    .getInstalledApplications(PackageManager.MATCH_UNINSTALLED_PACKAGES);
-            List<AppInfo> appInfos = new ArrayList<>(); // 保存过滤查到的AppInfo
-            switch (appFlag) {
-                case APPS_FLAG_ALL:
-                    appInfos.clear();
-                    for (ApplicationInfo app : applications) {
-                        if (isCancelled()) {
-                            break;
-                        }
-                        if (!app.packageName.equals(context.getPackageName())) {
-                            if (!app.packageName.contains("supersu")) {
-                                appInfos.add(getAppInfo(app, packageManager));
-                            }
-                        }
-                    }
-                    return appInfos;
-                case APPS_FLAG_SYSTEM:
-                    appInfos.clear();
-                    for (ApplicationInfo app : applications) {
-                        if (isCancelled()) {
-                            break;
-                        }
-                        if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                            appInfos.add(getAppInfo(app, packageManager));
-                        }
-                    }
-                    return appInfos;
-                case APPS_FLAG_USER:
-                    appInfos.clear();
-                    for (ApplicationInfo app : applications) {
-                        if (isCancelled()) {
-                            break;
-                        }
-                        if ((app.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
-                            if (!app.packageName.equals(context.getPackageName())) {
-                                if (!app.packageName.contains("supersu")) {
-                                    appInfos.add(getAppInfo(app, packageManager));
-                                }
-                            }
-                        }
-                    }
-                    return appInfos;
-                default:
-                    return appInfos;
+            if (appFlag == APPS_FLAG_DISABLE) {
+                return getDisableApps(context);
+            } else {
+                return getInstalledApps(context, this, appFlag);
             }
         }
 
@@ -146,6 +97,113 @@ public class AppsRepository {
             if (activity != null) {
                 callback.onAppsLoaded(appList);
             }
+        }
+    }
+
+    /**
+     * 通过root权限获取停用apps
+     *
+     * @param context
+     * @return 返回停用apps
+     */
+    private static List<AppInfo> getDisableApps(Context context) {
+        DataOutputStream dataOutputStream = null;
+        BufferedReader errorStream = null;
+        List<AppInfo> appList = null;
+        PackageManager packageManager = context.getPackageManager();
+        try {
+            // 申请su权限
+            Process process = Runtime.getRuntime().exec("su");
+            dataOutputStream = new DataOutputStream(process.getOutputStream());
+            // 执行pm install命令
+            String command = COMMAND_APP_LIST + "\n";
+            dataOutputStream.write(command.getBytes(Charset.forName("utf-8")));
+            dataOutputStream.flush();
+            dataOutputStream.writeBytes("exit\n");
+            dataOutputStream.flush();
+            int i = process.waitFor();
+            if (i == 0) { // 正确获取root权限
+                appList = new ArrayList<>();
+                String msg = "";
+                BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                while ((msg = br.readLine()) != null) {
+                    ApplicationInfo applicationInfo = packageManager.getPackageInfo(msg.replace("package:", ""), 0).applicationInfo;
+                    appList.add(getAppInfo(applicationInfo, packageManager));
+                }
+            }
+        } catch (Exception e) {
+            MyLogger.e(e.getMessage());
+        } finally {
+            try {
+                if (dataOutputStream != null) {
+                    dataOutputStream.close();
+                }
+                if (errorStream != null) {
+                    errorStream.close();
+                }
+            } catch (IOException e) {
+                MyLogger.e(e.getMessage());
+            }
+        }
+        return appList;
+    }
+
+    /**
+     * 通过packageManager.getInstalledApplications获取系统已安装应用
+     *
+     * @param context
+     * @param asyncTask
+     * @param appFlag   获取系统应用还是用户应用
+     * @return
+     */
+    private static List<AppInfo> getInstalledApps(Context context, GetAppsAsyncTask asyncTask, int appFlag) {
+        PackageManager packageManager = context.getPackageManager();
+        // 查询所有已经安装的应用程序
+        List<ApplicationInfo> applications = packageManager
+                .getInstalledApplications(PackageManager.MATCH_UNINSTALLED_PACKAGES);
+        List<AppInfo> appInfos = new ArrayList<>(); // 保存过滤查到的AppInfo
+        switch (appFlag) {
+            case APPS_FLAG_ALL:
+                appInfos.clear();
+                for (ApplicationInfo app : applications) {
+                    if (asyncTask.isCancelled()) {
+                        break;
+                    }
+                    if (!app.packageName.equals(context.getPackageName())) {
+                        if (!app.packageName.contains("supersu")) {
+                            appInfos.add(getAppInfo(app, packageManager));
+                        }
+                    }
+                }
+                return appInfos;
+            case APPS_FLAG_SYSTEM:
+                appInfos.clear();
+                for (ApplicationInfo app : applications) {
+                    if (asyncTask.isCancelled()) {
+                        break;
+                    }
+                    if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                        appInfos.add(getAppInfo(app, packageManager));
+                    }
+                }
+                return appInfos;
+            case APPS_FLAG_USER:
+                appInfos.clear();
+                for (ApplicationInfo app : applications) {
+                    if (asyncTask.isCancelled()) {
+                        break;
+                    }
+                    if ((app.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+                        if (!app.packageName.equals(context.getPackageName())) {
+                            if (!app.packageName.contains("supersu")) {
+                                appInfos.add(getAppInfo(app, packageManager));
+                            }
+                        }
+                    }
+                }
+                return appInfos;
+            default:
+                return appInfos;
         }
     }
 
@@ -176,110 +234,10 @@ public class AppsRepository {
     }
 
     /**
-     * 通过root，获取停用应用列表or停用应用or启用应用
-     *
-     * @param cmd
-     * @param callback
+     * 通用adb命令执行
      */
-    public void commandSu(final String cmd, final GetAppsCmdCallback callback) {
-        CommandSuAsyncTask commandSuAsyncTask = new CommandSuAsyncTask(mContext, cmd, callback);
-        commandSuAsyncTask.execute();
-    }
-
-    private static class CommandSuAsyncTask extends AsyncTask<Boolean, Object, List<AppInfo>> {
-
-        private Context context;
-        private String cmd;
-        private GetAppsCmdCallback callback;
-        private WeakReference<Context> weakReference;
-
-        public CommandSuAsyncTask(Context context, String cmd, GetAppsCmdCallback callback) {
-            this.context = context;
-            this.cmd = cmd;
-            this.callback = callback;
-            weakReference = new WeakReference<>(context);
-        }
-
-        @Override
-        protected List<AppInfo> doInBackground(Boolean... params) {
-            DataOutputStream dataOutputStream = null;
-            BufferedReader errorStream = null;
-            List<AppInfo> appList = null;
-            PackageManager packageManager = context.getPackageManager();
-            try {
-                // 申请su权限
-                Process process = Runtime.getRuntime().exec("su");
-                dataOutputStream = new DataOutputStream(process.getOutputStream());
-                // 执行pm install命令
-                String command = "pm " + cmd + "\n";
-                dataOutputStream.write(command.getBytes(Charset.forName("utf-8")));
-                dataOutputStream.flush();
-                dataOutputStream.writeBytes("exit\n");
-                dataOutputStream.flush();
-                int i = process.waitFor();
-                if (i == 0) { // 正确获取root权限
-                    appList = new ArrayList<>();
-                    if (cmd.contains(COMMAND_APP_LIST)) { // 获取应用
-                        String msg = "";
-                        BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                        while ((msg = br.readLine()) != null) {
-                            ApplicationInfo applicationInfo = packageManager.getPackageInfo(msg.replace("package:", ""), 0).applicationInfo;
-                            appList.add(getAppInfo(applicationInfo, packageManager));
-                        }
-                    } else {
-                        // 停用or启用or卸载
-                        MyLogger.e(cmd + " success");
-                    }
-                }
-            } catch (Exception e) {
-                MyLogger.e(e.getMessage());
-            } finally {
-                try {
-                    if (dataOutputStream != null) {
-                        dataOutputStream.close();
-                    }
-                    if (errorStream != null) {
-                        errorStream.close();
-                    }
-                } catch (IOException e) {
-                    MyLogger.e(e.getMessage());
-                }
-            }
-            return appList;
-        }
-
-        @Override
-        protected void onPostExecute(List<AppInfo> list) {
-            Context context = weakReference.get();
-            if (context instanceof BaseActivity || context instanceof RootActionIntentService) {
-                if (context == null) {
-                    return;
-                }
-            }
-            if (callback != null) {
-                if (list != null) {
-                    if (list.isEmpty() && list.size() == 0) {
-                        callback.onRootSuccess();
-                    } else {
-                        callback.onRootAppsLoaded(list);
-                    }
-                } else {
-                    callback.onRootError();
-                }
-            }
-        }
-    }
-
-    /**
-     * 应用程序运行命令获取 Root权限，设备必须已破解(获得ROOT权限)
-     * <p>
-     * command 命令： String apkRoot="chmod 777 "+getPackageCodePath();
-     * RootCommand(apkRoot);
-     *
-     * @return 应用程序是/否获取Root权限
-     */
-    public void getRoot(final GetRootCallback callback) {
-        GetRootAsyncTask getRootAsyncTask = new GetRootAsyncTask(mContext, callback);
+    public void getRoot(String cmd, final GetRootCallback callback) {
+        GetRootAsyncTask getRootAsyncTask = new GetRootAsyncTask(mContext, cmd, callback);
         getRootAsyncTask.execute();
     }
 
@@ -288,10 +246,12 @@ public class AppsRepository {
         private Context context;
         private GetRootCallback callback;
         private WeakReference<Context> weakReference;
+        private String cmd;
 
-        public GetRootAsyncTask(Context context, GetRootCallback callback) {
+        public GetRootAsyncTask(Context context, String cmd, GetRootCallback callback) {
             this.context = context;
             this.callback = callback;
+            this.cmd = cmd;
             weakReference = new WeakReference<>(context);
         }
 
@@ -302,7 +262,7 @@ public class AppsRepository {
             try {
                 process = Runtime.getRuntime().exec("su");
                 os = new DataOutputStream(process.getOutputStream());
-                os.writeBytes("chmod 777 " + context.getPackageCodePath() + "\n");
+                os.writeBytes(cmd + "\n");
                 os.writeBytes("exit\n");
                 os.flush();
                 int i = process.waitFor();
@@ -344,7 +304,7 @@ public class AppsRepository {
     private static class AccessibilityAsyncTask extends AsyncTask<Boolean, Object, Boolean> {
 
         String cmd1 = "settings put secure enabled_accessibility_services " +
-                "com.sscience.stopapp/com.sscience.stopapp.widget.MyAccessibilityService";
+                "com.sscience.stopapp/com.sscience.stopapp.service.MyAccessibilityService";
         String cmd2 = "settings put secure accessibility_enabled 1";
         private Context mContext;
         private WeakReference<Context> weakReference;
@@ -394,6 +354,86 @@ public class AppsRepository {
                 callback.onRoot(isRoot);
             }
         }
+    }
+
+    /**
+     * 通过XML解析AndroidManifest.xml获取组件信息
+     *
+     * @param packageName
+     * @param tabCategory
+     * @return
+     */
+    public List<ComponentInfo> getComponentInfo(String packageName, int tabCategory) {
+        PackageManager packageManager = mContext.getPackageManager();
+        List<ComponentInfo> componentInfoList = new ArrayList();
+        try {
+            Context createPackageContext = mContext.createPackageContext(packageName, 0);
+            AssetManager assets = createPackageContext.getAssets();
+            XmlResourceParser openXmlResourceParser = assets.openXmlResourceParser(
+                    ((Integer) AssetManager.class.getMethod("addAssetPath", new Class[]{String.class})
+                            .invoke(assets, new Object[]{mContext.getPackageManager()
+                                    .getApplicationInfo(packageName, 0).sourceDir})).intValue()
+                    , "AndroidManifest.xml");
+            Resources resources = new Resources(assets, createPackageContext.getResources().getDisplayMetrics(), null);
+            while (true) {
+                int next = openXmlResourceParser.next();
+                if (next == XmlResourceParser.END_DOCUMENT) {
+                    break;
+                } else if (next == XmlResourceParser.START_TAG) {
+                    if (!((tabCategory == 0 && openXmlResourceParser.getName().equals("activity"))
+                            || (tabCategory == 0 && openXmlResourceParser.getName().equals("activity-alias"))
+                            || (tabCategory == 1 && openXmlResourceParser.getName().equals("service"))
+                            || (tabCategory == 2 && openXmlResourceParser.getName().equals("receiver"))
+                            || (tabCategory == 3 && openXmlResourceParser.getName().equals("provider")))) {
+                        continue;
+                    }
+                    String attributeValue = openXmlResourceParser.getAttributeValue(
+                            "http://schemas.android.com/apk/res/android", "name");
+                    if (attributeValue == null) {
+                        for (int i2 = 0; i2 < openXmlResourceParser.getAttributeCount(); i2++) {
+                            if (TextUtils.isEmpty(openXmlResourceParser.getAttributeName(i2))) {
+                                int attributeNameResource = openXmlResourceParser.getAttributeNameResource(i2);
+                                if (attributeNameResource != 0 && resources.getResourceEntryName(attributeNameResource).equals("name")) {
+                                    attributeValue = openXmlResourceParser.getAttributeValue(i2);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (attributeValue != null) {
+                        ComponentInfo componentInfo = new ComponentInfo();
+                        String componentName = "";
+                        if (!attributeValue.contains(".")) {
+                            componentName = packageName + "." + attributeValue;
+                        } else if (attributeValue.startsWith(".")) {
+                            componentName = packageName + attributeValue;
+                        } else {
+                            componentName = attributeValue;
+                        }
+                        componentInfo.setComponentName(componentName);
+                        componentInfo.setEnable(packageManager.getComponentEnabledSetting(
+                                new ComponentName(packageName, componentName)) <= 1);
+                        componentInfo.setPackageName(packageName);
+                        componentInfoList.add(componentInfo);
+                    } else {
+                        continue;
+                    }
+                }
+            }
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        } catch (IllegalAccessException e1) {
+            e1.printStackTrace();
+        } catch (InvocationTargetException e1) {
+            e1.printStackTrace();
+        } catch (NoSuchMethodException e1) {
+            e1.printStackTrace();
+        } catch (PackageManager.NameNotFoundException e1) {
+            e1.printStackTrace();
+        } catch (XmlPullParserException e1) {
+            e1.printStackTrace();
+        }
+        return componentInfoList;
     }
 
     public void cancelTask() {
