@@ -100,7 +100,8 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
         if (isAddShortcut) {
             items = new String[]{mAppListActivity.getString(R.string.add_app_app_shortcut)};
         } else {
-            items = new String[]{mAppListActivity.getString(R.string.add_disable_apps), mAppListActivity.getString(R.string.uninstall_app), getString(R.string.component_details)};
+            items = new String[]{mAppListActivity.getString(R.string.add_disable_apps), mAppListActivity.getString(R.string.uninstall_app)};
+//                    , getString(R.string.component_details)};
         }
         builder.setItems(items, new DialogInterface.OnClickListener() {
             @Override

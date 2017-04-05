@@ -1,5 +1,7 @@
 package com.sscience.stopapp.model;
 
+import android.app.Activity;
+import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -286,9 +288,16 @@ public class AppsRepository {
 
         @Override
         protected void onPostExecute(Boolean isRoot) {
-            BaseActivity activity = (BaseActivity) weakReference.get();
-            if (activity != null) {
-                callback.onRoot(isRoot);
+            if (context instanceof Activity) {
+                Activity activity = (Activity) weakReference.get();
+                if (activity != null && callback != null) {
+                    callback.onRoot(isRoot);
+                }
+            } else if (context instanceof Service) {
+                Service service = (Service) weakReference.get();
+                if (service != null && callback != null) {
+                    callback.onRoot(isRoot);
+                }
             }
         }
     }

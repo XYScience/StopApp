@@ -175,6 +175,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                         } catch (CloneNotSupportedException e) {
                             e.printStackTrace();
                         }
+                        int cmdNum = 0;
                         List<AppInfo> appList = new ArrayList<>(((MainActivity) mActivity).getSelection());
                         if (type == 0) { // 停用应用
                             if (appList.isEmpty()) {
@@ -183,6 +184,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                             for (int i = 0; i < appList.size(); i++) {
                                 AppInfo appInfo = appList.get(i);
                                 if (appInfo.isEnable() == 1) {
+                                    cmdNum++;
                                     ((MainActivity) mActivity).getSelection().remove(appInfo);
                                     mListDisableAppsNew.get(mListDisableAppsNew.indexOf(appInfo)).setEnable(0);
                                     pmCommand(AppsRepository.COMMAND_DISABLE + appInfo.getAppPackageName(),
@@ -195,6 +197,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                             for (int i = 0; i < appList.size(); i++) {
                                 AppInfo appInfo = appList.get(i);
                                 if (appInfo.isEnable() == 0) {
+                                    cmdNum++;
                                     ((MainActivity) mActivity).getSelection().remove(appInfo);
                                     mListDisableAppsNew.get(mListDisableAppsNew.indexOf(appInfo)).setEnable(1);
                                     pmCommand(AppsRepository.COMMAND_ENABLE + appInfo.getAppPackageName(),
@@ -207,6 +210,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                             for (int i = 0; i < appList.size(); i++) {
                                 AppInfo appInfo = appList.get(i);
                                 if (appInfo.isEnable() == 0) {
+                                    cmdNum++;
                                     pmCommand(AppsRepository.COMMAND_ENABLE + appInfo.getAppPackageName(),
                                             CMD_FLAG_BATCH_APPS, null, -1);
                                 }
@@ -222,7 +226,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                                 mView.getRootSuccess(null, mListDisableApps, mListDisableAppsNew);
                                 mListDisableApps = mListDisableAppsNew;
                             }
-                        }, 2000);
+                        }, cmdNum < 2 ? 1000 : 2000);
                     }
                 });
     }

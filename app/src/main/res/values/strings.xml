@@ -27,7 +27,7 @@
     <string name="if_want_to_use_please_grant_app_root">暂时没有root权限！请授予本应用root权限！</string>
     <string name="quick_disable">一键停用</string>
     <string name="quick_enable">一键启用</string>
-    <string name="no_disable_apps">什么鬼都没有啊(ˉ▽ˉ)</string>
+    <string name="no_disable_apps">暂时没有停用应用(ˉ▽ˉ)</string>
     <string name="add">添加</string>
     <string name="add_apps">添加应用</string>
     <string name="add_finish">添加完成！</string>
