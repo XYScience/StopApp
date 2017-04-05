@@ -71,7 +71,11 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
         mAppsRepository.getApps(appFlag, new GetAppsCallback() {
             @Override
             public void onAppsLoaded(List<AppInfo> appList) {
-                getDisableApps(appList, true);
+                if (appList == null) {
+                    mView.getRootError();
+                } else {
+                    getDisableApps(appList, true);
+                }
             }
         });
     }
