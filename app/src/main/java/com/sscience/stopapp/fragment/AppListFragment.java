@@ -2,6 +2,7 @@ package com.sscience.stopapp.fragment;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DividerItemDecoration;
@@ -12,6 +13,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.science.baserecyclerviewadapter.interfaces.OnItemClickListener;
 import com.science.myloggerlibrary.MyLogger;
@@ -185,8 +188,16 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
         inflater.inflate(R.menu.menu_search, menu);
         MenuItem searchMenuItem = menu.findItem(R.id.menu_search);
         SearchView searchView = (SearchView) searchMenuItem.getActionView();
+        searchView.setQueryHint(getString(R.string.search_hint));
+        searchView.setIconifiedByDefault(false);
+        ImageView search_mag_icon = (ImageView) searchView.findViewById(R.id.search_mag_icon);
+        search_mag_icon.setImageResource(0);
+        LinearLayout search_plate = (LinearLayout) searchView.findViewById(R.id.search_plate);
+        search_plate.setBackgroundColor(Color.TRANSPARENT);
         searchView.setOnQueryTextListener(mQueryListener);
     }
+
+    private boolean isFirstOpenSearch;
 
     SearchView.OnQueryTextListener mQueryListener = new SearchView.OnQueryTextListener() {
         @Override
@@ -197,7 +208,11 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
         @Override
         public boolean onQueryTextChange(String newText) {
             // newText is text entered by user to SearchView
-            mAppListAdapter.getFilter().filter(newText);
+            if (isFirstOpenSearch) {
+                mAppListAdapter.getFilter().filter(newText);
+            } else {
+                isFirstOpenSearch = true;
+            }
             return true;
         }
     };

@@ -85,5 +85,6 @@
     <string name="component_receiver">广播接收器</string>
     <string name="component_provider">内容提供者</string>
     <string name="no_data">没有任何数据！</string>
+    <string name="search_hint">按应用名搜索</string>
 
 </resources>

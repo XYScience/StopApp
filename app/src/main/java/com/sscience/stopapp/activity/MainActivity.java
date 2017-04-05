@@ -1,6 +1,7 @@
 package com.sscience.stopapp.activity;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
@@ -10,6 +11,7 @@ import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -152,18 +154,22 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         MenuItem searchMenuItem = menu.findItem(R.id.menu_search);
         mSearchView = (SearchView) searchMenuItem.getActionView();
+        mSearchView.setQueryHint(getString(R.string.search_hint));
+        mSearchView.setIconifiedByDefault(false);
+        ImageView search_mag_icon = (ImageView) mSearchView.findViewById(R.id.search_mag_icon);
+        search_mag_icon.setImageResource(0);
+        LinearLayout search_plate = (LinearLayout) mSearchView.findViewById(R.id.search_plate);
+        search_plate.setBackgroundColor(Color.TRANSPARENT);
         mSearchView.setOnQueryTextListener(mQueryListener);
-//        // Get the search close button image view
-//        ImageView closeButton = (ImageView) mSearchView.findViewById(R.id.search_close_btn);
-//        // Set on click listener
-//        closeButton.setOnClickListener(mCloseListener);
         return true;
     }
+
+    private boolean isFirstOpenSearch;
 
     SearchView.OnQueryTextListener mQueryListener = new SearchView.OnQueryTextListener() {
         @Override
         public boolean onQueryTextSubmit(String query) {
-            return false;
+            return true;
         }
 
         @Override
@@ -171,21 +177,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 //            newText is text entered by user to SearchView
 //            if (!TextUtils.isEmpty(newText.trim())) {
 //            }
-            mMainFragment.mDisableAppAdapter.getFilter().filter(newText);
+            if (isFirstOpenSearch) {
+                mMainFragment.mDisableAppAdapter.getFilter().filter(newText);
+            } else {
+                isFirstOpenSearch = true;
+            }
             return true;
         }
     };
-
-//    View.OnClickListener mCloseListener = new View.OnClickListener() {
-//        @Override
-//        public void onClick(View v) {
-//            //Find EditText view
-//            EditText et = (EditText) mSearchView.findViewById(R.id.search_src_text);
-//            //Clear the text from EditText view
-//            et.setText("");
-//            mMainFragment.mDisableAppAdapter.getFilter().filter("");
-//        }
-//    };
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

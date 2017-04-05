@@ -85,5 +85,6 @@
     <string name="component_receiver">Receiver</string>
     <string name="component_provider">Provider</string>
     <string name="no_data">No data!</string>
+    <string name="search_hint">search by app name</string>
 
 </resources>
