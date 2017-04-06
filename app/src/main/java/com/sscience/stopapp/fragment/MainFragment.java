@@ -171,10 +171,15 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
 
     @Override
     public void getApps(List<AppInfo> appList) {
-        mAppList = appList;
-        mDisableAppAdapter.setData(false, mAppList);
-        setSwipeRefreshEnable(false);
-        setRefreshing(false);
+        if (appList.isEmpty()) {
+            mDisableAppAdapter.showLoadFailed(R.drawable.empty, getResources().getString(R.string.no_disable_apps), "");
+            snackBarShow(mMainActivity.mCoordinatorLayout, getString(R.string.no_disable_apps));
+        } else {
+            mAppList = appList;
+            mDisableAppAdapter.setData(false, mAppList);
+            setSwipeRefreshEnable(false);
+            setRefreshing(false);
+        }
     }
 
     /**
@@ -269,7 +274,7 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
     @Override
     public void getRootError() {
         setRefreshing(false);
-        mDisableAppAdapter.showLoadFailed();
+        mDisableAppAdapter.showLoadFailed(R.drawable.empty, getString(R.string.if_want_to_use_please_grant_app_root), "");
         snackBarShow(mMainActivity.mCoordinatorLayout, getString(R.string.if_want_to_use_please_grant_app_root));
     }
 
