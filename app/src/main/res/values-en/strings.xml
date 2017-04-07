@@ -86,5 +86,7 @@
     <string name="component_provider">Provider</string>
     <string name="no_data">No data!</string>
     <string name="search_hint">search by app name</string>
+    <string name="whether_uninstall_app">Do you want to uninstall the [%s] ?</string>
+    <string name="app">app</string>
 
 </resources>

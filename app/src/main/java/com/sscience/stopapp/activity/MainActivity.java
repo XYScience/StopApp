@@ -1,5 +1,6 @@
 package com.sscience.stopapp.activity;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -7,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -93,7 +95,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 mMainFragment.batchApps(1);
                 break;
             case R.id.ll_uninstall_app:
-                mMainFragment.uninstallApp();
+                uninstallApp();
                 break;
             case R.id.ll_add_shortcut:
                 for (AppInfo appInfo : mSelection) {
@@ -119,6 +121,24 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 break;
 
         }
+    }
+
+    private void uninstallApp() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.uninstall_app);
+        String appName = getString(R.string.app);
+        for (AppInfo appInfo : mSelection) {
+            appName = appInfo.getAppName();
+        }
+        builder.setMessage(getString(R.string.whether_uninstall_app, appName));
+        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                mMainFragment.uninstallApp();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, null);
+        builder.show();
     }
 
     public Set<AppInfo> getSelection() {

@@ -134,13 +134,13 @@ public class SettingActivity extends BaseActivity {
                             mSwitchAutoDisableApps.setChecked(!spAutoDisable);
                         } else {
                             mSwitchAutoDisableApps.setChecked(spAutoDisable);
+                            snackBarShow(mCoordinatorLayout, getString(R.string.if_want_to_use_please_grant_app_root));
                         }
                     }
                 });
                 break;
         }
     }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

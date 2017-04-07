@@ -172,7 +172,8 @@ public class AppsRepository {
                         break;
                     }
                     if (!app.packageName.equals(context.getPackageName())) {
-                        if (!app.packageName.contains("supersu")) {
+                        // 目前还不知道有什么办法知道app是授权管理~~
+                        if (!app.packageName.contains("supersu") || !app.packageName.contains("kingroot")) {
                             appInfos.add(getAppInfo(app, packageManager));
                         }
                     }

@@ -86,5 +86,7 @@
     <string name="component_provider">内容提供者</string>
     <string name="no_data">没有任何数据！</string>
     <string name="search_hint">按应用名搜索</string>
+    <string name="whether_uninstall_app">确认卸载 [%s] 吗？</string>
+    <string name="app">应用</string>
 
 </resources>
