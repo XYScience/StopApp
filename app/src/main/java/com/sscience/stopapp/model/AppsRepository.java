@@ -51,6 +51,7 @@ public class AppsRepository {
     public static final String COMMAND_ENABLE = "pm enable ";
     public static final String COMMAND_UNINSTALL = "pm uninstall ";
     public static final String COMMAND_GET_ROOT = "chmod 777 ";
+    private static String[] strRootManagerApp = new String[]{"com.sscience.stopapp", "eu.chainfire.supersu", "me.phh.superuser", "com.koushikdutta.superuser", "com.noshufou.android.su", "com.qihoo.permmgr", "com.kingroot.kinguser", "com.kingoapp.root", "com.shuame.rootgenius", "com.dianxinos.superuser", "com.miui.securitycenter", "com.miui.uac"};
     private Context mContext;
     private GetAppsAsyncTask mGetAppsAsyncTask;
     private AccessibilityAsyncTask mAccessibilityAsyncTask;
@@ -171,11 +172,9 @@ public class AppsRepository {
                     if (asyncTask.isCancelled()) {
                         break;
                     }
-                    if (!app.packageName.equals(context.getPackageName())) {
-                        // 目前还不知道有什么办法知道app是授权管理~~
-                        if (!app.packageName.contains("supersu") || !app.packageName.contains("kingroot")) {
-                            appInfos.add(getAppInfo(app, packageManager));
-                        }
+                    // 目前还不知道有什么办法知道app是授权管理~~
+                    if (!containsRootApp(app.packageName)) {
+                        appInfos.add(getAppInfo(app, packageManager));
                     }
                 }
                 return appInfos;
@@ -186,7 +185,9 @@ public class AppsRepository {
                         break;
                     }
                     if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                        appInfos.add(getAppInfo(app, packageManager));
+                        if (!containsRootApp(app.packageName)) {
+                            appInfos.add(getAppInfo(app, packageManager));
+                        }
                     }
                 }
                 return appInfos;
@@ -197,10 +198,8 @@ public class AppsRepository {
                         break;
                     }
                     if ((app.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
-                        if (!app.packageName.equals(context.getPackageName())) {
-                            if (!app.packageName.contains("supersu")) {
-                                appInfos.add(getAppInfo(app, packageManager));
-                            }
+                        if (!containsRootApp(app.packageName)) {
+                            appInfos.add(getAppInfo(app, packageManager));
                         }
                     }
                 }
@@ -208,6 +207,19 @@ public class AppsRepository {
             default:
                 return appInfos;
         }
+    }
+
+    /**
+     * 使用一个简单的循环方法比使用任何集合都更加高效
+     * @param targetValue
+     * @return
+     */
+    private static boolean containsRootApp(String targetValue) {
+        for (String s : strRootManagerApp) {
+            if (s.equals(targetValue))
+                return true;
+        }
+        return false;
     }
 
     private static AppInfo getAppInfo(ApplicationInfo applicationInfo, PackageManager packageManager) {
@@ -313,9 +325,9 @@ public class AppsRepository {
 
     private static class AccessibilityAsyncTask extends AsyncTask<Boolean, Object, Boolean> {
 
-        String cmd1 = "settings put secure enabled_accessibility_services " +
+        String cmd1 = "settings put secure accessibility_enabled 1";
+        String cmd2 = "settings put secure enabled_accessibility_services " +
                 "com.sscience.stopapp/com.sscience.stopapp.service.MyAccessibilityService";
-        String cmd2 = "settings put secure accessibility_enabled 1";
         private Context mContext;
         private WeakReference<Context> weakReference;
         private GetRootCallback callback;
