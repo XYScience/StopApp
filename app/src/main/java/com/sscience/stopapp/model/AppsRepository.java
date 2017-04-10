@@ -1,5 +1,6 @@
 package com.sscience.stopapp.model;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Activity;
 import android.app.Service;
 import android.content.ComponentName;
@@ -15,6 +16,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.text.TextUtils;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 
 import com.science.myloggerlibrary.MyLogger;
 import com.sscience.stopapp.base.BaseActivity;
@@ -32,6 +35,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.content.Context.ACCESSIBILITY_SERVICE;
 
 /**
  * @author SScience
@@ -211,6 +216,7 @@ public class AppsRepository {
 
     /**
      * 使用一个简单的循环方法比使用任何集合都更加高效
+     *
      * @param targetValue
      * @return
      */
@@ -325,9 +331,10 @@ public class AppsRepository {
 
     private static class AccessibilityAsyncTask extends AsyncTask<Boolean, Object, Boolean> {
 
-        String cmd1 = "settings put secure accessibility_enabled 1";
-        String cmd2 = "settings put secure enabled_accessibility_services " +
+        String cmd1 = "settings put secure enabled_accessibility_services " +
                 "com.sscience.stopapp/com.sscience.stopapp.service.MyAccessibilityService";
+        String cmd2 = "settings put secure accessibility_enabled 1";
+        private StringBuilder sb;
         private Context mContext;
         private WeakReference<Context> weakReference;
         private GetRootCallback callback;
@@ -335,8 +342,17 @@ public class AppsRepository {
 
         public AccessibilityAsyncTask(Context context, GetRootCallback callback) {
             mContext = context;
-            weakReference = new WeakReference<>(context);
+            this.weakReference = new WeakReference<>(context);
             this.callback = callback;
+            sb = new StringBuilder();
+            sb.append(cmd1);
+            for (AccessibilityServiceInfo serviceInfo : ((AccessibilityManager) context.getSystemService(ACCESSIBILITY_SERVICE))
+                    .getEnabledAccessibilityServiceList(AccessibilityEvent.TYPES_ALL_MASK)) {
+                // 注：必须为"settings put secure enabled_accessibility_services " + 包名 + "/" + 完整类名（包含包名），
+                // 如果类名不包含包名，则无障碍列表正常是开启，点击进去详情则是关闭状态。
+                String[] s = serviceInfo.getId().split("/");
+                sb.append(":").append(s[0]).append("/").append(s[0]).append(s[1]);
+            }
         }
 
         @Override
@@ -346,7 +362,7 @@ public class AppsRepository {
             try {
                 process = Runtime.getRuntime().exec("su");
                 os = new DataOutputStream(process.getOutputStream());
-                os.writeBytes(cmd1 + "\n");
+                os.writeBytes(sb.toString() + "\n");
                 os.writeBytes(cmd2 + "\n");
                 os.writeBytes("exit\n");
                 os.flush();
