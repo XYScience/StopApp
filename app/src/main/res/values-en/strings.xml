@@ -64,6 +64,9 @@
     <string name="cancel_select">Deselect</string>
     <string name="enable_app">Enable App</string>
     <string name="add_shortcut">Add Shortcut</string>
+    <string name="custom_app">Custom app</string>
+    <string name="custom_app_logo">Custom logo</string>
+    <string name="custom_app_name">Custom app name</string>
     <string name="remove_list">Remove from List</string>
     <string name="quit_again">Press again to exit the app</string>
     <string name="add_shortcut_success">Successfully created shortcuts!</string>

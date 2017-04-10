@@ -38,10 +38,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private MainFragment mMainFragment;
     private Set<AppInfo> mSelection; // 选择要操作的app(停用or移除列表)
     public MoveFloatingActionButton mFabDisable;
-    public LinearLayout mLlEnableApp, mLlUninstallApp, mLlAddShortcut, mLlRemoveList, mLlCancelSelect;
+    public LinearLayout mLlEnableApp, mLlAddShortcut, mLlCustomApp, mLlRemoveList, mLlUninstallApp, mLlCancelSelect;
     private long exitTime = 0;
     public String mRootStr;
-    private SearchView mSearchView;
 
     @Override
     protected int getContentLayout() {
@@ -56,9 +55,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
         mFabDisable = (MoveFloatingActionButton) findViewById(R.id.fab_disable);
         mLlEnableApp = (LinearLayout) findViewById(R.id.ll_enable_app);
-        mLlUninstallApp = (LinearLayout) findViewById(R.id.ll_uninstall_app);
         mLlAddShortcut = (LinearLayout) findViewById(R.id.ll_add_shortcut);
+        mLlCustomApp = (LinearLayout) findViewById(R.id.ll_custom_app);
         mLlRemoveList = (LinearLayout) findViewById(R.id.ll_remove_list);
+        mLlUninstallApp = (LinearLayout) findViewById(R.id.ll_uninstall_app);
         mLlCancelSelect = (LinearLayout) findViewById(R.id.ll_cancel_select);
         mSelection = new HashSet<>();
         mRootStr = getString(R.string.operate_success);
@@ -94,9 +94,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 mRootStr = getString(R.string.enable_app_success);
                 mMainFragment.batchApps(1);
                 break;
-            case R.id.ll_uninstall_app:
-                uninstallApp();
-                break;
             case R.id.ll_add_shortcut:
                 for (AppInfo appInfo : mSelection) {
                     CommonUtil.addDesktopShortcut(this, appInfo);
@@ -106,9 +103,15 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 checkSelection();
                 snackBarShow(mCoordinatorLayout, getString(R.string.add_shortcut_success));
                 break;
+            case R.id.ll_custom_app:
+                customApp();
+                break;
             case R.id.ll_remove_list:
                 mRootStr = getString(R.string.remove_list_success);
                 mMainFragment.batchApps(2);
+                break;
+            case R.id.ll_uninstall_app:
+                uninstallApp();
                 break;
             case R.id.ll_cancel_select:
                 mSelection.clear();
@@ -121,6 +124,21 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 break;
 
         }
+    }
+
+    private void customApp() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.custom_app);
+        String[] items = new String[]{getString(R.string.custom_app_logo), getString(R.string.custom_app_name)};
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                mMainFragment.customApp(i);
+                dialogInterface.dismiss();
+
+            }
+        });
+        builder.show();
     }
 
     private void uninstallApp() {
@@ -154,8 +172,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         } else {
             if (mSelection.size() == 1) {
                 mLlUninstallApp.setVisibility(View.VISIBLE);
+                mLlCustomApp.setVisibility(View.VISIBLE);
             } else {
                 mLlUninstallApp.setVisibility(View.GONE);
+                mLlCustomApp.setVisibility(View.GONE);
             }
             for (AppInfo appInfo : mSelection) {
                 if (appInfo.isEnable() == 0) {
@@ -173,14 +193,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         MenuItem searchMenuItem = menu.findItem(R.id.menu_search);
-        mSearchView = (SearchView) searchMenuItem.getActionView();
-        mSearchView.setQueryHint(getString(R.string.search_hint));
-        mSearchView.setIconifiedByDefault(false);
-        ImageView search_mag_icon = (ImageView) mSearchView.findViewById(R.id.search_mag_icon);
+        SearchView searchView = (SearchView) searchMenuItem.getActionView();
+        searchView.setQueryHint(getString(R.string.search_hint));
+        searchView.setIconifiedByDefault(false);
+        ImageView search_mag_icon = (ImageView) searchView.findViewById(R.id.search_mag_icon);
         search_mag_icon.setImageResource(0);
-        LinearLayout search_plate = (LinearLayout) mSearchView.findViewById(R.id.search_plate);
+        LinearLayout search_plate = (LinearLayout) searchView.findViewById(R.id.search_plate);
         search_plate.setBackgroundColor(Color.TRANSPARENT);
-        mSearchView.setOnQueryTextListener(mQueryListener);
+        searchView.setOnQueryTextListener(mQueryListener);
         return true;
     }
 

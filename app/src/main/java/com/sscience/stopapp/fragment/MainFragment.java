@@ -214,6 +214,24 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         }
     }
 
+    /**
+     * 自定义app
+     */
+    public void customApp(int i) {
+        for (int position = 0; position < mAppList.size(); position++) {
+            AppInfo appInfo = mAppList.get(position);
+            if (mMainActivity.getSelection().contains(mAppList.get(position))) {
+                if (i == 0) {
+
+                } else {
+                    appInfo.setAppName("Test");
+                    mDisableAppAdapter.updateItem(position, appInfo);
+                }
+                break;
+            }
+        }
+    }
+
     @Override
     public void getRootSuccess(AppInfo appInfo, List<AppInfo> apps, List<AppInfo> appsNew) {
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffCallBack(apps, appsNew), false);

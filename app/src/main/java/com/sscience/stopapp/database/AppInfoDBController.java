@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 
 import com.science.myloggerlibrary.MyLogger;
 import com.sscience.stopapp.bean.AppInfo;
@@ -29,6 +30,12 @@ public class AppInfoDBController {
         mSQLiteDatabase = openHelper.getWritableDatabase();
     }
 
+    /**
+     * 获取主页停用列表apps
+     *
+     * @param tableName
+     * @return
+     */
     public List<AppInfo> getDisableApps(String tableName) {
         final Cursor cursor = mSQLiteDatabase.rawQuery("SELECT * FROM " + tableName, null);
 
@@ -55,6 +62,13 @@ public class AppInfoDBController {
         return list;
     }
 
+    /**
+     * 搜索app
+     *
+     * @param tableName
+     * @param packageName
+     * @return
+     */
     public boolean searchApp(String tableName, String packageName) {
         boolean isExist = false;
         Cursor cursor = null;
@@ -72,6 +86,12 @@ public class AppInfoDBController {
         return isExist;
     }
 
+    /**
+     * 添加app
+     *
+     * @param appInfo
+     * @param tableName
+     */
     public void addDisableApp(AppInfo appInfo, String tableName) {
         ContentValues cv = new ContentValues();
         cv.put(AppInfo.APP_PACKAGE_NAME, appInfo.getAppPackageName());
@@ -82,20 +102,64 @@ public class AppInfoDBController {
         mSQLiteDatabase.insert(tableName, null, cv);
     }
 
+    /**
+     * 删除app
+     *
+     * @param packageName
+     * @param tableName
+     */
     public void deleteDisableApp(String packageName, String tableName) {
         String deleteQuery = "DELETE FROM " + tableName
                 + " where " + AppInfo.APP_PACKAGE_NAME + " = '" + packageName + "'";
         mSQLiteDatabase.execSQL(deleteQuery);
     }
 
+    /**
+     * 清空表
+     *
+     * @param tableName
+     */
     public void clearDisableApp(String tableName) {
         String deleteQuery = "DELETE FROM " + tableName;
         mSQLiteDatabase.execSQL(deleteQuery);
     }
 
+    /**
+     * 更新app是否停用
+     *
+     * @param packageName
+     * @param isEnable
+     * @param tableName
+     */
     public void updateDisableApp(String packageName, int isEnable, String tableName) {
         ContentValues cv = new ContentValues();
         cv.put(AppInfo.IS_ENABLE, isEnable);
+        String[] args = {packageName};
+        mSQLiteDatabase.update(tableName, cv, AppInfo.APP_PACKAGE_NAME + "=?", args);
+    }
+
+    /**
+     * 更新app名
+     * @param packageName
+     * @param appName
+     * @param tableName
+     */
+    public void updateAppName(String packageName, int appName, String tableName) {
+        ContentValues cv = new ContentValues();
+        cv.put(AppInfo.APP_NAME, appName);
+        String[] args = {packageName};
+        mSQLiteDatabase.update(tableName, cv, AppInfo.APP_PACKAGE_NAME + "=?", args);
+    }
+
+    /**
+     * 更新app logo
+     * @param packageName
+     * @param appIcon
+     * @param tableName
+     */
+    public void updateAppIcon(String packageName, Bitmap appIcon, String tableName) {
+        ContentValues cv = new ContentValues();
+        cv.put(AppInfo.APP_ICON, CommonUtil.getBytes(appIcon));
         String[] args = {packageName};
         mSQLiteDatabase.update(tableName, cv, AppInfo.APP_PACKAGE_NAME + "=?", args);
     }
