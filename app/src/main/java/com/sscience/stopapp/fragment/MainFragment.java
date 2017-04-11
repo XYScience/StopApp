@@ -3,6 +3,9 @@ package com.sscience.stopapp.fragment;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -16,7 +19,6 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.science.baserecyclerviewadapter.interfaces.OnItemClickListener;
-import com.science.myloggerlibrary.MyLogger;
 import com.sscience.stopapp.R;
 import com.sscience.stopapp.activity.MainActivity;
 import com.sscience.stopapp.adapter.DisableAppAdapter;
@@ -31,6 +33,7 @@ import com.sscience.stopapp.widget.DragSelectTouchListener;
 import com.sscience.stopapp.widget.MoveFloatingActionButton;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -260,8 +263,8 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         intent.setDataAndType(uri, "image/*");
         intent.putExtra("aspectX", 1);
         intent.putExtra("aspectY", 1);
-        intent.putExtra("outputX", CommonUtil.dipToPx(mMainActivity, 64));
-        intent.putExtra("outputY", CommonUtil.dipToPx(mMainActivity, 64));
+        intent.putExtra("outputX", CommonUtil.dipToPx(mMainActivity, 48));
+        intent.putExtra("outputY", CommonUtil.dipToPx(mMainActivity, 48));
         intent.putExtra("scale", true); // 去黑边
         intent.putExtra("scaleUpIfNeeded", true); // 去黑边
         intent.putExtra("return-data", false); // 裁剪后的图片以bitmap的形式返回（适合小图）
@@ -273,12 +276,52 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == REQUEST_PICK_IMAGE) {
-                startPhotoZoom(data.getData());
+                // startPhotoZoom(data.getData());
+                // 第二种方法
+                // Bitmap bitmap = BitmapFactory.decodeFile(getRealPathFromURI(data.getData()));
+                Bitmap bitmap = null;
+                try {
+                    bitmap = MediaStore.Images.Media.getBitmap(
+                            mMainActivity.getContentResolver(), data.getData());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                for (int i = 0; i < mAppList.size(); i++) {
+                    AppInfo appInfo = mAppList.get(i);
+                    if (mMainActivity.getSelection().contains(appInfo)) {
+                        appInfo.setAppIcon(bitmap);
+                        mDisableAppAdapter.updateItem(i, appInfo);
+                        mPresenter.updateAppIcon(appInfo.getAppPackageName(), bitmap);
+                        break;
+                    }
+                }
             } else if (requestCode == REQUEST_CROP_IMAGE) {
-                // uri.getPath():Uri.fromFile(File file)生成的uri
-                File file = new File(data.getData().getPath());
-                MyLogger.e("result:" + CommonUtil.formatSize(mMainActivity, String.valueOf(file.length())));
+                // uri.getPath():Uri.fromFile(File file)生成的file-uri
+                Bitmap bitmap = BitmapFactory.decodeFile(getRealPathFromURI(data.getData()));
+                for (int i = 0; i < mAppList.size(); i++) {
+                    AppInfo appInfo = mAppList.get(i);
+                    if (mMainActivity.getSelection().contains(appInfo)) {
+                        appInfo.setAppIcon(bitmap);
+                        mDisableAppAdapter.updateItem(i, appInfo);
+                        mPresenter.updateAppIcon(appInfo.getAppPackageName(), bitmap);
+                        break;
+                    }
+                }
             }
+        }
+    }
+
+    //file uri to real location in filesystem
+    public String getRealPathFromURI(Uri contentURI) {
+        Cursor cursor = mMainActivity.getContentResolver().query(contentURI, null, null, null, null);
+        if (cursor == null) {
+            // Uri.fromFile(File file)生成的file://uri
+            return contentURI.getPath();
+        } else {
+            // content://uri
+            cursor.moveToFirst();
+            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+            return cursor.getString(idx);
         }
     }
 
