@@ -1,5 +1,7 @@
 package com.sscience.stopapp.presenter;
 
+import android.graphics.Bitmap;
+
 import com.sscience.stopapp.base.BasePresenter;
 import com.sscience.stopapp.base.BaseView;
 import com.sscience.stopapp.bean.AppInfo;
@@ -79,6 +81,10 @@ public interface DisableAppsContract {
         List<String> getDisableAppPackageNames();
 
         void uninstallApp(AppInfo appInfo, int position);
+
+        void updateAppName(String packageName, String appName);
+
+        void updateAppIcon(String packageName,  Bitmap appIcon);
 
         void cancelTask();
     }

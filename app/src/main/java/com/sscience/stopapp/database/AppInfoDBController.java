@@ -144,7 +144,7 @@ public class AppInfoDBController {
      * @param appName
      * @param tableName
      */
-    public void updateAppName(String packageName, int appName, String tableName) {
+    public void updateAppName(String packageName, String appName, String tableName) {
         ContentValues cv = new ContentValues();
         cv.put(AppInfo.APP_NAME, appName);
         String[] args = {packageName};

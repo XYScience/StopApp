@@ -104,7 +104,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 snackBarShow(mCoordinatorLayout, getString(R.string.add_shortcut_success));
                 break;
             case R.id.ll_custom_app:
-                customApp();
+                mMainFragment.customApp();
                 break;
             case R.id.ll_remove_list:
                 mRootStr = getString(R.string.remove_list_success);
@@ -124,21 +124,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 break;
 
         }
-    }
-
-    private void customApp() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.custom_app);
-        String[] items = new String[]{getString(R.string.custom_app_logo), getString(R.string.custom_app_name)};
-        builder.setItems(items, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                mMainFragment.customApp(i);
-                dialogInterface.dismiss();
-
-            }
-        });
-        builder.show();
     }
 
     private void uninstallApp() {

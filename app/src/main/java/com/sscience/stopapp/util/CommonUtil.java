@@ -10,6 +10,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
+import android.text.format.Formatter;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
@@ -95,6 +97,16 @@ public class CommonUtil {
     // convert from byte array to bitmap
     public static Bitmap getImage(byte[] image) {
         return BitmapFactory.decodeByteArray(image, 0, image.length);
+    }
+
+    /**
+     * 根据文件大小自动转化为KB, MB, GB
+     *
+     * @param size
+     * @return
+     */
+    public static String formatSize(Context context, String size) {
+        return Formatter.formatFileSize(context, Long.valueOf(TextUtils.isEmpty(size) ? "0" : size));
     }
 
     /**

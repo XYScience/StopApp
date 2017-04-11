@@ -91,5 +91,6 @@
     <string name="search_hint">search by app name</string>
     <string name="whether_uninstall_app">Do you want to uninstall the [%s] ?</string>
     <string name="app">app</string>
+    <string name="enter_app_name">Enter custom app name</string>
 
 </resources>

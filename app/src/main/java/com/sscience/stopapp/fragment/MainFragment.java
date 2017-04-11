@@ -1,13 +1,22 @@
 package com.sscience.stopapp.fragment;
 
+import android.app.Activity;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.EditText;
 
 import com.science.baserecyclerviewadapter.interfaces.OnItemClickListener;
+import com.science.myloggerlibrary.MyLogger;
 import com.sscience.stopapp.R;
 import com.sscience.stopapp.activity.MainActivity;
 import com.sscience.stopapp.adapter.DisableAppAdapter;
@@ -15,11 +24,13 @@ import com.sscience.stopapp.base.BaseFragment;
 import com.sscience.stopapp.bean.AppInfo;
 import com.sscience.stopapp.presenter.DisableAppsContract;
 import com.sscience.stopapp.service.RootActionIntentService;
+import com.sscience.stopapp.util.CommonUtil;
 import com.sscience.stopapp.util.DiffCallBack;
 import com.sscience.stopapp.util.SharedPreferenceUtil;
 import com.sscience.stopapp.widget.DragSelectTouchListener;
 import com.sscience.stopapp.widget.MoveFloatingActionButton;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +45,8 @@ import java.util.Set;
 
 public class MainFragment extends BaseFragment implements DisableAppsContract.View {
 
+    private static final int REQUEST_PICK_IMAGE = 0;
+    private static final int REQUEST_CROP_IMAGE = 1;
     private DisableAppsContract.Presenter mPresenter;
     private RecyclerView mRecyclerView;
     public DisableAppAdapter mDisableAppAdapter;
@@ -217,19 +230,80 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
     /**
      * 自定义app
      */
-    public void customApp(int i) {
-        for (int position = 0; position < mAppList.size(); position++) {
-            AppInfo appInfo = mAppList.get(position);
-            if (mMainActivity.getSelection().contains(mAppList.get(position))) {
+    public void customApp() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
+        builder.setTitle(R.string.custom_app);
+        String[] items = new String[]{getString(R.string.custom_app_logo), getString(R.string.custom_app_name)};
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
                 if (i == 0) {
-
+                    customAppLogo();
                 } else {
-                    appInfo.setAppName("Test");
-                    mDisableAppAdapter.updateItem(position, appInfo);
+                    customAppName();
                 }
-                break;
+                dialogInterface.dismiss();
+            }
+        });
+        builder.show();
+    }
+
+    public void customAppLogo() {
+        Intent intentGallery = new Intent(Intent.ACTION_PICK, null);
+        intentGallery.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
+        startActivityForResult(intentGallery, REQUEST_PICK_IMAGE);
+    }
+
+    private void startPhotoZoom(Uri uri) {
+        File file = new File(mMainActivity.getExternalFilesDir("AppLogo"), "/" + "custom_app_logo.png");
+        Intent intent = new Intent("com.android.camera.action.CROP");
+        intent.setDataAndType(uri, "image/*");
+        intent.putExtra("aspectX", 1);
+        intent.putExtra("aspectY", 1);
+        intent.putExtra("outputX", CommonUtil.dipToPx(mMainActivity, 64));
+        intent.putExtra("outputY", CommonUtil.dipToPx(mMainActivity, 64));
+        intent.putExtra("scale", true); // 去黑边
+        intent.putExtra("scaleUpIfNeeded", true); // 去黑边
+        intent.putExtra("return-data", false); // 裁剪后的图片以bitmap的形式返回（适合小图）
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file)); // EXTRA_OUTPUT不需要ContentUri
+        startActivityForResult(intent, REQUEST_CROP_IMAGE);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == REQUEST_PICK_IMAGE) {
+                startPhotoZoom(data.getData());
+            } else if (requestCode == REQUEST_CROP_IMAGE) {
+                // uri.getPath():Uri.fromFile(File file)生成的uri
+                File file = new File(data.getData().getPath());
+                MyLogger.e("result:" + CommonUtil.formatSize(mMainActivity, String.valueOf(file.length())));
             }
         }
+    }
+
+    public void customAppName() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
+        View view = LayoutInflater.from(mMainActivity).inflate(R.layout.dialog_edit_app_name, null);
+        builder.setView(view);
+        final EditText etAppName = (EditText) view.findViewById(R.id.et_app_name);
+        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                for (int i = 0; i < mAppList.size(); i++) {
+                    AppInfo appInfo = mAppList.get(i);
+                    if (mMainActivity.getSelection().contains(appInfo)) {
+                        appInfo.setAppName(etAppName.getText().toString());
+                        mDisableAppAdapter.updateItem(i, appInfo);
+                        mPresenter.updateAppName(appInfo.getAppPackageName(), etAppName.getText().toString());
+                        break;
+                    }
+                }
+                dialog.dismiss();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, null);
+        builder.show();
     }
 
     @Override

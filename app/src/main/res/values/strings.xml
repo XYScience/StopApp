@@ -91,5 +91,6 @@
     <string name="search_hint">按应用名搜索</string>
     <string name="whether_uninstall_app">确认卸载 [%s] 吗？</string>
     <string name="app">应用</string>
+    <string name="enter_app_name">输入应用名</string>
 
 </resources>

@@ -2,6 +2,7 @@ package com.sscience.stopapp.presenter;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.text.TextUtils;
 
@@ -239,6 +240,16 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
     public void uninstallApp(final AppInfo appInfo, final int position) {
         pmCommand(AppsRepository.COMMAND_UNINSTALL + appInfo.getAppPackageName(), CMD_FLAG_UNINSTALL,
                 appInfo, position);
+    }
+
+    @Override
+    public void updateAppName(String packageName, String appName) {
+        mAppInfoDBController.updateAppName(packageName, appName, AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
+    }
+
+    @Override
+    public void updateAppIcon(String packageName, Bitmap appIcon) {
+        mAppInfoDBController.updateAppIcon(packageName, appIcon, AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
     }
 
     @Override
