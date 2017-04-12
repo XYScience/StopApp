@@ -92,5 +92,8 @@
     <string name="whether_uninstall_app">确认卸载 [%s] 吗？</string>
     <string name="app">应用</string>
     <string name="enter_app_name">输入应用名</string>
+    <string name="picture_too_large_please_reselect">选择的图片过大，请重新选择！</string>
+    <string name="grant_app_permissions">自定义图标需要读取图库文件，请授予小黑屋读写权限！</string>
+    <string name="deny_app_permissions">授予读写权限才能自定义图标！</string>
 
 </resources>

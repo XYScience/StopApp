@@ -105,7 +105,15 @@ public abstract class BaseActivity extends AppCompatActivity {
                         public void onClick(DialogInterface dialog, int which) {
                             ActivityCompat.requestPermissions(BaseActivity.this, permissions, REQUEST_PERMISSION_CODE);
                         }
-                    }).setNegativeButton(getString(R.string.deny), null).show();
+                    }).setNegativeButton(getString(R.string.deny), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (mPermissionCallback != null) {
+                        mPermissionCallback.noPermission();
+                        mPermissionCallback = null;
+                    }
+                }
+            }).show();
         } else {
             ActivityCompat.requestPermissions(BaseActivity.this, permissions, REQUEST_PERMISSION_CODE);
         }
@@ -194,6 +202,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     /**
      * view渐显or渐隐动画
+     *
      * @param view
      * @param alpha
      * @param interpolator

@@ -1,9 +1,11 @@
 package com.sscience.stopapp.fragment;
 
+import android.Manifest;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -19,15 +21,18 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.science.baserecyclerviewadapter.interfaces.OnItemClickListener;
+import com.science.myloggerlibrary.MyLogger;
 import com.sscience.stopapp.R;
 import com.sscience.stopapp.activity.MainActivity;
 import com.sscience.stopapp.adapter.DisableAppAdapter;
+import com.sscience.stopapp.base.BaseActivity;
 import com.sscience.stopapp.base.BaseFragment;
 import com.sscience.stopapp.bean.AppInfo;
 import com.sscience.stopapp.presenter.DisableAppsContract;
 import com.sscience.stopapp.service.RootActionIntentService;
 import com.sscience.stopapp.util.CommonUtil;
 import com.sscience.stopapp.util.DiffCallBack;
+import com.sscience.stopapp.util.ImageUtil;
 import com.sscience.stopapp.util.SharedPreferenceUtil;
 import com.sscience.stopapp.widget.DragSelectTouchListener;
 import com.sscience.stopapp.widget.MoveFloatingActionButton;
@@ -50,6 +55,7 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
 
     private static final int REQUEST_PICK_IMAGE = 0;
     private static final int REQUEST_CROP_IMAGE = 1;
+    private static final String SP_LOGO_RULE = "sp_logo_rule";
     private DisableAppsContract.Presenter mPresenter;
     private RecyclerView mRecyclerView;
     public DisableAppAdapter mDisableAppAdapter;
@@ -252,9 +258,37 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
     }
 
     public void customAppLogo() {
-        Intent intentGallery = new Intent(Intent.ACTION_PICK, null);
-        intentGallery.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
-        startActivityForResult(intentGallery, REQUEST_PICK_IMAGE);
+        mMainActivity.performCodeWithPermission(getString(R.string.grant_app_permissions), new BaseActivity.PermissionCallback() {
+            @Override
+            public void hasPermission() {
+                boolean spLogoRule = (boolean) SharedPreferenceUtil.get(mMainActivity, SP_LOGO_RULE, false);
+                if (!spLogoRule) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
+                    builder.setTitle(R.string.tip);
+                    builder.setMessage("选取的图标请按照Google Android启动图标设计规范，大小最好不要超过40kb，以免图标压缩失真！");
+                    builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent intentGallery = new Intent(Intent.ACTION_PICK, null);
+                            intentGallery.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
+                            startActivityForResult(intentGallery, REQUEST_PICK_IMAGE);
+                            SharedPreferenceUtil.put(mMainActivity, SP_LOGO_RULE, true);
+                            dialog.dismiss();
+                        }
+                    });
+                    builder.show();
+                } else {
+                    Intent intentGallery = new Intent(Intent.ACTION_PICK, null);
+                    intentGallery.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
+                    startActivityForResult(intentGallery, REQUEST_PICK_IMAGE);
+                }
+            }
+
+            @Override
+            public void noPermission() {
+                snackBarShow(mMainActivity.mCoordinatorLayout, getString(R.string.deny_app_permissions));
+            }
+        }, Manifest.permission.READ_EXTERNAL_STORAGE);
     }
 
     private void startPhotoZoom(Uri uri) {
@@ -277,15 +311,27 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == REQUEST_PICK_IMAGE) {
                 // startPhotoZoom(data.getData());
-                // 第二种方法
-                // Bitmap bitmap = BitmapFactory.decodeFile(getRealPathFromURI(data.getData()));
-                Bitmap bitmap = null;
-                try {
-                    bitmap = MediaStore.Images.Media.getBitmap(
-                            mMainActivity.getContentResolver(), data.getData());
-                } catch (IOException e) {
-                    e.printStackTrace();
+                File file = new File(ImageUtil.getRealPathFromURI(mMainActivity, data.getData()));
+                MyLogger.e("原文件大小:" + CommonUtil.formatSize(mMainActivity, String.valueOf(file.length())));
+                if (file.length() > 1024 * 1024) {
+                    snackBarShow(mMainActivity.mCoordinatorLayout, getString(R.string.picture_too_large_please_reselect));
+                    return;
                 }
+                Bitmap bitmap = null;
+                if (file.length() < 40 * 1024) {
+                    try {
+                        bitmap = MediaStore.Images.Media.getBitmap(mMainActivity.getContentResolver(), data.getData());
+                        MyLogger.e("不用压缩:" + CommonUtil.formatSize(mMainActivity, String.valueOf(CommonUtil.getBytes(bitmap).length)));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    ActivityManager am = (ActivityManager) mMainActivity.getSystemService(Context.ACTIVITY_SERVICE);
+                    bitmap = ImageUtil.getScaledBitmap(mMainActivity, data.getData(),
+                            am.getLauncherLargeIconSize(), am.getLauncherLargeIconSize());
+                    MyLogger.e("压缩后大小:" + CommonUtil.formatSize(mMainActivity, String.valueOf(CommonUtil.getBytes(bitmap).length)));
+                }
+
                 for (int i = 0; i < mAppList.size(); i++) {
                     AppInfo appInfo = mAppList.get(i);
                     if (mMainActivity.getSelection().contains(appInfo)) {
@@ -297,7 +343,7 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
                 }
             } else if (requestCode == REQUEST_CROP_IMAGE) {
                 // uri.getPath():Uri.fromFile(File file)生成的file-uri
-                Bitmap bitmap = BitmapFactory.decodeFile(getRealPathFromURI(data.getData()));
+                Bitmap bitmap = BitmapFactory.decodeFile(ImageUtil.getRealPathFromURI(mMainActivity, data.getData()));
                 for (int i = 0; i < mAppList.size(); i++) {
                     AppInfo appInfo = mAppList.get(i);
                     if (mMainActivity.getSelection().contains(appInfo)) {
@@ -308,20 +354,6 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
                     }
                 }
             }
-        }
-    }
-
-    //file uri to real location in filesystem
-    public String getRealPathFromURI(Uri contentURI) {
-        Cursor cursor = mMainActivity.getContentResolver().query(contentURI, null, null, null, null);
-        if (cursor == null) {
-            // Uri.fromFile(File file)生成的file://uri
-            return contentURI.getPath();
-        } else {
-            // content://uri
-            cursor.moveToFirst();
-            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-            return cursor.getString(idx);
         }
     }
 
