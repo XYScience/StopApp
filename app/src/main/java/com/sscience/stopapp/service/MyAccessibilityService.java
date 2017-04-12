@@ -2,6 +2,7 @@ package com.sscience.stopapp.service;
 
 import android.accessibilityservice.AccessibilityService;
 import android.content.Intent;
+import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.science.myloggerlibrary.MyLogger;
@@ -42,6 +43,26 @@ public class MyAccessibilityService extends AccessibilityService {
             }
             appsRepository.cancelTask();
         }
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED) {
+            MyLogger.e("click");
+        }
+    }
+
+    @Override
+    public boolean onKeyEvent(KeyEvent event) {
+        MyLogger.e("onKeyEvent");
+        int keyCode = event.getKeyCode();
+
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK:
+                MyLogger.e("Back");
+                break;
+
+            case KeyEvent.KEYCODE_HOME:
+                MyLogger.e("Home");
+                break;
+        }
+        return super.onKeyEvent(event);
     }
 
     @Override

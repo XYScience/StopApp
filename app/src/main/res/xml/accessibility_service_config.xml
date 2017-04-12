@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <accessibility-service
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:accessibilityEventTypes="typeWindowStateChanged"
+    android:accessibilityEventTypes="typeWindowStateChanged|typeViewClicked"
     android:accessibilityFeedbackType="feedbackGeneric"
-    android:accessibilityFlags="flagIncludeNotImportantViews"
+    android:accessibilityFlags="flagRequestFilterKeyEvents|flagRetrieveInteractiveWindows"
+    android:canRequestFilterKeyEvents="true"
+    android:canRetrieveWindowContent="true"
     android:description="@string/automatic_disable_app_back_to_desktop"/>
