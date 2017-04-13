@@ -16,6 +16,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -40,7 +41,6 @@ import com.sscience.stopapp.widget.MoveFloatingActionButton;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -265,7 +265,7 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
                 if (!spLogoRule) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(mMainActivity);
                     builder.setTitle(R.string.tip);
-                    builder.setMessage("选取的图标请按照Google Android启动图标设计规范，大小最好不要超过40kb，以免图标压缩失真！");
+                    builder.setMessage(R.string.logo_rule);
                     builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -382,7 +382,7 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
     }
 
     @Override
-    public void getRootSuccess(AppInfo appInfo, List<AppInfo> apps, List<AppInfo> appsNew) {
+    public void getRootSuccess(List<AppInfo> apps, List<AppInfo> appsNew) {
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffCallBack(apps, appsNew), false);
         diffResult.dispatchUpdatesTo(mDisableAppAdapter);
         mAppList = appsNew;
@@ -395,7 +395,10 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
             }
         }
         mMainActivity.checkSelection();
-        snackBarShow(mMainActivity.mCoordinatorLayout, mMainActivity.mRootStr);
+        String str = mMainActivity.mRootStr;
+        if (!TextUtils.isEmpty(str)) {
+            snackBarShow(mMainActivity.mCoordinatorLayout, mMainActivity.mRootStr);
+        }
         setRefreshing(false);
         if (mAppList.isEmpty()) {
             mDisableAppAdapter.showLoadFailed(R.drawable.empty, getResources().getString(R.string.no_disable_apps), "");
@@ -423,18 +426,10 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
     @Override
     public void onResume() {
         super.onResume();
-        // 若已停用的app以Shortcut形势启动，则需更新主页app为启用
-        Set<String> packageSet = new HashSet<>();
-        packageSet = (Set<String>) SharedPreferenceUtil.get(getActivity()
-                , RootActionIntentService.APP_SHORTCUT_PACKAGE_NAME, packageSet);
-        if (packageSet != null && packageSet.size() != 0) {
-            for (int i = 0; i < mAppList.size(); i++) {
-                AppInfo appInfo = mAppList.get(i);
-                if (packageSet.contains(appInfo.getAppPackageName()) || appInfo.isEnable() == 1) {
-                    upDateItemIfLaunch(appInfo, i);
-                }
-            }
-            SharedPreferenceUtil.remove(getActivity(), RootActionIntentService.APP_SHORTCUT_PACKAGE_NAME);
+        boolean spUpdateApp = (boolean) SharedPreferenceUtil.get(mMainActivity, RootActionIntentService.APP_UPDATE_HOME_APPS, false);
+        if (spUpdateApp) {
+            mPresenter.updateHomeApps();
+            SharedPreferenceUtil.put(mMainActivity, RootActionIntentService.APP_UPDATE_HOME_APPS, false);
         }
     }
 

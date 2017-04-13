@@ -15,9 +15,9 @@ import com.sscience.stopapp.database.AppInfoDBOpenHelper;
 import com.sscience.stopapp.model.AppsRepository;
 import com.sscience.stopapp.model.GetAppsCallback;
 import com.sscience.stopapp.model.GetRootCallback;
-import com.sscience.stopapp.widget.AppInfoComparator;
 import com.sscience.stopapp.util.SharedPreferenceUtil;
 import com.sscience.stopapp.util.ShortcutsManager;
+import com.sscience.stopapp.widget.AppInfoComparator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,7 +34,7 @@ import java.util.List;
 
 public class DisableAppsPresenter implements DisableAppsContract.Presenter {
 
-    public static final String SP_DISABLE_APPS = "sp_disable_apps";
+    public static final String SP_LAUNCH_APP = "sp_launch_app";
     public static final int CMD_FLAG_LAUNCH_APP = 0;
     public static final int CMD_FLAG_UNINSTALL = 1;
     public static final int CMD_FLAG_BATCH_APPS = 2;
@@ -107,6 +107,8 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
 
     private void launchAppIntent(String packageName) {
         try {
+            // 存储启动的app，用于自动冻结
+            SharedPreferenceUtil.put(mActivity, SP_LAUNCH_APP, packageName);
             Intent resolveIntent = mActivity.getPackageManager().getLaunchIntentForPackage(packageName);
             mActivity.startActivity(resolveIntent);
         } catch (NullPointerException e) {
@@ -228,12 +230,20 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                mView.getRootSuccess(null, mListDisableApps, mListDisableAppsNew);
+                                mView.getRootSuccess(mListDisableApps, mListDisableAppsNew);
                                 mListDisableApps = mListDisableAppsNew;
                             }
                         }, cmdNum < 2 ? 1000 : 2000);
                     }
                 });
+    }
+
+    @Override
+    public void updateHomeApps() {
+        List<AppInfo> disableApps = mAppInfoDBController.getDisableApps(AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
+        Collections.sort(disableApps, new AppInfoComparator());
+        mView.getRootSuccess(mListDisableApps, disableApps);
+        mListDisableApps = disableApps;
     }
 
     @Override

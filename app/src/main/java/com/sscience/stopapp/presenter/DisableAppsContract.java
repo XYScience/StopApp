@@ -30,10 +30,9 @@ public interface DisableAppsContract {
         /**
          * 停用或启用app成功
          *
-         * @param appInfo 停用or启用的第一个app
          * @param apps    停用或启用app成功后需要更新列表(app停用or启用状态)
          */
-        void getRootSuccess(AppInfo appInfo, List<AppInfo> apps, List<AppInfo> appsNew);
+        void getRootSuccess(List<AppInfo> apps, List<AppInfo> appsNew);
 
         /**
          * 获取root失败
@@ -85,6 +84,8 @@ public interface DisableAppsContract {
         void updateAppName(String packageName, String appName);
 
         void updateAppIcon(String packageName,  Bitmap appIcon);
+
+        void updateHomeApps();
 
         void cancelTask();
     }

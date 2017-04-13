@@ -40,7 +40,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     public MoveFloatingActionButton mFabDisable;
     public LinearLayout mLlEnableApp, mLlAddShortcut, mLlCustomApp, mLlRemoveList, mLlUninstallApp, mLlCancelSelect;
     private long exitTime = 0;
-    public String mRootStr;
+    public String mRootStr = "";
 
     @Override
     protected int getContentLayout() {
@@ -61,7 +61,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         mLlUninstallApp = (LinearLayout) findViewById(R.id.ll_uninstall_app);
         mLlCancelSelect = (LinearLayout) findViewById(R.id.ll_cancel_select);
         mSelection = new HashSet<>();
-        mRootStr = getString(R.string.operate_success);
 
         mMainFragment = (MainFragment) getSupportFragmentManager().findFragmentById(R.id.contentFrame);
         if (mMainFragment == null) {

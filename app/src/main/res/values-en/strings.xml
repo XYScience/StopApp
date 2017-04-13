@@ -95,5 +95,6 @@
     <string name="picture_too_large_please_reselect">The picture that you select is too large, please select again!</string>
     <string name="grant_app_permissions">Custom icons need to read the gallery, please grant read and write permissions!</string>
     <string name="deny_app_permissions">If you want to custom app logo, you must grant the permission!</string>
+    <string name="logo_rule">The customized logo that you select please follow the android icon specification, the icon size is best not to exceed 40kb!</string>
 
 </resources>
