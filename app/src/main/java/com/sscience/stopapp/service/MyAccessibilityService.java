@@ -29,15 +29,13 @@ public class MyAccessibilityService extends AccessibilityService {
     private AppInfoDBController mDBController;
     private AppsRepository mAppsRepository;
     private CountDownTimer mCountDownTimer;
-    private boolean isBack;
+    private String appCurrentActivity;
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_CLICKED) {
-                MyLogger.e("click");
-            }
-            backHomeDisableApp(event);
+            appCurrentActivity = event.getClassName().toString();
+            actionHomeDisableApp(event);
         }
     }
 
@@ -46,7 +44,7 @@ public class MyAccessibilityService extends AccessibilityService {
         int keyCode = event.getKeyCode();
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
-                isBack = true;
+                actionBackDisableApp();
                 break;
 
             case KeyEvent.KEYCODE_HOME:
@@ -57,12 +55,40 @@ public class MyAccessibilityService extends AccessibilityService {
     }
 
     /**
+     * 按返回键推出app自动冻结(目前只支持物理返回按键）
+     */
+    private void actionBackDisableApp() {
+        final String packageName = (String) SharedPreferenceUtil.get(this, DisableAppsPresenter.SP_LAUNCH_APP, "");
+        if (TextUtils.isEmpty(packageName)) {
+            return;
+        }
+        if (TextUtils.equals(appCurrentActivity, CommonUtil.getAppMainActivity(this, packageName))) {
+            appCurrentActivity = null;
+            mAppsRepository.getRoot(AppsRepository.COMMAND_DISABLE + packageName, new GetRootCallback() {
+                @Override
+                public void onRoot(boolean isRoot) {
+                    if (isRoot) {
+                        MyLogger.e("已退出App自动冻结的App：" + packageName);
+                        updateDisableApp(packageName);
+                    } else {
+                        Toast.makeText(MyAccessibilityService.this, getString(R.string.if_want_to_use_please_grant_app_root), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+            mAppsRepository.cancelTask();
+        }
+    }
+
+    /**
      * 回到桌面自动冻结(可一定时间后冻结)
      */
-    private void backHomeDisableApp(AccessibilityEvent event) {
+    private void actionHomeDisableApp(AccessibilityEvent event) {
         String foregroundPackageName = event.getPackageName().toString();
-        final String launchPackage = (String) SharedPreferenceUtil.get(this, DisableAppsPresenter.SP_LAUNCH_APP, "");
-        if (TextUtils.equals(foregroundPackageName, launchPackage)) {
+        final String packageName = (String) SharedPreferenceUtil.get(this, DisableAppsPresenter.SP_LAUNCH_APP, "");
+        if (TextUtils.isEmpty(packageName)) {
+            return;
+        }
+        if (TextUtils.equals(foregroundPackageName, packageName)) {
             if (mCountDownTimer != null) {
                 mCountDownTimer.cancel();
                 mCountDownTimer = null;
@@ -79,14 +105,12 @@ public class MyAccessibilityService extends AccessibilityService {
 
                 @Override
                 public void onFinish() {
-                    mAppsRepository.getRoot(AppsRepository.COMMAND_DISABLE + launchPackage, new GetRootCallback() {
+                    mAppsRepository.getRoot(AppsRepository.COMMAND_DISABLE + packageName, new GetRootCallback() {
                         @Override
                         public void onRoot(boolean isRoot) {
                             if (isRoot) {
-                                MyLogger.e("回到桌面已自动冻结的App：" + launchPackage);
-                                // 切换到主界面时，更新app列表
-                                SharedPreferenceUtil.put(MyAccessibilityService.this, RootActionIntentService.APP_UPDATE_HOME_APPS, true);
-                                mDBController.updateDisableApp(launchPackage, 0, AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
+                                MyLogger.e("回到桌面已自动冻结的App：" + packageName);
+                                updateDisableApp(packageName);
                             } else {
                                 Toast.makeText(MyAccessibilityService.this, getString(R.string.if_want_to_use_please_grant_app_root), Toast.LENGTH_SHORT).show();
                             }
@@ -97,6 +121,14 @@ public class MyAccessibilityService extends AccessibilityService {
             };
             mCountDownTimer.start();
         }
+    }
+
+    private void updateDisableApp(String packageName) {
+        // 切换到主界面时，更新app列表
+        SharedPreferenceUtil.put(MyAccessibilityService.this, RootActionIntentService.APP_UPDATE_HOME_APPS, true);
+        // 避免重复更新
+        SharedPreferenceUtil.put(MyAccessibilityService.this, DisableAppsPresenter.SP_LAUNCH_APP, "");
+        mDBController.updateDisableApp(packageName, 0, AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
     }
 
     @Override

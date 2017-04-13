@@ -204,4 +204,21 @@ public class CommonUtil {
         final ResolveInfo res = context.getPackageManager().resolveActivity(intent, 0);
         return res.activityInfo.packageName;
     }
+
+    /**
+     * 获取App主Activity
+     */
+    public static String getAppMainActivity(Context context, String packageName) {
+        if (TextUtils.isEmpty(packageName)) {
+            return "";
+        }
+        final Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        intent.setPackage(packageName);
+        final ResolveInfo res = context.getPackageManager().resolveActivity(intent, 0);
+        if (res == null || res.activityInfo == null) {
+            return "";
+        }
+        return res.activityInfo.name;
+    }
 }
