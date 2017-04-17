@@ -29,13 +29,20 @@ public class MyAccessibilityService extends AccessibilityService {
     private AppInfoDBController mDBController;
     private AppsRepository mAppsRepository;
     private CountDownTimer mCountDownTimer;
-    private String appCurrentActivity;
+    private String appCurrentPackageName;
+    private boolean isActionBack;
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            appCurrentActivity = event.getClassName().toString();
-            actionHomeDisableApp(event);
+            appCurrentPackageName = event.getPackageName().toString();
+            String packageName = (String) SharedPreferenceUtil.get(this, DisableAppsPresenter.SP_LAUNCH_APP, "");
+            if (TextUtils.isEmpty(packageName) || TextUtils.equals(appCurrentPackageName, packageName)) {
+                isActionBack = false;
+                return;
+            }
+            // actionHomeDisableApp(event);
+            actionBackDisableApp(packageName);
         }
     }
 
@@ -44,11 +51,14 @@ public class MyAccessibilityService extends AccessibilityService {
         int keyCode = event.getKeyCode();
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
-                actionBackDisableApp();
+                String packageName = (String) SharedPreferenceUtil.get(this, DisableAppsPresenter.SP_LAUNCH_APP, "");
+                if (TextUtils.equals(appCurrentPackageName, packageName)) {
+                    isActionBack = true;
+                }
                 break;
 
-            case KeyEvent.KEYCODE_HOME:
-
+            default:
+                isActionBack = false;
                 break;
         }
         return super.onKeyEvent(event);
@@ -57,13 +67,9 @@ public class MyAccessibilityService extends AccessibilityService {
     /**
      * 按返回键推出app自动冻结(目前只支持物理返回按键）
      */
-    private void actionBackDisableApp() {
-        final String packageName = (String) SharedPreferenceUtil.get(this, DisableAppsPresenter.SP_LAUNCH_APP, "");
-        if (TextUtils.isEmpty(packageName)) {
-            return;
-        }
-        if (TextUtils.equals(appCurrentActivity, CommonUtil.getAppMainActivity(this, packageName))) {
-            appCurrentActivity = null;
+    private void actionBackDisableApp(final String packageName) {
+        if (isActionBack) {
+            isActionBack = false;
             mAppsRepository.getRoot(AppsRepository.COMMAND_DISABLE + packageName, new GetRootCallback() {
                 @Override
                 public void onRoot(boolean isRoot) {
