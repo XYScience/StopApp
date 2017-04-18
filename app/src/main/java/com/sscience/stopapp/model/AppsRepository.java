@@ -232,11 +232,17 @@ public class AppsRepository {
         AppInfo appInfo = new AppInfo();
         appInfo.setAppName(applicationInfo.loadLabel(packageManager).toString());
         appInfo.setAppPackageName(applicationInfo.packageName);
-        Drawable appDrawable = applicationInfo.loadIcon(packageManager);
+        Drawable appDrawable = null;
+        try {
+            appDrawable = applicationInfo.loadIcon(packageManager);
+        } catch (Exception e) {
+            MyLogger.e(appInfo.getAppName());
+            MyLogger.e(e.toString());
+        }
         if (appDrawable instanceof BitmapDrawable) {
             appInfo.setAppIcon(((BitmapDrawable) appDrawable).getBitmap());
         } else {
-            MyLogger.e("VectorDrawable:" + appInfo.getAppPackageName());
+            MyLogger.e("VectorDrawable:" + appInfo.getAppName());
             appInfo.setAppIcon(drawableToBitmap(appDrawable));
         }
         appInfo.setEnable(applicationInfo.enabled ? 1 : 0);

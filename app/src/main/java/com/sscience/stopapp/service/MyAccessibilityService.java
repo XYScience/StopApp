@@ -35,14 +35,15 @@ public class MyAccessibilityService extends AccessibilityService {
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            appCurrentPackageName = event.getPackageName().toString();
             String packageName = (String) SharedPreferenceUtil.get(this, DisableAppsPresenter.SP_LAUNCH_APP, "");
-            if (TextUtils.isEmpty(packageName) || TextUtils.equals(appCurrentPackageName, packageName)) {
-                isActionBack = false;
-                return;
+            if (TextUtils.equals(appCurrentPackageName, packageName)) {
+                appCurrentPackageName = event.getPackageName().toString();
+                if (!TextUtils.equals(appCurrentPackageName, packageName) && isActionBack) {
+                    actionBackDisableApp(packageName);
+                }
             }
+            appCurrentPackageName = event.getPackageName().toString();
             // actionHomeDisableApp(event);
-            actionBackDisableApp(packageName);
         }
     }
 
@@ -51,10 +52,7 @@ public class MyAccessibilityService extends AccessibilityService {
         int keyCode = event.getKeyCode();
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
-                String packageName = (String) SharedPreferenceUtil.get(this, DisableAppsPresenter.SP_LAUNCH_APP, "");
-                if (TextUtils.equals(appCurrentPackageName, packageName)) {
-                    isActionBack = true;
-                }
+                isActionBack = true;
                 break;
 
             default:

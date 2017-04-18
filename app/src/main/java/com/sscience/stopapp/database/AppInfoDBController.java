@@ -48,7 +48,12 @@ public class AppInfoDBController {
                 AppInfo appInfo = new AppInfo();
                 appInfo.setAppPackageName(cursor.getString(cursor.getColumnIndex(AppInfo.APP_PACKAGE_NAME)));
                 appInfo.setAppName(cursor.getString(cursor.getColumnIndex(AppInfo.APP_NAME)));
-                appInfo.setAppIcon(CommonUtil.getImage(cursor.getBlob(cursor.getColumnIndex(AppInfo.APP_ICON))));
+                try {
+                    appInfo.setAppIcon(CommonUtil.getImage(cursor.getBlob(cursor.getColumnIndex(AppInfo.APP_ICON))));
+                } catch (Exception e) {
+                    MyLogger.e(cursor.getString(cursor.getColumnIndex(AppInfo.APP_NAME)));
+                    MyLogger.e(e.toString());
+                }
                 appInfo.setEnable(cursor.getInt(cursor.getColumnIndex(AppInfo.IS_ENABLE)));
                 appInfo.setSystemApp(cursor.getInt(cursor.getColumnIndex(AppInfo.IS_SYSTEM_APP)));
                 list.add(appInfo);
@@ -140,6 +145,7 @@ public class AppInfoDBController {
 
     /**
      * 更新app名
+     *
      * @param packageName
      * @param appName
      * @param tableName
@@ -153,6 +159,7 @@ public class AppInfoDBController {
 
     /**
      * 更新app logo
+     *
      * @param packageName
      * @param appIcon
      * @param tableName
