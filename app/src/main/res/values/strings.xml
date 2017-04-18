@@ -79,7 +79,8 @@
     <string name="nonsupport_app_shortcut">你的系统版本小于7.1，不支持App Shortcut！</string>
     <string name="display_system_apps">显示系统Apps</string>
     <string name="display_system_apps_subtitle">在主页停用列表显示系统Apps</string>
-    <string name="automatic_disable_app_back_to_desktop">回到桌面时，通过无障碍服务自动停用App</string>
+    <string name="automatic_disable_app_back_to_desktop">通过无障碍服务，按%s自动停用App</string>
+    <string name="automatic_disable_app_action_back">按返回键退出App时，自动停用App</string>
     <string name="auto_disable_service">小黑屋-自动冻结</string>
     <string name="auto_disable">自动冻结</string>
     <string name="search_no_app">暂时无此应用！</string>
@@ -96,5 +97,10 @@
     <string name="grant_app_permissions">自定义图标需要读取图库文件，请授予小黑屋读写权限！</string>
     <string name="deny_app_permissions">授予读写权限才能自定义图标！</string>
     <string name="logo_rule">选取的图标请按照Google Android启动图标设计规范，大小最好不要超过40kb，以免图标压缩失真！</string>
+    <string name="auto_disable_conditions">自动停用条件</string>
+    <string name="auto_disable_immediately">Home键退出立即</string>
+    <string name="auto_disable_30s">Home键退出30秒后</string>
+    <string name="auto_disable_60s">Home键退出60秒后</string>
+    <string name="auto_disable_action_back">返回键退出后</string>
 
 </resources>

@@ -29,21 +29,16 @@ public class MyAccessibilityService extends AccessibilityService {
     private AppInfoDBController mDBController;
     private AppsRepository mAppsRepository;
     private CountDownTimer mCountDownTimer;
-    private String appCurrentPackageName;
+    private String foregroundPackageName;
     private boolean isActionBack;
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             String packageName = (String) SharedPreferenceUtil.get(this, DisableAppsPresenter.SP_LAUNCH_APP, "");
-            if (TextUtils.equals(appCurrentPackageName, packageName)) {
-                appCurrentPackageName = event.getPackageName().toString();
-                if (!TextUtils.equals(appCurrentPackageName, packageName) && isActionBack) {
-                    actionBackDisableApp(packageName);
-                }
-            }
-            appCurrentPackageName = event.getPackageName().toString();
-            // actionHomeDisableApp(event);
+            actionBackDisableApp(event, packageName);
+            foregroundPackageName = event.getPackageName().toString();
+            actionHomeDisableApp(foregroundPackageName, packageName);
         }
     }
 
@@ -65,8 +60,14 @@ public class MyAccessibilityService extends AccessibilityService {
     /**
      * 按返回键推出app自动冻结(目前只支持物理返回按键）
      */
-    private void actionBackDisableApp(final String packageName) {
-        if (isActionBack) {
+    private void actionBackDisableApp(AccessibilityEvent event, final String packageName) {
+        if (!TextUtils.equals(foregroundPackageName, packageName)) {
+            // 如果上一个前台应用不是启动的停用app，表明早已退出启动的停用app
+            return;
+        }
+        // 获取当前的前台应用，如果当前的前台应用不是启动的停用app，且是按了返回键，则是按返回键退出app
+        foregroundPackageName = event.getPackageName().toString();
+        if (!TextUtils.equals(foregroundPackageName, packageName) && isActionBack) {
             isActionBack = false;
             mAppsRepository.getRoot(AppsRepository.COMMAND_DISABLE + packageName, new GetRootCallback() {
                 @Override
@@ -86,19 +87,14 @@ public class MyAccessibilityService extends AccessibilityService {
     /**
      * 回到桌面自动冻结(可一定时间后冻结)
      */
-    private void actionHomeDisableApp(AccessibilityEvent event) {
-        String foregroundPackageName = event.getPackageName().toString();
-        final String packageName = (String) SharedPreferenceUtil.get(this, DisableAppsPresenter.SP_LAUNCH_APP, "");
-        if (TextUtils.isEmpty(packageName)) {
-            return;
-        }
+    private void actionHomeDisableApp(String foregroundPackageName, final String packageName) {
         if (TextUtils.equals(foregroundPackageName, packageName)) {
             if (mCountDownTimer != null) {
                 mCountDownTimer.cancel();
                 mCountDownTimer = null;
             }
         }
-        if (!TextUtils.equals(foregroundPackageName, CommonUtil.getLauncherPackageName(this))) {
+        if (TextUtils.isEmpty(packageName) || !TextUtils.equals(foregroundPackageName, CommonUtil.getLauncherPackageName(this))) {
             return;
         }
         if (mCountDownTimer == null) {
@@ -149,6 +145,8 @@ public class MyAccessibilityService extends AccessibilityService {
             mCountDownTimer.cancel();
             mCountDownTimer = null;
         }
+        mDBController = null;
+        mAppsRepository = null;
         return super.onUnbind(intent);
     }
 

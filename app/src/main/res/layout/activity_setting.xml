@@ -28,45 +28,6 @@
             android:textSize="16sp"/>
 
         <RelativeLayout
-            android:id="@+id/ll_auto_disable"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?android:attr/selectableItemBackground"
-            android:onClick="onClick"
-            android:padding="16dp">
-
-            <TextView
-                android:id="@+id/tv_auto_disable"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/auto_disable"
-                android:textColor="@color/textPrimary"
-                android:textSize="16sp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_below="@+id/tv_auto_disable"
-                android:layout_marginTop="2dp"
-                android:layout_toLeftOf="@+id/switch_auto_disable"
-                android:text="@string/automatic_disable_app_back_to_desktop"
-                android:textColor="@color/textSecondary"
-                android:textSize="14sp"/>
-
-            <android.support.v7.widget.SwitchCompat
-                android:id="@+id/switch_auto_disable"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="16dp"
-                android:background="@null"
-                android:clickable="false"/>
-
-        </RelativeLayout>
-
-        <RelativeLayout
             android:id="@+id/ll_display_system_apps"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -95,6 +56,46 @@
 
             <android.support.v7.widget.SwitchCompat
                 android:id="@+id/switch_display_system_apps"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="16dp"
+                android:background="@null"
+                android:clickable="false"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/ll_auto_disable"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/selectableItemBackground"
+            android:onClick="onClick"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tv_auto_disable"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/auto_disable"
+                android:textColor="@color/textPrimary"
+                android:textSize="16sp"/>
+
+            <TextView
+                android:id="@+id/tv_auto_disable_sub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/tv_auto_disable"
+                android:layout_marginTop="2dp"
+                android:layout_toLeftOf="@+id/switch_auto_disable"
+                android:text="@string/automatic_disable_app_back_to_desktop"
+                android:textColor="@color/textSecondary"
+                android:textSize="14sp"/>
+
+            <android.support.v7.widget.SwitchCompat
+                android:id="@+id/switch_auto_disable"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"

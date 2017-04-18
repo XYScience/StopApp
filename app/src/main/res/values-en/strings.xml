@@ -79,7 +79,8 @@
     <string name="nonsupport_app_shortcut">Your Android version does not support App Shortcut!</string>
     <string name="display_system_apps">Display System Apps</string>
     <string name="display_system_apps_subtitle">Display the system apps on the home page</string>
-    <string name="automatic_disable_app_back_to_desktop">Automatically disable app when you back to desktop</string>
+    <string name="automatic_disable_app_back_to_desktop">Automatically disable app %s </string>
+    <string name="automatic_disable_app_action_back">Automatically disable app after action back</string>
     <string name="auto_disable_service">Stop App-Automatically Disable</string>
     <string name="auto_disable">Automatically Disable</string>
     <string name="search_no_app">Did not find anything</string>
@@ -96,5 +97,10 @@
     <string name="grant_app_permissions">Custom icons need to read the gallery, please grant read and write permissions!</string>
     <string name="deny_app_permissions">If you want to custom app logo, you must grant the permission!</string>
     <string name="logo_rule">The customized logo that you select please follow the android icon specification, the icon size is best not to exceed 40kb!</string>
+    <string name="auto_disable_conditions">Automatic disable conditions</string>
+    <string name="auto_disable_immediately">after Home immediately</string>
+    <string name="auto_disable_30s">after Home 30s</string>
+    <string name="auto_disable_60s">after Home 60s</string>
+    <string name="auto_disable_action_back">after action Back</string>
 
 </resources>

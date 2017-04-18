@@ -2,6 +2,7 @@ package com.sscience.stopapp.activity;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -15,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.TextView;
 
 import com.sscience.stopapp.R;
 import com.sscience.stopapp.base.BaseActivity;
@@ -36,6 +38,7 @@ public class SettingActivity extends BaseActivity {
     public static final String SP_AUTO_DISABLE_APPS = "sp_auto_disable_apps";
     private CoordinatorLayout mCoordinatorLayout;
     private SwitchCompat mSwitchManualShortcut, mSwitchDisplaySystemApps, mSwitchAutoDisableApps;
+    private TextView mTvAutoDisableSub;
     private boolean isSetDisplaySystemApps = false;
 
     public static void actionStartActivity(Activity activity, int requestCode) {
@@ -56,6 +59,7 @@ public class SettingActivity extends BaseActivity {
         mSwitchManualShortcut = (SwitchCompat) findViewById(R.id.switch_manual_shortcut);
         mSwitchDisplaySystemApps = (SwitchCompat) findViewById(R.id.switch_display_system_apps);
         mSwitchAutoDisableApps = (SwitchCompat) findViewById(R.id.switch_auto_disable);
+        mTvAutoDisableSub = (TextView) findViewById(R.id.tv_auto_disable_sub);
 
         mSwitchManualShortcut.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -123,24 +127,50 @@ public class SettingActivity extends BaseActivity {
                 mSwitchDisplaySystemApps.setChecked(!spDisplaySystemApps);
                 break;
             case R.id.ll_auto_disable:
-                final boolean spAutoDisable = (boolean) SharedPreferenceUtil.get(this, SP_AUTO_DISABLE_APPS, false);
-                mSwitchAutoDisableApps.setChecked(!spAutoDisable);
-                AppsRepository appsRepository = new AppsRepository(this);
-                appsRepository.openAccessibilityServices(new GetRootCallback() {
-                    @Override
-                    public void onRoot(boolean isRoot) {
-                        if (isRoot) {
-                            SharedPreferenceUtil.put(SettingActivity.this, SP_AUTO_DISABLE_APPS, !spAutoDisable);
-                            mSwitchAutoDisableApps.setChecked(!spAutoDisable);
-                        } else {
-                            mSwitchAutoDisableApps.setChecked(spAutoDisable);
-                            snackBarShow(mCoordinatorLayout, getString(R.string.if_want_to_use_please_grant_app_root));
-                        }
-                    }
-                });
+                autoDisabledApp();
                 break;
         }
     }
+
+    private void autoDisabledApp() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.auto_disable_conditions);
+        final String[] items = new String[]{getString(R.string.auto_disable_immediately)
+                , getString(R.string.auto_disable_30s), getString(R.string.auto_disable_60s)
+                , getString(R.string.auto_disable_action_back)};
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if (i == 0) {
+                    mTvAutoDisableSub.setText(getString(R.string.automatic_disable_app_back_to_desktop, getString(R.string.auto_disable_immediately)));
+                } else if (i == 1) {
+                    mTvAutoDisableSub.setText(getString(R.string.automatic_disable_app_back_to_desktop, getString(R.string.auto_disable_30s)));
+                } else if (i == 2) {
+                    mTvAutoDisableSub.setText(getString(R.string.automatic_disable_app_back_to_desktop, getString(R.string.auto_disable_60s)));
+                } else if (i == 3) {
+                    mTvAutoDisableSub.setText(getString(R.string.automatic_disable_app_action_back));
+                }
+                dialogInterface.dismiss();
+            }
+        });
+        builder.show();
+        final boolean spAutoDisable = (boolean) SharedPreferenceUtil.get(this, SP_AUTO_DISABLE_APPS, false);
+        mSwitchAutoDisableApps.setChecked(!spAutoDisable);
+        AppsRepository appsRepository = new AppsRepository(this);
+        appsRepository.openAccessibilityServices(new GetRootCallback() {
+            @Override
+            public void onRoot(boolean isRoot) {
+                if (isRoot) {
+                    SharedPreferenceUtil.put(SettingActivity.this, SP_AUTO_DISABLE_APPS, !spAutoDisable);
+                    mSwitchAutoDisableApps.setChecked(!spAutoDisable);
+                } else {
+                    mSwitchAutoDisableApps.setChecked(spAutoDisable);
+                    snackBarShow(mCoordinatorLayout, getString(R.string.if_want_to_use_please_grant_app_root));
+                }
+            }
+        });
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
