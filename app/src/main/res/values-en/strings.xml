@@ -102,5 +102,6 @@
     <string name="auto_disable_30s">after Home 30s</string>
     <string name="auto_disable_60s">after Home 60s</string>
     <string name="auto_disable_action_back">after action Back</string>
+    <string name="auto_disable_close">close</string>
 
 </resources>

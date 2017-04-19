@@ -30,8 +30,6 @@ import com.sscience.stopapp.widget.MoveFloatingActionButton;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.sscience.stopapp.activity.SettingActivity.SP_AUTO_DISABLE_APPS;
-
 public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     public CoordinatorLayout mCoordinatorLayout;
@@ -74,8 +72,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         // Create the presenter
         new DisableAppsPresenter(MainActivity.this, mMainFragment);
 
-        boolean spAutoDisable = (boolean) SharedPreferenceUtil.get(this, SP_AUTO_DISABLE_APPS, false);
-        if (spAutoDisable) {
+        int spAutoDisable = (int) SharedPreferenceUtil.get(this, SettingActivity.SP_AUTO_DISABLE_APPS, -1);
+        if (spAutoDisable != -1) {
             AppsRepository appsRepository = new AppsRepository(this);
             appsRepository.openAccessibilityServices(null);
         }

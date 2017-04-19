@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import com.science.myloggerlibrary.MyLogger;
 import com.sscience.stopapp.R;
+import com.sscience.stopapp.activity.SettingActivity;
 import com.sscience.stopapp.database.AppInfoDBController;
 import com.sscience.stopapp.database.AppInfoDBOpenHelper;
 import com.sscience.stopapp.model.AppsRepository;
@@ -36,9 +37,14 @@ public class MyAccessibilityService extends AccessibilityService {
     public void onAccessibilityEvent(AccessibilityEvent event) {
         if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             String packageName = (String) SharedPreferenceUtil.get(this, DisableAppsPresenter.SP_LAUNCH_APP, "");
-            actionBackDisableApp(event, packageName);
+            int spAutoDisable = (int) SharedPreferenceUtil.get(this, SettingActivity.SP_AUTO_DISABLE_APPS, -1);
+            if (spAutoDisable != -1 && spAutoDisable == 666) {
+                actionBackDisableApp(event, packageName);
+            }
             foregroundPackageName = event.getPackageName().toString();
-            actionHomeDisableApp(foregroundPackageName, packageName);
+            if (spAutoDisable != -1 && spAutoDisable != 666) {
+                actionHomeDisableApp(spAutoDisable, foregroundPackageName, packageName);
+            }
         }
     }
 
@@ -87,7 +93,7 @@ public class MyAccessibilityService extends AccessibilityService {
     /**
      * 回到桌面自动冻结(可一定时间后冻结)
      */
-    private void actionHomeDisableApp(String foregroundPackageName, final String packageName) {
+    private void actionHomeDisableApp(int spAutoDisable, String foregroundPackageName, final String packageName) {
         if (TextUtils.equals(foregroundPackageName, packageName)) {
             if (mCountDownTimer != null) {
                 mCountDownTimer.cancel();
@@ -98,7 +104,7 @@ public class MyAccessibilityService extends AccessibilityService {
             return;
         }
         if (mCountDownTimer == null) {
-            mCountDownTimer = new CountDownTimer(5 * 1000, 1000) {
+            mCountDownTimer = new CountDownTimer(spAutoDisable * 1000, 1000) {
                 @Override
                 public void onTick(long millisUntilFinished) {
                 }

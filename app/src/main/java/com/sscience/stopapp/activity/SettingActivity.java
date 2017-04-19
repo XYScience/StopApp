@@ -87,8 +87,17 @@ public class SettingActivity extends BaseActivity {
 
         boolean spDisplaySystemApps = (boolean) SharedPreferenceUtil.get(this, SP_DISPLAY_SYSTEM_APPS, true);
         mSwitchDisplaySystemApps.setChecked(spDisplaySystemApps);
-        boolean spAutoDisable = (boolean) SharedPreferenceUtil.get(this, SP_AUTO_DISABLE_APPS, false);
-        mSwitchAutoDisableApps.setChecked(spAutoDisable);
+        int spAutoDisableCondition = (int) SharedPreferenceUtil.get(this, SP_AUTO_DISABLE_APPS, -1);
+        mSwitchAutoDisableApps.setChecked(spAutoDisableCondition != -1);
+        if (spAutoDisableCondition == 0) {
+            mTvAutoDisableSub.setText(getString(R.string.automatic_disable_app_back_to_desktop, getString(R.string.auto_disable_immediately)));
+        } else if (spAutoDisableCondition == 30) {
+            mTvAutoDisableSub.setText(getString(R.string.automatic_disable_app_back_to_desktop, getString(R.string.auto_disable_30s)));
+        } else if (spAutoDisableCondition == 60) {
+            mTvAutoDisableSub.setText(getString(R.string.automatic_disable_app_back_to_desktop, getString(R.string.auto_disable_60s)));
+        } else if (spAutoDisableCondition == 666) {
+            mTvAutoDisableSub.setText(getString(R.string.automatic_disable_app_action_back));
+        }
     }
 
     @Override
@@ -135,36 +144,46 @@ public class SettingActivity extends BaseActivity {
     private void autoDisabledApp() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.auto_disable_conditions);
-        final String[] items = new String[]{getString(R.string.auto_disable_immediately)
+        final String[] items = new String[]{getString(R.string.auto_disable_close)
+                , getString(R.string.auto_disable_immediately)
                 , getString(R.string.auto_disable_30s), getString(R.string.auto_disable_60s)
                 , getString(R.string.auto_disable_action_back)};
         builder.setItems(items, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 if (i == 0) {
-                    mTvAutoDisableSub.setText(getString(R.string.automatic_disable_app_back_to_desktop, getString(R.string.auto_disable_immediately)));
+                    mTvAutoDisableSub.setText(getString(R.string.automatic_disable_app_accessibility_service));
+                    mSwitchAutoDisableApps.setChecked(false);
+                    SharedPreferenceUtil.put(SettingActivity.this, SP_AUTO_DISABLE_APPS, -1);
                 } else if (i == 1) {
-                    mTvAutoDisableSub.setText(getString(R.string.automatic_disable_app_back_to_desktop, getString(R.string.auto_disable_30s)));
+                    mTvAutoDisableSub.setText(getString(R.string.automatic_disable_app_back_to_desktop, getString(R.string.auto_disable_immediately)));
+                    autoDisabledAppCmd(0);
                 } else if (i == 2) {
-                    mTvAutoDisableSub.setText(getString(R.string.automatic_disable_app_back_to_desktop, getString(R.string.auto_disable_60s)));
+                    mTvAutoDisableSub.setText(getString(R.string.automatic_disable_app_back_to_desktop, getString(R.string.auto_disable_30s)));
+                    autoDisabledAppCmd(30);
                 } else if (i == 3) {
+                    mTvAutoDisableSub.setText(getString(R.string.automatic_disable_app_back_to_desktop, getString(R.string.auto_disable_60s)));
+                    autoDisabledAppCmd(60);
+                } else if (i == 4) {
                     mTvAutoDisableSub.setText(getString(R.string.automatic_disable_app_action_back));
+                    autoDisabledAppCmd(666);
                 }
                 dialogInterface.dismiss();
             }
         });
         builder.show();
-        final boolean spAutoDisable = (boolean) SharedPreferenceUtil.get(this, SP_AUTO_DISABLE_APPS, false);
-        mSwitchAutoDisableApps.setChecked(!spAutoDisable);
+    }
+
+    private void autoDisabledAppCmd(final int condition) {
+        mSwitchAutoDisableApps.setChecked(true);
         AppsRepository appsRepository = new AppsRepository(this);
         appsRepository.openAccessibilityServices(new GetRootCallback() {
             @Override
             public void onRoot(boolean isRoot) {
                 if (isRoot) {
-                    SharedPreferenceUtil.put(SettingActivity.this, SP_AUTO_DISABLE_APPS, !spAutoDisable);
-                    mSwitchAutoDisableApps.setChecked(!spAutoDisable);
+                    SharedPreferenceUtil.put(SettingActivity.this, SP_AUTO_DISABLE_APPS, condition);
                 } else {
-                    mSwitchAutoDisableApps.setChecked(spAutoDisable);
+                    mSwitchAutoDisableApps.setChecked(false);
                     snackBarShow(mCoordinatorLayout, getString(R.string.if_want_to_use_please_grant_app_root));
                 }
             }

@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import com.science.myloggerlibrary.MyLogger;
 import com.sscience.stopapp.R;
+import com.sscience.stopapp.activity.SettingActivity;
 import com.sscience.stopapp.activity.ShortcutActivity;
 import com.sscience.stopapp.database.AppInfoDBController;
 import com.sscience.stopapp.database.AppInfoDBOpenHelper;
@@ -17,8 +18,6 @@ import com.sscience.stopapp.presenter.DisableAppsPresenter;
 import com.sscience.stopapp.util.CommonUtil;
 import com.sscience.stopapp.util.SharedPreferenceUtil;
 import com.sscience.stopapp.util.ShortcutsManager;
-
-import static com.sscience.stopapp.activity.SettingActivity.SP_AUTO_DISABLE_APPS;
 
 /**
  * @author SScience
@@ -63,8 +62,8 @@ public class RootActionIntentService extends IntentService {
             } catch (NullPointerException e) {
                 enableApp(packageName);
             }
-            boolean spAutoDisable = (boolean) SharedPreferenceUtil.get(this, SP_AUTO_DISABLE_APPS, false);
-            if (spAutoDisable) {
+            int spAutoDisable = (int) SharedPreferenceUtil.get(this, SettingActivity.SP_AUTO_DISABLE_APPS, -1);
+            if (spAutoDisable != -1) {
                 AppsRepository appsRepository = new AppsRepository(this);
                 appsRepository.openAccessibilityServices(null);
             }

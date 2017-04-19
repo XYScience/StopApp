@@ -90,7 +90,7 @@
                 android:layout_below="@+id/tv_auto_disable"
                 android:layout_marginTop="2dp"
                 android:layout_toLeftOf="@+id/switch_auto_disable"
-                android:text="@string/automatic_disable_app_back_to_desktop"
+                android:text="@string/automatic_disable_app_accessibility_service"
                 android:textColor="@color/textSecondary"
                 android:textSize="14sp"/>
 
