@@ -42,8 +42,8 @@
     <string name="feedback_suggestions">反馈建议</string>
     <string name="feedback_suggestions_detail">有任何意见或建议，欢迎邮件反馈</string>
     <string name="share_title">请选择分享方式</string>
-    <string name="share_content">试下免费开源的冻结App[小黑屋]吧：\n</string>
-    <string name="about_app_dialog">专注冻结不(liu)常(mang)用应用，我是小黑屋，我为自己带盐</string>
+    <string name="share_content">试下免费开源的停用App[小黑屋]吧：\n</string>
+    <string name="about_app_dialog">专注停用不(liu)常(mang)用应用，我是小黑屋，我为自己带盐</string>
     <string name="send_email_subject">小黑屋应用反馈</string>
     <string name="send_email_app_name">App名：</string>
     <string name="send_email_app_version">\nApp版本：</string>
@@ -82,8 +82,8 @@
     <string name="automatic_disable_app_accessibility_service">通过无障碍服务，自动停用App</string>
     <string name="automatic_disable_app_back_to_desktop">%s自动停用App</string>
     <string name="automatic_disable_app_action_back">按返回键退出App时，自动停用App</string>
-    <string name="auto_disable_service">小黑屋-自动冻结</string>
-    <string name="auto_disable">自动冻结</string>
+    <string name="auto_disable_service">小黑屋-自动停用</string>
+    <string name="auto_disable">自动停用</string>
     <string name="search_no_app">暂时无此应用！</string>
     <string name="component_activity">界面</string>
     <string name="component_service">服务</string>

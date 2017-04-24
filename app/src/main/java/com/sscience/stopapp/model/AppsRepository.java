@@ -141,6 +141,7 @@ public class AppsRepository {
             }
         } catch (Exception e) {
             MyLogger.e(e.getMessage());
+            return appList;
         } finally {
             try {
                 if (dataOutputStream != null) {
