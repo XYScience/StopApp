@@ -14,6 +14,7 @@ import java.io.Serializable;
 
 public class AppInfo implements Serializable, Cloneable {
 
+    private static final long serialVersionUID = -2984090829607150673L;
     public final static String APP_PACKAGE_NAME = "appPackageName";
     public final static String APP_NAME = "appName";
     public final static String APP_ICON = "appIcon";

@@ -19,6 +19,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 
 import com.science.baserecyclerviewadapter.interfaces.OnItemClickListener;
@@ -378,7 +379,10 @@ public class MainFragment extends BaseFragment implements DisableAppsContract.Vi
             }
         });
         builder.setNegativeButton(R.string.cancel, null);
-        builder.show();
+        AlertDialog dialog = builder.show();
+        // 解决dialog中的EditText默认不弹出软件盘
+        dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
     @Override
