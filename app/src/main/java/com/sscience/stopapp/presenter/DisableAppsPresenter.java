@@ -22,7 +22,9 @@ import com.sscience.stopapp.widget.AppInfoComparator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -59,11 +61,18 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
 
     @Override
     public void start() {
-        List<AppInfo> disableApps = mAppInfoDBController.getDisableApps(AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
-        if (disableApps.isEmpty() && disableApps.size() == 0) {
+        boolean spDisplayAllApps = (boolean) SharedPreferenceUtil.get(mActivity,
+                SettingActivity.SP_DISPLAY_ALL_APPS, false);
+        if (spDisplayAllApps) {
             getDisableAppsFromRoot(AppsRepository.APPS_FLAG_DISABLE);
         } else {
+            List<AppInfo> disableApps = mAppInfoDBController.getDisableApps(AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
             getDisableApps(disableApps, false);
+//            if (disableApps.isEmpty() && disableApps.size() == 0) {
+//                getDisableAppsFromRoot(AppsRepository.APPS_FLAG_DISABLE);
+//            } else {
+//                getDisableApps(disableApps, false);
+//            }
         }
     }
 
@@ -116,12 +125,15 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
         }
     }
 
-    private void getDisableApps(List<AppInfo> appList, boolean isFirst) {
+    private void getDisableApps(List<AppInfo> appList, boolean isDisplayAllApps) {
         mListDisableApps.clear();
-        for (AppInfo appInfo : appList) {
-            if (isFirst) {
-                mAppInfoDBController.addDisableApp(appInfo, AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
+        if (isDisplayAllApps) {
+            Set<AppInfo> disableApps = new HashSet<>(mAppInfoDBController.getDisableApps(AppInfoDBOpenHelper.TABLE_NAME_APP_INFO));
+            Set<AppInfo> allDisableApps = new HashSet<>(appList);
+            for (AppInfo appInfo : allDisableApps) {
+                disableApps.add(appInfo);
             }
+            appList = new ArrayList<>(disableApps);
         }
         if ((boolean) SharedPreferenceUtil.get(mActivity, SettingActivity.SP_DISPLAY_SYSTEM_APPS, true)) {
             mListDisableApps = appList;

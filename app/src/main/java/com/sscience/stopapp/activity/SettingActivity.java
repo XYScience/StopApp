@@ -35,9 +35,11 @@ import com.sscience.stopapp.util.ShortcutsManager;
 public class SettingActivity extends BaseActivity {
 
     public static final String SP_DISPLAY_SYSTEM_APPS = "sp_display_system_apps";
+    public static final String SP_DISPLAY_ALL_APPS = "sp_display_all_apps";
     public static final String SP_AUTO_DISABLE_APPS = "sp_auto_disable_apps";
     private CoordinatorLayout mCoordinatorLayout;
-    private SwitchCompat mSwitchManualShortcut, mSwitchDisplaySystemApps, mSwitchAutoDisableApps;
+    private SwitchCompat mSwitchManualShortcut, mSwitchDisplaySystemApps, mSwitchDisplayAllApps
+            , mSwitchAutoDisableApps;
     private TextView mTvAutoDisableSub;
     private boolean isSetDisplaySystemApps = false;
 
@@ -58,6 +60,7 @@ public class SettingActivity extends BaseActivity {
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
         mSwitchManualShortcut = (SwitchCompat) findViewById(R.id.switch_manual_shortcut);
         mSwitchDisplaySystemApps = (SwitchCompat) findViewById(R.id.switch_display_system_apps);
+        mSwitchDisplayAllApps = (SwitchCompat) findViewById(R.id.switch_display_all_apps);
         mSwitchAutoDisableApps = (SwitchCompat) findViewById(R.id.switch_auto_disable);
         mTvAutoDisableSub = (TextView) findViewById(R.id.tv_auto_disable_sub);
 
@@ -87,6 +90,8 @@ public class SettingActivity extends BaseActivity {
 
         boolean spDisplaySystemApps = (boolean) SharedPreferenceUtil.get(this, SP_DISPLAY_SYSTEM_APPS, true);
         mSwitchDisplaySystemApps.setChecked(spDisplaySystemApps);
+        boolean spDisplayAllApps = (boolean) SharedPreferenceUtil.get(this, SP_DISPLAY_ALL_APPS, false);
+        mSwitchDisplayAllApps.setChecked(spDisplayAllApps);
         int spAutoDisableCondition = (int) SharedPreferenceUtil.get(this, SP_AUTO_DISABLE_APPS, -1);
         mSwitchAutoDisableApps.setChecked(spAutoDisableCondition != -1);
         if (spAutoDisableCondition == 0) {
@@ -134,6 +139,12 @@ public class SettingActivity extends BaseActivity {
                 boolean spDisplaySystemApps = (boolean) SharedPreferenceUtil.get(this, SP_DISPLAY_SYSTEM_APPS, true);
                 SharedPreferenceUtil.put(this, SP_DISPLAY_SYSTEM_APPS, !spDisplaySystemApps);
                 mSwitchDisplaySystemApps.setChecked(!spDisplaySystemApps);
+                break;
+            case R.id.ll_display_all_apps:
+                isSetDisplaySystemApps = true;
+                boolean spDisplayAllApps = (boolean) SharedPreferenceUtil.get(this, SP_DISPLAY_ALL_APPS, false);
+                SharedPreferenceUtil.put(this, SP_DISPLAY_ALL_APPS, !spDisplayAllApps);
+                mSwitchDisplayAllApps.setChecked(!spDisplayAllApps);
                 break;
             case R.id.ll_auto_disable:
                 autoDisabledApp();

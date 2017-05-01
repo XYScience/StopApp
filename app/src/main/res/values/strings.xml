@@ -79,8 +79,10 @@
     <string name="remove_app_app_shortcut">移除App Shortcut</string>
     <string name="manual_shortcut_subtitle">长按App图标呼出常用的快捷方式列表，仅支持Android 7.1+</string>
     <string name="nonsupport_app_shortcut">你的系统版本小于7.1，不支持App Shortcut！</string>
-    <string name="display_system_apps">显示系统Apps</string>
+    <string name="display_system_apps">显示系统停用Apps</string>
+    <string name="display_all_apps">显示所有停用Apps</string>
     <string name="display_system_apps_subtitle">在主页停用列表显示系统Apps</string>
+    <string name="display_all_apps_subtitle">在主页停用列表显示所有Apps</string>
     <string name="automatic_disable_app_accessibility_service">通过无障碍服务，自动停用App</string>
     <string name="automatic_disable_app_back_to_desktop">%s自动停用App</string>
     <string name="automatic_disable_app_action_back">按返回键退出App时，自动停用App</string>

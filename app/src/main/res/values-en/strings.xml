@@ -79,8 +79,10 @@
     <string name="remove_app_app_shortcut">Remove App Shortcut</string>
     <string name="manual_shortcut_subtitle">If your app targets Android 7.1 (API level 25) or higher, you can define shortcuts to specific actions in your app.</string>
     <string name="nonsupport_app_shortcut">Your Android version does not support App Shortcut!</string>
-    <string name="display_system_apps">Display System Apps</string>
+    <string name="display_system_apps">Display system disabled apps</string>
+    <string name="display_all_apps">Display all disabled apps</string>
     <string name="display_system_apps_subtitle">Display the system apps on the home page</string>
+    <string name="display_all_apps_subtitle">Display the all apps on the home page</string>
     <string name="automatic_disable_app_accessibility_service">Automatically disable app by accessibility service</string>
     <string name="automatic_disable_app_back_to_desktop">Automatically disable app %s </string>
     <string name="automatic_disable_app_action_back">Automatically disable app after action back</string>
