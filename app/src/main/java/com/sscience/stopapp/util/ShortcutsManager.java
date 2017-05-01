@@ -108,6 +108,7 @@ public class ShortcutsManager {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
             mShortcutManager.disableShortcuts(Arrays.asList(shortcutID), test);
             mShortcutManager.removeDynamicShortcuts(Arrays.asList(shortcutID));
+            mDBController.deleteDisableApp(shortcutID, AppInfoDBOpenHelper.TABLE_NAME_SHORTCUT_APP_INFO);
         }
     }
 }

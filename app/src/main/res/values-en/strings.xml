@@ -21,7 +21,8 @@
     <string name="user_apps">User apps</string>
     <string name="disable_apps">Disable apps</string>
     <string name="whether_disable_app">Would you like to disable [ % s ] ?</string>
-    <string name="add_disable_apps">Stop app</string>
+    <string name="add_disable_apps">Join the stop app list</string>
+    <string name="remove_disable_apps_list">Out off the stop app list</string>
     <string name="uninstall_app">Uninstall app</string>
     <string name="component_details">Component details</string>
     <string name="if_want_to_use_please_grant_app_root">Failure to get root permission!Please grant the root permission!</string>
@@ -75,6 +76,7 @@
     <string name="remove_list_success">Successfully remove apps from list!</string>
     <string name="disable_success">Successfully Disable apps!</string>
     <string name="add_app_app_shortcut">Add App Shortcut</string>
+    <string name="remove_app_app_shortcut">Remove App Shortcut</string>
     <string name="manual_shortcut_subtitle">If your app targets Android 7.1 (API level 25) or higher, you can define shortcuts to specific actions in your app.</string>
     <string name="nonsupport_app_shortcut">Your Android version does not support App Shortcut!</string>
     <string name="display_system_apps">Display System Apps</string>

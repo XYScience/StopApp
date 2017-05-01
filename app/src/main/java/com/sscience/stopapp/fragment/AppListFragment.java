@@ -2,7 +2,10 @@ package com.sscience.stopapp.fragment;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DividerItemDecoration;
@@ -25,12 +28,16 @@ import com.sscience.stopapp.activity.MainActivity;
 import com.sscience.stopapp.adapter.AppListAdapter;
 import com.sscience.stopapp.base.BaseFragment;
 import com.sscience.stopapp.bean.AppInfo;
+import com.sscience.stopapp.database.AppInfoDBController;
+import com.sscience.stopapp.database.AppInfoDBOpenHelper;
 import com.sscience.stopapp.model.AppsRepository;
 import com.sscience.stopapp.presenter.AppsContract;
 import com.sscience.stopapp.presenter.AppsPresenter;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static android.app.Activity.RESULT_OK;
 import static com.sscience.stopapp.activity.AppListActivity.EXTRA_MANUAL_SHORTCUT;
@@ -48,6 +55,7 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
     public AppListAdapter mAppListAdapter;
     private AppsContract.Presenter mPresenter;
     private AppListActivity mAppListActivity;
+    private AppInfoDBController mAppInfoDBController;
 
     public static AppListFragment newInstance(int tabCategory) {
         AppListFragment fragment = new AppListFragment();
@@ -73,7 +81,22 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(mAppListActivity, layoutManager.getOrientation()));
 
-        mAppListAdapter = new AppListAdapter(mAppListActivity, mRecyclerView);
+        mAppInfoDBController = new AppInfoDBController(mAppListActivity);
+        Set<String> appPackageSet = new HashSet<>();
+        if (mAppListActivity.getIntent().getBooleanExtra(EXTRA_MANUAL_SHORTCUT, false)) {
+            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                ShortcutManager manager = mAppListActivity.getSystemService(ShortcutManager.class);
+                for (ShortcutInfo shortcutInfo : manager.getDynamicShortcuts()) {
+                    appPackageSet.add(shortcutInfo.getId());
+                }
+            }
+        } else {
+            List<AppInfo> appInfoSet = mAppInfoDBController.getDisableApps(AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
+            for (AppInfo appInfo : appInfoSet) {
+                appPackageSet.add(appInfo.getAppPackageName());
+            }
+        }
+        mAppListAdapter = new AppListAdapter(mAppListActivity, mRecyclerView, appPackageSet);
         mRecyclerView.setAdapter(mAppListAdapter);
 
         int tabCategory = getArguments().getInt(TAB_CATEGORY);
@@ -93,28 +116,51 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
                 onLazyLoad();
             }
         });
+
+        mAppListAdapter.setCheckedChangeListener(new AppListAdapter.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(AppInfo info, int position, boolean isChecked) {
+                if (mAppListActivity.getIntent().getBooleanExtra(EXTRA_MANUAL_SHORTCUT, false)) {
+                    if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                        if (isChecked) {
+                            if (mAppListAdapter.getDisablePackages().size() == 4) {
+                                mAppListAdapter.updateItem(position, info);
+                                snackBarShow(mAppListActivity.mCoordinatorLayout, getString(R.string.shortcut_num_limit));
+                            } else {
+                                mAppListActivity.setAbleApp(true);
+                                mAppListActivity.addAppShortcut(Arrays.asList(info));
+                                mAppListAdapter.addDisableAppList(info, true);
+                            }
+                        } else {
+                            mAppListActivity.removeAppShortcut(info.getAppPackageName());
+                            mAppListAdapter.addDisableAppList(info, false);
+                        }
+                    }
+                } else {
+                    ableApp(info, position, isChecked, true);
+                    mPresenter.ableApp(info, position, isChecked);
+                }
+            }
+        });
     }
 
     private void operationApps(final AppInfo appInfo, final int position) {
-        final boolean isAddShortcut = mAppListActivity.getIntent().getBooleanExtra(EXTRA_MANUAL_SHORTCUT, false);
+        if (mAppListActivity.getIntent().getBooleanExtra(EXTRA_MANUAL_SHORTCUT, false)) {
+            return;
+        }
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(appInfo.getAppName());
-        final String[] items;
-        if (isAddShortcut) {
-            items = new String[]{mAppListActivity.getString(R.string.add_app_app_shortcut)};
-        } else {
-            items = new String[]{mAppListActivity.getString(R.string.add_disable_apps), mAppListActivity.getString(R.string.uninstall_app)};
-//                    , getString(R.string.component_details)};
-        }
+        final boolean isDisableAppList = mAppInfoDBController.searchApp(AppInfoDBOpenHelper.TABLE_NAME_APP_INFO,
+                appInfo.getAppPackageName());
+        final String[] items = new String[]{mAppListActivity.getString(isDisableAppList ? R.string.remove_disable_apps_list : R.string.add_disable_apps)
+                , mAppListActivity.getString(R.string.uninstall_app)};
+        // , getString(R.string.component_details)};
         builder.setItems(items, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 if (i == 0) {
-                    if (isAddShortcut) {
-                        mAppListActivity.addAppShortcut(Arrays.asList(appInfo));
-                    } else {
-                        mPresenter.addDisableApps(appInfo);
-                    }
+                    ableApp(appInfo, position, !isDisableAppList, true);
+                    mPresenter.ableApp(appInfo, position, !isDisableAppList);
                     dialogInterface.dismiss();
                 } else if (i == 1) {
                     mPresenter.uninstallApp(appInfo, position);
@@ -156,15 +202,28 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
     }
 
     @Override
-    public void getRootError() {
+    public void getRootError(String cmd) {
         snackBarShow(mAppListActivity.mCoordinatorLayout, getString(R.string.if_want_to_use_please_grant_app_root));
     }
 
     @Override
     public void uninstallSuccess(String appName, int position) {
-        mAppListActivity.setUninstallSuccess();
+        mAppListActivity.setAbleApp(true);
         mAppListAdapter.removeData(position);
         snackBarShow(mAppListActivity.mCoordinatorLayout, getString(R.string.uninstall_success, appName));
+    }
+
+    @Override
+    public void ableApp(AppInfo appInfo, int position, boolean isChecked, boolean isAbleApp) {
+        mAppListActivity.setAbleApp(true);
+        mAppListAdapter.addDisableAppList(appInfo, isAbleApp == isChecked);
+        appInfo.setEnable(isAbleApp ? (isChecked ? 0 : 1) : (isChecked ? 1 : 0));
+        mAppListAdapter.updateItem(position, appInfo);
+        if (isAbleApp == isChecked) {
+            mAppInfoDBController.addDisableApp(appInfo, AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
+        } else {
+            mAppInfoDBController.deleteDisableApp(appInfo.getAppPackageName(), AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
+        }
     }
 
     public void addDisableApps(List<AppInfo> appList) {

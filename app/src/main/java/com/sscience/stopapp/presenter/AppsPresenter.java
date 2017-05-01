@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.sscience.stopapp.model.AppsRepository.COMMAND_ENABLE;
 import static com.sscience.stopapp.model.AppsRepository.COMMAND_UNINSTALL;
 
 /**
@@ -64,8 +65,7 @@ public class AppsPresenter implements AppsContract.Presenter {
 
     @Override
     public void addDisableApps(AppInfo appInfo) {
-        AppInfoDBController appInfoDBController = new AppInfoDBController(mContext);
-        List<AppInfo> disableApps = appInfoDBController.getDisableApps(AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
+        List<AppInfo> disableApps = mAppInfoDBController.getDisableApps(AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
         if (disableApps.contains(appInfo)) {
             mView.hadAddDisableApps();
             return;
@@ -85,7 +85,7 @@ public class AppsPresenter implements AppsContract.Presenter {
                     mAppInfoDBController.deleteDisableApp(appInfo.getAppPackageName(), AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
                     mView.uninstallSuccess(appInfo.getAppName(), position);
                 } else {
-                    mView.getRootError();
+                    mView.getRootError(COMMAND_UNINSTALL);
                 }
             }
         });
@@ -97,5 +97,20 @@ public class AppsPresenter implements AppsContract.Presenter {
             mAppInfoDBController.addDisableApp(appInfo, AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
         }
         mView.addDisableAppsSuccess();
+    }
+
+    @Override
+    public void ableApp(final AppInfo appInfo, final int position, final boolean isChecked) {
+        mAppsRepository.getRoot(
+                (isChecked ? AppsRepository.COMMAND_DISABLE : COMMAND_ENABLE) + appInfo.getAppPackageName(),
+                new GetRootCallback() {
+                    @Override
+                    public void onRoot(boolean isRoot) {
+                        if (!isRoot) {
+                            mView.ableApp(appInfo, position, isChecked, false);
+                            mView.getRootError(isChecked ? AppsRepository.COMMAND_DISABLE : COMMAND_ENABLE);
+                        }
+                    }
+                });
     }
 }

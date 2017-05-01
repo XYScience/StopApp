@@ -32,11 +32,25 @@ public class AppListAdapter extends AppAdapter implements Filterable {
     private Resources mResources;
     private AppFilter mAppFilter;
     private List<AppInfo> mOriginalAppInfo;
+    private Set<String> mDisablePackages;
 
-    public AppListAdapter(Activity activity, RecyclerView recyclerView) {
+    public AppListAdapter(Activity activity, RecyclerView recyclerView, Set<String> disablePackages) {
         super(activity, recyclerView);
         mAppListActivity = (AppListActivity) activity;
         mResources = mAppListActivity.getResources();
+        mDisablePackages = disablePackages;
+    }
+
+    public void addDisableAppList(AppInfo appInfo, boolean isAbleApp) {
+        if (isAbleApp) {
+            mDisablePackages.add(appInfo.getAppPackageName());
+        } else {
+            mDisablePackages.remove(appInfo.getAppPackageName());
+        }
+    }
+
+    public Set<String> getDisablePackages() {
+        return mDisablePackages;
     }
 
     @Override
@@ -45,7 +59,7 @@ public class AppListAdapter extends AppAdapter implements Filterable {
     }
 
     @Override
-    public void convertCommon(ViewHolder viewHolder, List<AppInfo> appInfo, int position) {
+    public void convertCommon(ViewHolder viewHolder, final List<AppInfo> appInfo, final int position) {
         super.convertCommon(viewHolder, appInfo, position);
         final AppInfo info = appInfo.get(position);
         viewHolder.setText(R.id.tv_app_package_name, info.getAppPackageName());
@@ -59,17 +73,13 @@ public class AppListAdapter extends AppAdapter implements Filterable {
                 : mResources.getColor(R.color.translucentBg));
         AppCompatCheckBox cb = viewHolder.getView(R.id.cb_select_apps);
         cb.setOnCheckedChangeListener(null); // CheckBox在执行setChecked时会触发setOnCheckedChangeListener
-        cb.setChecked(mAppListActivity.getSelection().contains(info));
+        cb.setChecked(mDisablePackages.contains(info.getAppPackageName()));
         cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Set<AppInfo> appList = mAppListActivity.getSelection();
-                if (isChecked) {
-                    appList.add(info);
-                } else {
-                    appList.remove(info);
+                if (mCheckedChangeListener != null) {
+                    mCheckedChangeListener.onCheckedChanged(info, position, isChecked);
                 }
-                mAppListActivity.checkSelection();
             }
         });
     }
@@ -113,6 +123,16 @@ public class AppListAdapter extends AppAdapter implements Filterable {
                 Toast.makeText(mAppListActivity, "暂时无此应用！", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    public interface OnCheckedChangeListener {
+        void onCheckedChanged(AppInfo info, int position, boolean isChecked);
+    }
+
+    private OnCheckedChangeListener mCheckedChangeListener;
+
+    public void setCheckedChangeListener(OnCheckedChangeListener checkedChangeListener) {
+        mCheckedChangeListener = checkedChangeListener;
     }
 }
 

@@ -22,9 +22,11 @@ public interface AppsContract {
 
         void addDisableAppsSuccess();
 
-        void getRootError();
+        void getRootError(String cmd);
 
         void uninstallSuccess(String appName, int position);
+
+        void ableApp(AppInfo appInfo, int position, boolean isChecked, boolean isAbleApp);
     }
 
     interface Presenter extends BasePresenter {
@@ -35,6 +37,8 @@ public interface AppsContract {
         void uninstallApp(AppInfo appInfo, int position);
 
         void addDisableApps(AppInfo appInfo);
+
+        void ableApp(AppInfo appInfo, int position, boolean isChecked);
 
         List<AppInfo> getApps();
     }

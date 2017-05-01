@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/coordinatorLayout"
     android:layout_width="match_parent"
@@ -24,7 +25,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginEnd="8dp"
-                android:alpha="0" />
+                android:alpha="0"
+                android:visibility="gone"/>
         </android.support.v7.widget.Toolbar>
 
         <android.support.design.widget.TabLayout
@@ -34,7 +36,7 @@
             android:layout_below="@+id/toolbar"
             android:background="@color/colorPrimary"
             android:scrollbars="horizontal"
-            app:tabMode="scrollable" />
+            app:tabMode="scrollable"/>
 
     </android.support.design.widget.AppBarLayout>
 
@@ -42,7 +44,7 @@
         android:id="@+id/viewpager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
@@ -51,7 +53,8 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/activity_horizontal_margin"
         android:alpha="0"
+        android:visibility="gone"
         app:layout_behavior="com.sscience.stopapp.widget.ScrollAwareFABBehavior"
-        app:srcCompat="@drawable/ic_white_fab_confirm" />
+        app:srcCompat="@drawable/ic_white_fab_confirm"/>
 
 </android.support.design.widget.CoordinatorLayout>

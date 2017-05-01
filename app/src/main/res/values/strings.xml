@@ -22,6 +22,7 @@
     <string name="disable_apps">停用应用</string>
     <string name="whether_disable_app">要把 [ %s ] 关进小黑屋吗？</string>
     <string name="add_disable_apps">加入小黑屋</string>
+    <string name="remove_disable_apps_list">移除小黑屋</string>
     <string name="uninstall_app">卸载应用</string>
     <string name="component_details">组件详情</string>
     <string name="if_want_to_use_please_grant_app_root">暂时没有root权限！请授予本应用root权限！</string>
@@ -75,6 +76,7 @@
     <string name="remove_list_success">移出列表成功！</string>
     <string name="disable_success">成功关进小黑屋！</string>
     <string name="add_app_app_shortcut">添加App Shortcut</string>
+    <string name="remove_app_app_shortcut">移除App Shortcut</string>
     <string name="manual_shortcut_subtitle">长按App图标呼出常用的快捷方式列表，仅支持Android 7.1+</string>
     <string name="nonsupport_app_shortcut">你的系统版本小于7.1，不支持App Shortcut！</string>
     <string name="display_system_apps">显示系统Apps</string>
