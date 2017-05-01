@@ -36,7 +36,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     private MainFragment mMainFragment;
     private Set<AppInfo> mSelection; // 选择要操作的app(停用or移除列表)
     public MoveFloatingActionButton mFabDisable;
-    public LinearLayout mLlEnableApp, mLlAddShortcut, mLlCustomApp, mLlRemoveList, mLlUninstallApp, mLlCancelSelect;
+    public LinearLayout mLlEnableApp, mLlAddShortcut, mLlCustomApp, mLlRemoveListEnable, mLlRemoveList, mLlUninstallApp, mLlCancelSelect;
     private long exitTime = 0;
     public String mRootStr = "";
 
@@ -55,6 +55,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
         mLlEnableApp = (LinearLayout) findViewById(R.id.ll_enable_app);
         mLlAddShortcut = (LinearLayout) findViewById(R.id.ll_add_shortcut);
         mLlCustomApp = (LinearLayout) findViewById(R.id.ll_custom_app);
+        mLlRemoveListEnable = (LinearLayout) findViewById(R.id.ll_remove_list_enable);
         mLlRemoveList = (LinearLayout) findViewById(R.id.ll_remove_list);
         mLlUninstallApp = (LinearLayout) findViewById(R.id.ll_uninstall_app);
         mLlCancelSelect = (LinearLayout) findViewById(R.id.ll_cancel_select);
@@ -100,12 +101,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
                 checkSelection();
                 snackBarShow(mCoordinatorLayout, getString(R.string.add_shortcut_success));
                 break;
+            case R.id.ll_remove_list_enable:
+                mRootStr = getString(R.string.remove_list_enable_success);
+                mMainFragment.batchApps(2);
+                break;
             case R.id.ll_custom_app:
                 mMainFragment.customApp();
                 break;
             case R.id.ll_remove_list:
                 mRootStr = getString(R.string.remove_list_success);
-                mMainFragment.batchApps(2);
+                mMainFragment.batchApps(3);
                 break;
             case R.id.ll_uninstall_app:
                 uninstallApp();
@@ -232,6 +237,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK) {
+            mMainFragment.mSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             // 在App列表界面选择要停用的apps返回后更新主界面
             mMainFragment.reLoadDisableApps();
         }

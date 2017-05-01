@@ -97,7 +97,7 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/ll_custom_app"
+                    android:id="@+id/ll_remove_list_enable"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:background="?android:selectableItemBackground"
@@ -112,13 +112,13 @@
                         android:layout_height="26dp"
                         android:layout_marginEnd="32dp"
                         android:scaleType="centerInside"
-                        android:src="@drawable/ic_color_lens_black"
+                        android:src="@drawable/ic_playlist_play_black"
                         android:tint="@color/menuIconColor"/>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/custom_app"
+                        android:text="@string/remove_list_enable"
                         android:textColor="@color/textPrimary"
                         android:textSize="16sp"/>
 
@@ -151,6 +151,34 @@
                         android:textSize="16sp"/>
 
                 </LinearLayout>
+
+                <LinearLayout
+                android:id="@+id/ll_custom_app"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="?android:selectableItemBackground"
+                android:gravity="center_vertical"
+                android:onClick="onClick"
+                android:orientation="horizontal"
+                android:paddingEnd="16dp"
+                android:paddingStart="16dp">
+
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_marginEnd="32dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_color_lens_black"
+                    android:tint="@color/menuIconColor"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/custom_app"
+                    android:textColor="@color/textPrimary"
+                    android:textSize="16sp"/>
+
+            </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/ll_uninstall_app"

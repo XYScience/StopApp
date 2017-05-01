@@ -226,21 +226,6 @@ public class AppListFragment extends BaseFragment implements AppsContract.View {
         }
     }
 
-    public void addDisableApps(List<AppInfo> appList) {
-        mPresenter.addDisableAppsSuccess(appList);
-    }
-
-    public List<AppInfo> getApps() {
-        return mPresenter.getApps();
-    }
-
-    /**
-     * 点击ToolBar里的选择框时，更新列表的选择
-     */
-    public void reFreshAppAdapter() {
-        mAppListAdapter.notifyDataSetChanged();
-    }
-
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // Inflate the menu; this adds items to the action bar if it is present.

@@ -225,7 +225,7 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                                             AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
                                 }
                             }
-                        } else if (type == 2) { // 移除列表
+                        } else if (type == 2) { // 移除列表并且启用
                             for (int i = 0; i < appList.size(); i++) {
                                 AppInfo appInfo = appList.get(i);
                                 if (appInfo.isEnable() == 0) {
@@ -233,6 +233,14 @@ public class DisableAppsPresenter implements DisableAppsContract.Presenter {
                                     pmCommand(AppsRepository.COMMAND_ENABLE + appInfo.getAppPackageName(),
                                             CMD_FLAG_BATCH_APPS, null, -1);
                                 }
+                                ((MainActivity) mActivity).getSelection().remove(appInfo);
+                                mListDisableAppsNew.remove(appInfo);
+                                mAppInfoDBController.deleteDisableApp(appInfo.getAppPackageName(),
+                                        AppInfoDBOpenHelper.TABLE_NAME_APP_INFO);
+                            }
+                        } else if (type == 3) { // 移出列表
+                            for (int i = 0; i < appList.size(); i++) {
+                                AppInfo appInfo = appList.get(i);
                                 ((MainActivity) mActivity).getSelection().remove(appInfo);
                                 mListDisableAppsNew.remove(appInfo);
                                 mAppInfoDBController.deleteDisableApp(appInfo.getAppPackageName(),
