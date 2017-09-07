@@ -9,7 +9,7 @@ Screenshot
       
 License
 -------------------------      
-StopApp is released under the [Apache 2.0 license](https://github.com/XYScience/StopApp/blob/master/LICENSE.txt).      
+StopApp is released under the [Apache 2.0 license](https://github.com/XYScience/StopApp/blob/master/LICENSE).      
       
 ```      
 Copyright 2017 SScience<chentushen.science@gmail.com>
